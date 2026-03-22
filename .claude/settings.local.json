@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(code --install-extension esbenp.prettier-vscode)",
+      "Bash(code --install-extension dbaeumer.vscode-eslint)",
+      "Bash(code --install-extension eamodio.gitlens)",
+      "Bash(code --install-extension usernamehw.errorlens)",
+      "Bash(code --install-extension formulahendry.auto-rename-tag)",
+      "Bash(where code:*)",
+      "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension esbenp.prettier-vscode --force)",
+      "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension dbaeumer.vscode-eslint --force)",
+      "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension eamodio.gitlens --force)",
+      "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension usernamehw.errorlens --force)",
+      "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension formulahendry.auto-rename-tag --force)",
+      "Bash(cmd.exe /c \"code --install-extension esbenp.prettier-vscode\")"
+    ]
+  }
+}

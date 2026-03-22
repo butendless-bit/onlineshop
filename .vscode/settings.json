@@ -1,0 +1,21 @@
+{
+  // 기본 포맷터: Prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 저장 시 Prettier 자동 포맷
+  "editor.formatOnSave": true,
+
+  // 저장 시 ESLint 자동 수정
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // 탭 크기 2칸
+  "editor.tabSize": 2,
+
+  // 파일 저장 시 줄 끝 공백 제거
+  "files.trimTrailingWhitespace": true,
+
+  // Material Icon Theme 활성화
+  "workbench.iconTheme": "material-icon-theme"
+}
