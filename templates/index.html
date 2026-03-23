@@ -1804,8 +1804,10 @@ async function generateSubscriptionPOP(product) {
   // 연장보증 기간 = 구독 계약 기간 (contract_months)
   const warrantyMonths = months;
   const cleaningDetail = cleanCareDetail(careDesc) || '제품 외관 및 내부 클리닝 서비스';
-  // TV는 두번째 항목 고정: 파손보장 보험 서비스
-  const secondCare = category === 'tv' ? '파손보장 보험 서비스' : cleaningDetail;
+  // TV·노트북·태블릿은 두번째 항목 고정
+  const secondCare = (category === 'tv') ? '파손보장 보험 서비스'
+    : (category === 'laptop' || category === 'tablet') ? '파손보장보험 가입, 가전교체서비스 혜택'
+    : cleaningDetail;
   document.getElementById('sub-care-benefit').innerHTML = `
     <div class="sub-care-list">
       <div class="sub-care-item">
