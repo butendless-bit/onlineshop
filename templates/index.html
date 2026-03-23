@@ -1783,8 +1783,11 @@ async function generateSubscriptionPOP(product) {
   const careDescMap = CARE_PLAN_DESC[category] || {};
   const careDesc = product.care_benefit ||
     (carePlan && careDescMap[carePlan] ? careDescMap[carePlan] : '');
-  const warrantyMonths = extractCareMonths(careDesc, 36);
+  // 연장보증 기간 = 구독 계약 기간 (contract_months)
+  const warrantyMonths = months;
   const cleaningDetail = cleanCareDetail(careDesc) || '제품 외관 및 내부 클리닝 서비스';
+  // TV는 두번째 항목 고정: 파손보장 보험 서비스
+  const secondCare = category === 'tv' ? '파손보장 보험 서비스' : cleaningDetail;
   document.getElementById('sub-care-benefit').innerHTML = `
     <div class="sub-care-list">
       <div class="sub-care-item">
@@ -1793,7 +1796,7 @@ async function generateSubscriptionPOP(product) {
       </div>
       <div class="sub-care-item">
         <span class="sub-care-bullet">-</span>
-        <span class="sub-care-text">${cleaningDetail}</span>
+        <span class="sub-care-text">${secondCare}</span>
       </div>
     </div>`;
 
