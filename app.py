@@ -22,6 +22,10 @@ if os.environ.get("VERCEL"):
 
 # ── 기본 라우트 ────────────────────────────────────────────────────────────────
 @app.route("/")
+def intro():
+    return render_template("intro.html")
+
+@app.route("/main")
 def index():
     return render_template("index.html", store_name=STORE_NAME)
 
