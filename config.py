@@ -31,6 +31,8 @@ CATEGORIES = {
     "vacuum":       {"name": "청소기",    "code": "002008"},
     "dishwasher":   {"name": "식기세척기","code": "002009"},
     "range":        {"name": "전기레인지","code": "002010"},
+    "laptop":       {"name": "노트북",    "code": "002011"},
+    "tablet":       {"name": "태블릿",    "code": "002012"},
 }
 
 # ── Flask ─────────────────────────────────────────────────────────────────────
@@ -102,6 +104,18 @@ CATEGORY_SEARCH_TERMS = {
         ("전기레인지",  2),
         ("인덕션",      2),
         ("하이브리드레인지",1),
+    ],
+    "laptop": [
+        ("노트북",       3),
+        ("게이밍 노트북", 2),
+        ("초경량 노트북", 1),
+        ("비즈니스 노트북",1),
+    ],
+    "tablet": [
+        ("태블릿",      3),
+        ("갤럭시탭",    2),
+        ("아이패드",    2),
+        ("태블릿PC",    1),
     ],
 }
 
@@ -220,6 +234,31 @@ SUB_FILTERS = {
             {"label": "1구",      "value": "1"},
         ]},
     ],
+    "laptop": [
+        {"group": "브랜드", "key": "laptop_brand", "filters": [
+            {"label": "삼성",   "value": "삼성"},
+            {"label": "LG",     "value": "LG"},
+            {"label": "애플",   "value": "애플"},
+            {"label": "기타",   "value": "기타"},
+        ]},
+        {"group": "화면크기", "key": "laptop_size", "filters": [
+            {"label": "16인치 이상", "value": "16+"},
+            {"label": "14~15인치",   "value": "14s"},
+            {"label": "13인치 이하", "value": "small"},
+        ]},
+    ],
+    "tablet": [
+        {"group": "브랜드", "key": "tablet_brand", "filters": [
+            {"label": "삼성",   "value": "삼성"},
+            {"label": "애플",   "value": "애플"},
+            {"label": "기타",   "value": "기타"},
+        ]},
+        {"group": "화면크기", "key": "tablet_size", "filters": [
+            {"label": "12인치 이상", "value": "12+"},
+            {"label": "10~11인치",   "value": "10s"},
+            {"label": "9인치 이하",  "value": "small"},
+        ]},
+    ],
 }
 
 # ── 카테고리별 구독상품 검색어 ─────────────────────────────────────────────────
@@ -234,6 +273,8 @@ SUBSCRIPTION_SEARCH_TERMS = {
     "vacuum":       "청소기 구독",
     "dishwasher":   "식기세척기 구독",
     "range":        "전기레인지 구독",
+    "laptop":       "노트북 구독",
+    "tablet":       "태블릿 구독",
 }
 
 USER_AGENT = (

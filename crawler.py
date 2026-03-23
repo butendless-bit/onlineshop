@@ -55,6 +55,8 @@ CATEGORY_KEYWORDS = {
     "vacuum":       "청소기",
     "dishwasher":   "식기세척기",
     "range":        "전기레인지",
+    "laptop":       "노트북",
+    "tablet":       "태블릿",
 }
 
 
