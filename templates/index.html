@@ -48,6 +48,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
 <style>
+  :root {
+    --sub-summary-row-h: 32px;
+  }
   * { font-family: 'Pretendard', sans-serif; }
   body { background: #0a0a0f; color: #e4e4f0; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -122,11 +125,250 @@
   /* 숨김 POP 카드 렌더링 영역 */
   #pop-render-zone {
     position: fixed; left: -9999px; top: 0;
-    width: 520px;
+    width: 560px; height: 792px;
     background: #fff;
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
     overflow: hidden;
     line-height: 1.4;
+  }
+
+  @page { size: A5 portrait; margin: 0; }
+  html, body { margin: 0; padding: 0; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
+
+  /* ── 구독 POP 카드 (A5 고정 560x792) ── */
+  #pop-card-subscription {
+    position: fixed; left: -9999px; top: 0;
+    width: 560px; height: 792px; max-height: 792px; overflow: hidden;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    display: flex; flex-direction: column;
+    background: linear-gradient(175deg,#b3d9ee 0%,#c8e5f3 20%,#daeef8 45%,#eaf5fb 70%,#f4f9fd 100%);
+  }
+  .sub-cloud-1 {
+    position: absolute; top: 20px; right: 30px;
+    width: 260px; height: 160px; background: rgba(255,255,255,0.5);
+    border-radius: 50%; filter: blur(28px); pointer-events: none; z-index: 0;
+  }
+  .sub-cloud-2 {
+    position: absolute; top: 180px; left: -20px;
+    width: 200px; height: 130px; background: rgba(255,255,255,0.4);
+    border-radius: 50%; filter: blur(22px); pointer-events: none; z-index: 0;
+  }
+  /* ① 최상단 바 */
+  .sub-topbar {
+    height: 38px; flex-shrink: 0;
+    background: rgba(255,255,255,0.55);
+    border-bottom: 1px solid rgba(220,235,245,0.8);
+    display: flex; align-items: center; justify-content: flex-start;
+    padding: 0 16px; position: relative; z-index: 1;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-topbar-left { font-size: 12px; color: #333; font-weight: 500; }
+  /* ② 타이틀 + QR */
+  .sub-title-area {
+    flex-shrink: 0; position: relative;
+    padding: 14px 110px 0 18px; z-index: 1;
+  }
+  .sub-copy-line {
+    font-size: 14px; color: #333; font-weight: 500;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-copy-line strong { font-weight: 900; }
+  .sub-main-title {
+    font-size: 52px; font-weight: 900; color: #e60012;
+    letter-spacing: -2px; line-height: 1.0;
+    white-space: nowrap; margin-top: 6px;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-title-divider { display: none; }
+  .sub-qr-wrap {
+    position: absolute; right: 14px; top: 10px; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .sub-qr-label {
+    font-size: 10px; color: #444; font-weight: 600;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  /* ③ 제품 정보 */
+  .sub-product-area {
+    flex-shrink: 0; padding: 24px 16px 10px; position: relative; z-index: 1;
+  }
+  .sub-period {
+    font-size: 12px; color: #555; text-align: right; margin-bottom: 4px;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-product-name {
+    font-size: 28px; font-weight: 900; color: #111;
+    word-break: keep-all; line-height: 1.25;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-model-no {
+    font-size: 12px; color: #888; margin-top: 4px;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--sub-summary-row-h);
+    margin-top: 8px;
+  }
+  .sub-summary-label {
+    flex: 0 0 auto;
+    font-size: 16px;
+    font-weight: 700;
+    color: #55626d;
+    line-height: 1;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-summary-sep {
+    flex: 0 0 auto;
+    font-size: 16px;
+    font-weight: 700;
+    color: #6d7d88;
+    line-height: 1;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-summary-value {
+    min-width: 0;
+    font-size: 30px;
+    font-weight: 900;
+    color: #111;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  /* ④ 빨간 혜택 박스 (height 고정 없음) */
+  .sub-price-box {
+    background: #e60012; border-radius: 16px;
+    margin: 24px 14px 16px; padding: 20px 20px 18px;
+    position: relative; z-index: 1;
+  }
+  .sub-price-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 10px;
+  }
+  .sub-price-box > .sub-price-row { position: relative; z-index: 1; }
+  .sub-price-box > .sub-price-row:first-of-type { padding-bottom: 12px; }
+  .sub-price-box > .sub-price-row:last-of-type  { padding-top: 12px; }
+  .sub-price-label-wrap {
+    display: flex; flex-direction: column; justify-content: flex-start; flex-shrink: 0; gap: 2px;
+    transform: translateY(-4px);
+  }
+  .sub-price-right {
+    display: flex; flex-direction: column; align-items: flex-end; justify-self: end;
+    transform: translateY(-6px);
+  }
+  .sub-price-label-main {
+    font-size: 28px; font-weight: 800; color: #fff; line-height: 1.2;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-price-label-sub {
+    font-size: 22px; color: rgba(255,255,255,0.85); line-height: 1.2;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-price-amount { display: flex; align-items: baseline; gap: 4px; }
+  .sub-price-unit {
+    font-size: 20px; font-weight: 700; color: #fff; line-height: 1; transform: translateY(-2px);
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-price-num {
+    font-size: 52px; font-weight: 900; color: #fff; letter-spacing: -2px; line-height: 1;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-price-won {
+    font-size: 22px; font-weight: 700; color: #fff; line-height: 1; transform: translateY(-1px);
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-cashback {
+    font-size: 11px; color: rgba(255,255,255,0.8); text-align: right; margin-top: 2px;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-price-divider {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 50%;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-0.5px);
+    margin: 0;
+    pointer-events: none;
+  }
+  .sub-benefit-desc {
+    font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 8px; line-height: 1.4;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  /* ⑤ 안심케어 */
+  .sub-care-section {
+    flex-shrink: 0; padding: 18px 14px 6px; position: relative; z-index: 1;
+  }
+  .sub-care-title {
+    font-size: 16px; font-weight: 900; color: #e60012; margin-bottom: 6px;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-care-box {
+    border: 1.5px solid #ddd; border-radius: 10px; padding: 4px 12px; background: #fff;
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+  }
+  .sub-care-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .sub-care-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 100%;
+    justify-content: center;
+  }
+  .sub-care-item {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 3px;
+  }
+  .sub-care-bullet {
+    font-size: 13px;
+    line-height: 1.15;
+    color: #333;
+    text-align: center;
+  }
+  .sub-care-text {
+    font-size: 12px; color: #333; line-height: 1.15; word-break: keep-all;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  /* ⑥ 주석 */
+  .sub-notes-section { flex-shrink: 0; padding: 16px 14px 4px; position: relative; z-index: 1; }
+  .sub-notes-section p {
+    font-size: 9px; color: #999; line-height: 1.6;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  /* ⑦ 푸터 */
+  .sub-footer-section {
+    flex-shrink: 0; background: rgba(255,255,255,0.45);
+    border-top: 1px solid rgba(200,220,230,0.6);
+    margin-top: auto;
+    padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;
+    position: relative; z-index: 1;
+  }
+  .sub-footer-left { display: flex; flex-direction: column; gap: 2px; }
+  .sub-footer-store {
+    font-size: 11px; font-weight: 700; color: #555;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-footer-date2 {
+    font-size: 10px; color: #bbb;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  }
+  .sub-footer-right {
+    font-size: 10px; color: #bbb;
+    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
   }
 </style>
 </head>
@@ -177,12 +419,20 @@
   </div>
 </div>
 
+<!-- ══════════════════════ SUBSCRIPTION TABS ══════════════════════ -->
+<div class="fixed top-[120px] left-0 right-0 z-30 border-b border-[#1a1a2e]"
+     style="background:rgba(8,8,18,0.97); backdrop-filter:blur(8px);">
+  <div class="max-w-screen-xl mx-auto px-4">
+    <div class="tab-scroll flex gap-1 overflow-x-auto py-3" id="sub-tab-container"></div>
+  </div>
+</div>
+
 <!-- ══════════════════════ MAIN CONTENT ══════════════════════ -->
-<main class="max-w-screen-xl mx-auto px-4 py-8">
+<main class="max-w-screen-xl mx-auto px-4 py-8" style="padding-top: calc(2rem + 44px);">
   <div class="flex items-center justify-between mb-4">
     <div>
       <h2 class="text-xl font-bold text-white" id="section-title">전체 추천</h2>
-      <p class="text-sm text-gray-500 mt-0.5" id="section-subtitle">가성비 기준 TOP 5 추천 상품</p>
+      <p class="text-sm text-gray-500 mt-0.5" id="section-subtitle">가성비 기준 TOP 10 추천 상품</p>
     </div>
     <div class="text-xs text-gray-600 flex items-center gap-1">
       <iconify-icon icon="solar:info-circle-bold" style="font-size:14px;"></iconify-icon>
@@ -206,27 +456,6 @@
     </div>
   </div>
 
-  <!-- ══ 구독전용 섹션 ══ -->
-  <div id="subscription-section" class="hidden mt-12">
-    <div class="flex items-center gap-3 mb-5">
-      <div class="w-1 h-6 rounded-full" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"></div>
-      <h3 class="text-lg font-bold text-white">구독전용 상품</h3>
-      <span class="text-xs px-2.5 py-0.5 rounded-full font-bold"
-            style="background:rgba(99,102,241,0.15); color:#818cf8; border:1px solid rgba(99,102,241,0.3);">
-        월 구독료 · 카드혜택 포함
-      </span>
-      <button onclick="triggerSubscriptionCrawl()" id="sub-crawl-btn"
-        class="ml-auto flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all"
-        style="background:rgba(99,102,241,0.12); color:#818cf8; border:1px solid rgba(99,102,241,0.25);">
-        <iconify-icon icon="solar:refresh-bold" style="font-size:13px;"></iconify-icon>
-        구독상품 업데이트
-      </button>
-    </div>
-    <div id="subscription-grid"
-         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-    </div>
-  </div>
-
   <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 text-center">
     <div class="w-20 h-20 rounded-3xl flex items-center justify-center mb-6" style="background:#1a1a24;">
       <iconify-icon icon="solar:database-bold" style="color:#3a3a4f;font-size:40px;"></iconify-icon>
@@ -241,6 +470,30 @@
   </div>
 </main>
 
+<!-- ══════════════════════ 구독전용 섹션 ══════════════════════ -->
+<section id="subscription-section" class="hidden border-t border-[#1a1a2e] pb-16"
+         style="background:linear-gradient(180deg,#08080f 0%,#0a0a14 100%);">
+  <div class="max-w-screen-xl mx-auto px-4 pt-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-1 h-6 rounded-full" style="background:linear-gradient(135deg,#3b82f6,#6366f1);"></div>
+      <h3 class="text-lg font-bold text-white">구독전용 상품</h3>
+      <span class="text-xs px-2.5 py-0.5 rounded-full font-bold"
+            style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3);">
+        월 구독료 · 안심케어 포함
+      </span>
+      <button onclick="triggerSubscriptionCrawl()" id="sub-crawl-btn"
+        class="ml-auto flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+        style="background:rgba(59,130,246,0.1); color:#60a5fa; border:1px solid rgba(59,130,246,0.25);">
+        <iconify-icon icon="solar:refresh-bold" style="font-size:13px;"></iconify-icon>
+        구독상품 업데이트
+      </button>
+    </div>
+    <div id="subscription-grid"
+         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════════════ POP 고정 바 ══════════════════════ -->
 <div id="pop-bar" class="fixed bottom-0 left-0 right-0 z-50 border-t border-[#2a2a3a]"
      style="background:rgba(17,17,24,0.97); backdrop-filter:blur(16px);">
@@ -252,7 +505,7 @@
       </div>
       <div>
         <div class="text-sm font-bold text-white"><span id="selected-count">0</span>개 선택됨</div>
-        <div class="text-xs text-gray-500">최대 5개까지 선택 가능</div>
+        <div class="text-xs text-gray-500">선택한 상품을 POP로 출력할 수 있습니다</div>
       </div>
     </div>
     <div class="flex items-center gap-2">
@@ -283,75 +536,153 @@
 <!-- ══════════════════════ 숨김 POP 렌더링 카드 ══════════════════════ -->
 <div id="pop-render-zone">
 
-  <!-- ① 헤더 -->
-  <div style="background:#e60012; padding:16px 20px 12px; text-align:center;">
-    <div style="font-size:32px; font-weight:900; color:#fff; letter-spacing:-0.5px; line-height:1.1; word-break:keep-all;">
-      온오프 초특가상품
-    </div>
-    <div style="font-size:15px; font-weight:500; color:rgba(255,255,255,0.9); margin-top:4px;">
-      온오프 통합매장인 <span id="pop-store-name">광복롯데몰</span> 단독특가
+<!-- ■ 일반 상품 POP (시안형) -->
+<div id="pop-card" style="position:fixed;left:-9999px;top:0;width:560px;height:792px;max-height:792px;background:#fff;font-family:'Pretendard','Noto Sans KR',sans-serif;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;">
+
+  <div style="height:156px;background:#f70808;padding:24px 18px 0;text-align:center;flex-shrink:0;box-sizing:border-box;">
+    <div id="pop-headline" style="font-size:56px;font-weight:900;color:#fff;letter-spacing:-2px;line-height:1.08;word-break:keep-all;min-height:62px;padding-bottom:4px;">온오프 초특가상품</div>
+    <div id="pop-subtitle" style="font-size:18px;font-weight:500;color:#fff;line-height:1.28;letter-spacing:-0.6px;margin-top:20px;min-height:46px;padding:0 12px;">온오프 통합매장인 우리매장 단독 특가</div>
+  </div>
+
+  <div style="height:260px;background:#fff;position:relative;display:flex;align-items:center;justify-content:center;padding:12px 22px 6px;flex-shrink:0;box-sizing:border-box;">
+    <img id="pop-img" src="" alt="" style="max-width:280px;max-height:220px;object-fit:contain;display:block;" crossorigin="anonymous">
+    <div style="position:absolute;right:12px;top:18px;width:110px;padding:8px 6px 10px;background:#fff;border:2px solid #222;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;">
+      <div id="pop-qr" style="background:#fff;"></div>
+      <div style="font-size:13px;font-weight:800;color:#111;text-align:center;line-height:1;margin-top:8px;">구매QR링크</div>
     </div>
   </div>
 
-  <!-- ② 이미지 + QR -->
-  <div style="background:#fff; padding:16px 20px 8px; display:flex; gap:12px; align-items:flex-start; min-height:220px;">
-    <div style="flex:1; display:flex; align-items:center; justify-content:center; min-height:180px;">
-      <img id="pop-img" src="" alt="제품 이미지"
-           style="max-width:260px; max-height:200px; object-fit:contain;"
-           crossorigin="anonymous">
+  <div style="height:136px;background:#efefef;padding:8px 24px 10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-sizing:border-box;">
+    <div id="pop-product-name" style="width:100%;font-size:24px;font-weight:900;color:#111;text-align:center;word-break:keep-all;letter-spacing:-1px;line-height:1.28;"></div>
+  </div>
+
+  <div style="height:48px;background:#fff;padding:10px 34px 0 30px;display:flex;align-items:flex-start;justify-content:flex-start;flex-shrink:0;box-sizing:border-box;">
+    <span id="pop-model-no" style="display:inline-block;max-width:260px;font-size:14px;color:#222;font-weight:500;line-height:1.28;"></span>
+  </div>
+
+  <div style="height:180px;background:#fff;padding:6px 38px 0;flex-shrink:0;box-sizing:border-box;">
+    <div style="height:160px;background:#fff100;border-radius:8px;position:relative;padding:18px 22px 10px;box-sizing:border-box;">
+      <div style="position:absolute;left:14px;top:-12px;display:flex;justify-content:flex-start;">
+        <div id="pop-badge" style="display:inline-flex;align-items:center;justify-content:center;height:36px;min-width:214px;padding:0 26px;background:#f70808;border-radius:20px;font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.5px;white-space:nowrap;text-align:center;">온라인쇼핑몰 기획전 특가</div>
+      </div>
+      <div style="position:absolute;top:10px;right:18px;display:flex;align-items:flex-end;gap:8px;">
+        <span style="font-size:13px;color:#111;font-weight:500;line-height:1;">기존가</span>
+        <span id="pop-orig-price" style="display:inline-block;max-width:180px;font-size:24px;color:#111;font-weight:500;vertical-align:bottom;line-height:1.08;"></span>
+      </div>
+      <div id="pop-price-row" style="display:flex;align-items:flex-end;justify-content:flex-end;gap:10px;line-height:1;margin-top:2px;padding-right:12px;">
+        <span style="font-size:20px;font-weight:800;color:#111;padding-bottom:16px;">혜택가</span>
+        <span id="pop-sale-price" style="display:inline-block;max-width:100%;font-size:74px;font-weight:900;color:#f70808;letter-spacing:-3px;line-height:1.04;padding-bottom:10px;"></span>
+      </div>
+      <div id="pop-benefit-note" style="font-size:14px;color:#111;text-align:right;font-weight:700;line-height:1.3;margin-top:6px;min-height:22px;"></div>
     </div>
-    <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0;">
-      <div id="pop-qr"></div>
-      <div style="font-size:11px; font-weight:600; color:#333; text-align:center;">구매QR링크</div>
+  </div>
+
+  <!-- JS 참조용 (화면 미표시) -->
+  <div style="display:none;">
+    <span id="pop-date"></span>
+    <span id="pop-footer-store"></span>
+    <span id="pop-criteria-date"></span>
+  </div>
+
+</div><!-- /pop-card -->
+
+<!-- ■ 구독 상품 POP (A5 고정 560x792) -->
+<div id="pop-card-subscription">
+
+  <!-- 구름 효과 -->
+  <div class="sub-cloud-1"></div>
+  <div class="sub-cloud-2"></div>
+
+  <!-- ① 최상단 바 -->
+  <div class="sub-topbar">
+    <span class="sub-topbar-left">구독이 쉬워지는 곳</span>
+  </div>
+
+  <!-- ② 타이틀 + QR -->
+  <div class="sub-title-area">
+    <div class="sub-copy-line">하구 싶은대로 다 되는 <strong>구독</strong></div>
+    <div class="sub-main-title">하이마트 온라인 구독</div>
+    <div class="sub-title-divider"></div>
+    <div class="sub-qr-wrap">
+      <div id="sub-qr"></div>
+      <div class="sub-qr-label">구매QR링크</div>
     </div>
   </div>
 
   <!-- ③ 제품 정보 -->
-  <div style="background:#f5f5f5; padding:12px 20px 10px;">
-    <div id="pop-product-name"
-         style="font-size:22px; font-weight:800; color:#111; text-align:center; word-break:keep-all; line-height:1.25;">
-      LG 12Kg 일반 세탁기
+  <div class="sub-product-area">
+    <div id="sub-period" class="sub-period"></div>
+    <div id="sub-product-name" class="sub-product-name"></div>
+    <div id="sub-model-no" class="sub-model-no"></div>
+    <div class="sub-summary-row">
+      <span class="sub-summary-label">구독 개월 수</span>
+      <span class="sub-summary-sep">:</span>
+      <span id="sub-months" class="sub-summary-value"></span>
     </div>
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
-      <span id="pop-model-no" style="font-size:13px; color:#777; font-weight:500;">TR12WL</span>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <span style="font-size:12px; color:#888;">기존가</span>
-        <span id="pop-orig-price"
-              style="font-size:17px; color:#999; text-decoration:line-through; font-weight:600;">
-          450,000원
-        </span>
-        <span style="color:#e60012; font-size:16px; font-weight:900;">↓</span>
+    <div class="sub-summary-row">
+      <span class="sub-summary-label">월 구독료</span>
+      <span class="sub-summary-sep">:</span>
+      <span id="sub-monthly-fee" class="sub-summary-value"></span>
+    </div>
+  </div>
+
+  <!-- ④ 빨간 혜택 박스 -->
+  <div class="sub-price-box">
+    <div class="sub-price-row">
+      <div class="sub-price-label-wrap">
+        <span class="sub-price-label-main">롯데카드</span>
+        <span class="sub-price-label-sub">월 30만원 사용 시</span>
+      </div>
+      <div class="sub-price-right">
+        <div class="sub-price-amount">
+          <span class="sub-price-unit">월</span>
+          <span id="sub-lotte-price" class="sub-price-num"></span>
+          <span class="sub-price-won">원</span>
+        </div>
+        <div id="sub-cashback" class="sub-cashback"></div>
       </div>
     </div>
+    <div class="sub-price-divider"></div>
+    <div class="sub-price-row">
+      <div class="sub-price-label-wrap">
+        <span class="sub-price-label-main">롯데카드</span>
+        <span class="sub-price-label-sub">월 70만원 사용 시</span>
+      </div>
+      <div class="sub-price-right">
+        <div class="sub-price-amount">
+          <span class="sub-price-unit">월</span>
+          <span id="sub-hybrid-price" class="sub-price-num"></span>
+          <span class="sub-price-won">원</span>
+        </div>
+      </div>
+    </div>
+    <div id="sub-benefit-desc" class="sub-benefit-desc"></div>
   </div>
 
-  <!-- ④ 가격 박스 -->
-  <div style="background:#FFD700; margin:0 20px 16px; border-radius:8px; padding:12px 16px 10px;">
-    <div style="background:#e60012; color:#fff; font-size:11px; font-weight:700;
-                padding:3px 10px; border-radius:20px; display:inline-block;
-                margin-bottom:6px; letter-spacing:0.3px;">
-      온라인쇼핑몰 기획전 특가
-    </div>
-    <div id="pop-sale-price"
-         style="font-size:46px; font-weight:900; color:#111; line-height:1;
-                letter-spacing:-1px; text-align:center;">
-      347,140
-    </div>
-    <div id="pop-benefit-note"
-         style="font-size:12px; color:#555; text-align:right; margin-top:4px;">
-      카드 사용조건 부 총 혜택가: 0원
+  <!-- ⑤ 안심케어 -->
+  <div class="sub-care-section">
+    <div class="sub-care-title">구독 안심케어 혜택</div>
+    <div class="sub-care-box">
+      <div id="sub-care-benefit" class="sub-care-content"></div>
     </div>
   </div>
 
-  <!-- ⑤ 푸터 -->
-  <div style="background:#f9f9f9; border-top:1px solid #eee; padding:8px 20px;
-              display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; flex-direction:column; gap:2px;">
-      <span style="font-size:11px; color:#888; font-weight:600;" id="pop-footer-store">롯데하이마트 광복롯데점</span>
-      <span id="pop-criteria-date" style="font-size:10px; color:#bbb; font-weight:400;"></span>
-    </div>
-    <span id="pop-date" style="font-size:11px; color:#aaa;"></span>
+  <!-- ⑥ 주석 -->
+  <div class="sub-notes-section">
+    <p>※ 금액은 변동될 수 있으며, 자세한 내용은 직원에게 문의 바랍니다.</p>
+    <p>※ 표시된 가격은 실제 가격보다 반영이 늦을 수 있으니, 실제 판매 가격은 표시된 전자 가격표를 확인 바랍니다.</p>
   </div>
+
+  <!-- ⑦ 푸터 -->
+  <div class="sub-footer-section">
+    <div class="sub-footer-left">
+      <span id="sub-store-name" class="sub-footer-store"></span>
+      <span id="sub-criteria-date" class="sub-footer-date2"></span>
+    </div>
+    <span id="sub-print-date" class="sub-footer-right"></span>
+  </div>
+
+</div><!-- /pop-card-subscription -->
 
 </div>
 <!-- /pop-render-zone -->
@@ -449,11 +780,28 @@
 // ── 전역 상태 ─────────────────────────────────────────────────────────────────
 const state = {
   activeCategory: null,
+  activeSubCategory: null,  // 구독전용 탭 선택 (null=전체)
   data: {},                 // 카테고리별 캐시 데이터 (필터 없음)
   selected: new Set(),
   selectedItems: new Map(),
+  selectedSubs: new Set(),        // 구독 상품 선택 (model_no)
+  selectedSubItems: new Map(),    // 구독 상품 상세 데이터
   activeFilters: {},        // {spec_key: value}  현재 활성 필터
   filtersConfig: {},        // /api/filters 응답
+};
+
+// 안심케어 설명 정적 테이블
+const CARE_PLAN_DESC = {
+  tv:          { '안심케어1': 'TV 화면·패널·스피커 클리닝, 리모컨 소독 · 36개월 1회' },
+  aircon:      { '안심케어1': '완전 분해 클리닝 (열교환기·팬·필터 세척), 스팀살균·UV살균·피톤치드 분사 · 36개월 1회' },
+  refrigerator:{ '안심케어1': '내부 분해 클리닝, 스팀살균·UV살균·피톤치드 분사, 기계실 청소 · 36개월 1회' },
+  washer:      { '안심케어1': '드럼 완전 분해 스팀세척, 고무패킹·세탁조 곰팡이 제거, 고압세척 · 36개월 1회' },
+  dryer:       { '안심케어1': '드럼 내부·필터·덕트 분해 클리닝, 스팀살균, 외관 청소 · 36개월 1회' },
+  kimchi:      { '안심케어1': '내부 분리 스팀세척, 탈취·UV살균, 도어 패킹 클리닝 · 36개월 1회' },
+  airpurifier: { '안심케어1': '헤파필터 교체, 내부 분해 청소, UV살균 · 36개월 1회' },
+  vacuum:      { '안심케어1': '필터 교체, 흡입구·브러시·본체 내부 분해 청소 · 36개월 1회' },
+  dishwasher:  { '안심케어1': '필터·분사암·내벽 고온 스팀세척, 도어 패킹 점검 · 36개월 1회' },
+  range:       { '안심케어1': '상판·버너·오븐 내부 완전 클리닝, 스팀세척 · 36개월 1회' },
 };
 
 const CATEGORIES_ORDER = [
@@ -466,12 +814,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('today-date').textContent =
     new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
 
-  // 매장명을 POP 카드에도 반영
+  // 매장명을 POP 카드 푸터에 반영
   const sn = document.getElementById('store-name').textContent.trim();
   if (sn) {
     document.getElementById('pop-footer-store').textContent = sn;
-    const mallPart = sn.replace('롯데하이마트','').trim();
-    if (mallPart) document.getElementById('pop-store-name').textContent = mallPart;
   }
 
   loadStatus();
@@ -495,109 +841,152 @@ async function loadStatus() {
   } catch {}
 }
 
+// ── 구독 탭 바 ───────────────────────────────────────────────────────────────
+function buildSubTabs() {
+  const c = document.getElementById('sub-tab-container');
+  c.innerHTML = '';
+
+  const allBtn = makeSubTab('all', '구독전용', !state.activeSubCategory, null, true);
+  c.appendChild(allBtn);
+
+  for (const key of CATEGORIES_ORDER) {
+    const catData = _subData[key];
+    if (!catData?.items?.length) continue;
+    c.appendChild(makeSubTab(key, catData.category_name, state.activeSubCategory === key, catData.items.length, false));
+  }
+}
+
+function makeSubTab(key, label, active, count, isAll) {
+  const btn = document.createElement('button');
+  btn.onclick = () => selectSubTab(key);
+  const BASE = 'display:inline-flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;min-width:78px;padding:6px 16px;border-radius:8px;font-size:14px;font-weight:600;line-height:20px;white-space:nowrap;transition:all 0.15s;cursor:pointer;border:none;text-align:center;';
+  btn.style.cssText = BASE + (active
+    ? (isAll
+      ? 'background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;'
+      : 'background:rgba(59,130,246,0.2);color:#60a5fa;border:1px solid rgba(59,130,246,0.4);')
+    : 'background:transparent;color:#6b7280;');
+  btn.innerHTML = label;
+  if (count !== null && count !== undefined)
+    btn.innerHTML += `<span style="font-size:10px;padding:2px 6px;border-radius:4px;${active?'background:rgba(255,255,255,0.2);color:#fff;':'background:#0f1624;color:#1d4ed8;'}">${count}</span>`;
+  return btn;
+}
+
+function selectSubTab(key) {
+  state.activeSubCategory = key === 'all' ? null : key;
+  buildSubTabs();
+  renderSubscriptionSection();
+  // 구독 섹션으로 부드럽게 스크롤
+  setTimeout(() => {
+    document.getElementById('subscription-section')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 60);
+}
+
 // ── 구독 데이터 로드 ──────────────────────────────────────────────────────────
 let _subData = {};  // 카테고리별 구독 캐시
 
 async function loadSubscriptionSection() {
-  const cat = state.activeCategory;
-  const params = cat ? `?category=${cat}` : '';
   try {
-    const r = await fetch(`/api/subscription/recommended${params}`);
-    const d = await r.json();
-
-    if (cat) {
-      // 단일 카테고리 → {category_key, items}
-      _subData = d.items?.length ? { [cat]: d } : {};
-    } else {
-      _subData = d;
-    }
+    const r = await fetch('/api/subscription/recommended');
+    _subData = await r.json();
   } catch {
     _subData = {};
   }
+  buildSubTabs();
   renderSubscriptionSection();
 }
 
 function renderSubscriptionSection() {
-  const section  = document.getElementById('subscription-section');
-  const grid     = document.getElementById('subscription-grid');
-  const cat      = state.activeCategory;
-  const keys     = cat ? [cat] : Object.keys(_subData);
+  const section = document.getElementById('subscription-section');
+  const grid    = document.getElementById('subscription-grid');
+  const subCat  = state.activeSubCategory;
+  const keys    = subCat ? [subCat] : Object.keys(_subData);
   const hasItems = keys.some(k => (_subData[k]?.items?.length > 0));
 
   if (!hasItems) { section.classList.add('hidden'); return; }
   section.classList.remove('hidden');
   grid.innerHTML = '';
 
-  const CATEGORIES_ORDER = [
-    'tv','refrigerator','washer','dryer','kimchi',
-    'aircon','airpurifier','vacuum','dishwasher','range'
-  ];
   const orderedKeys = CATEGORIES_ORDER.filter(k => keys.includes(k));
 
   orderedKeys.forEach(key => {
     const catData = _subData[key];
     if (!catData?.items?.length) return;
 
-    if (!cat) {
+    if (!subCat) {
       // 전체 보기 — 카테고리 헤더
       const hdr = document.createElement('div');
       hdr.className = 'col-span-full flex items-center gap-3 mt-4 first:mt-0';
       hdr.innerHTML = `
-        <div class="w-1 h-5 rounded-full" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);"></div>
-        <span class="text-sm font-bold text-gray-300">${catData.category_name}</span>
-        <div class="flex-1 h-px" style="background:#2a2a3a;"></div>`;
+        <div class="w-1 h-5 rounded-full" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);"></div>
+        <span class="text-sm font-bold" style="color:#93c5fd;">${catData.category_name}</span>
+        <div class="flex-1 h-px" style="background:#1a1a2e;"></div>`;
       grid.appendChild(hdr);
     }
 
     catData.items.forEach((item, idx) => {
-      grid.appendChild(createSubscriptionCard(item, idx));
+      grid.appendChild(createSubscriptionCard(item, idx, key));
     });
   });
 }
 
-function createSubscriptionCard(item, idx) {
+function createSubscriptionCard(item, idx, catKey) {
   const wrap = document.createElement('div');
   wrap.style.animationDelay = `${idx * 60}ms`;
   wrap.className = 'animate-fadeUp';
 
-  const monthly        = item.monthly_fee         ? Number(item.monthly_fee)         : 0;
-  const cardMonthly    = item.card_benefit_monthly ? Number(item.card_benefit_monthly) : monthly;
-  const cardDiscount   = monthly - cardMonthly;
-  const cardDiscPct    = monthly > 0 ? Math.round(cardDiscount / monthly * 100) : 0;
-  const months         = item.contract_months || 60;
-  const carePlan       = item.care_plan || '';
+  const monthly     = item.monthly_fee         ? Number(item.monthly_fee)         : 0;
+  const cardMonthly = item.card_benefit_monthly ? Number(item.card_benefit_monthly) : monthly;
+  const cardDiscount = monthly - cardMonthly;
+  const cardDiscPct  = monthly > 0 ? Math.round(cardDiscount / monthly * 100) : 0;
+  const months      = item.contract_months || 60;
+  const carePlan    = item.care_plan || '';
 
-  // goodsAttrs 파싱
+  // 안심케어 설명
+  const category   = catKey || item.category || '';
+  const careDesc   = (CARE_PLAN_DESC[category] && CARE_PLAN_DESC[category][carePlan]) || '';
+
+  // goodsAttrs 파싱 — 주요 스펙 추출
   let attrs = [];
   try { attrs = JSON.parse(item.goods_attrs || '[]'); } catch {}
-  const attrsHtml = attrs.slice(0,3).map(a =>
-    `<span class="text-[10px] px-2 py-0.5 rounded-full" style="background:rgba(99,102,241,0.1);color:#a5b4fc;border:1px solid rgba(99,102,241,0.2);">${a.val}</span>`
-  ).join('');
 
-  const careBadge = carePlan
-    ? `<span class="badge" style="background:rgba(99,102,241,0.15);color:#c4b5fd;border:1px solid rgba(139,92,246,0.3);">
-         <iconify-icon icon="solar:shield-check-bold" style="font-size:11px;"></iconify-icon>${carePlan}
-       </span>`
-    : '';
+  // 표시할 우선 키 목록
+  const PRIO_KEYS = ['형태','총체용량','세탁용량','건조용량','평형수','적용면적','에너지효율','색상'];
+  const prioAttrs = PRIO_KEYS.map(k => attrs.find(a => a.grp === k)).filter(Boolean);
+  const otherAttrs = attrs.filter(a => !PRIO_KEYS.includes(a.grp) && a.grp !== '출시연도');
+  const showAttrs = [...prioAttrs, ...otherAttrs].slice(0, 5);
+
+  const specRows = showAttrs.map(a =>
+    `<div class="flex justify-between items-center py-0.5">
+       <span class="text-[10px]" style="color:#6b7280;">${a.grp}</span>
+       <span class="text-[10px] font-semibold" style="color:#d1d5db;">${a.val}</span>
+     </div>`
+  ).join('');
 
   wrap.innerHTML = `
     <div class="rounded-2xl border overflow-hidden h-full flex flex-col transition-all hover:-translate-y-1"
-         style="background:#111118; border-color:#2a2a3a; box-shadow:none;"
-         onmouseover="this.style.borderColor='rgba(99,102,241,0.5)'; this.style.boxShadow='0 12px 40px rgba(99,102,241,0.12)'"
-         onmouseout="this.style.borderColor='#2a2a3a'; this.style.boxShadow='none'">
+         style="background:#0c0c18; border-color:#1e2035; box-shadow:none;"
+         onmouseover="this.style.borderColor='rgba(59,130,246,0.45)'; this.style.boxShadow='0 12px 40px rgba(59,130,246,0.1)'"
+         onmouseout="this.style.borderColor='#1e2035'; this.style.boxShadow='none'">
 
-      <!-- 구독 뱃지 + 기간 -->
+      <!-- 상단 뱃지 바 -->
       <div class="px-3 pt-3 flex items-center justify-between">
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md"
-              style="background:rgba(99,102,241,0.2);color:#818cf8;border:1px solid rgba(99,102,241,0.3);">
-          구독전용
-        </span>
-        <span class="text-[11px] font-semibold" style="color:#6366f1;">${months}개월</span>
+        <div class="flex items-center gap-2">
+          <div class="sub-check-box w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all flex-shrink-0"
+               style="border-color:#1e3a6e; background:transparent;"
+               onclick="event.stopPropagation(); toggleSubSelection('${item.model_no || item.id}', this)"
+               data-id="${item.model_no || item.id}">
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-md"
+                style="background:rgba(29,78,216,0.25);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);">
+            구독전용
+          </span>
+        </div>
+        <span class="text-[11px] font-semibold" style="color:#3b82f6;">${months}개월 약정</span>
       </div>
 
       <!-- 이미지 -->
       <div class="mx-3 mt-2 rounded-xl flex items-center justify-center overflow-hidden"
-           style="background:#f8f8f8; height:150px;">
+           style="background:#f5f6f8; height:140px;">
         ${item.image_url
           ? `<img src="${item.image_url}" alt="${item.product_name}"
                   class="max-h-full max-w-full object-contain p-2"
@@ -605,54 +994,54 @@ function createSubscriptionCard(item, idx) {
           : `<iconify-icon icon="solar:box-bold" style="font-size:40px;color:#ccc;"></iconify-icon>`}
       </div>
 
-      <!-- 케어 + 속성 뱃지 -->
-      <div class="px-3 pt-2 flex flex-wrap gap-1 min-h-[26px]">
-        ${careBadge}${attrsHtml}
+      <!-- 상품명 -->
+      <div class="px-3 pt-2">
+        <p class="text-sm font-semibold text-white line-clamp-2 leading-snug">${item.product_name}</p>
+        <p class="text-[10px] mt-0.5 font-mono" style="color:#374151;">${item.model_no || ''}</p>
       </div>
 
-      <!-- 상품명 -->
-      <div class="px-3 pt-1 flex-1 flex flex-col justify-between pb-3">
-        <div>
-          <p class="text-sm font-semibold text-white line-clamp-2 leading-snug">${item.product_name}</p>
-          <p class="text-[11px] mt-0.5 font-mono" style="color:#4b5563;">${item.model_no || ''}</p>
-        </div>
+      <!-- 스펙 테이블 -->
+      ${showAttrs.length ? `
+      <div class="mx-3 mt-2 px-2 py-1.5 rounded-lg" style="background:#0f1020; border:1px solid #1a1d30;">
+        ${specRows}
+      </div>` : ''}
 
-        <!-- 가격 정보 -->
-        <div class="mt-3 space-y-1.5">
-          <!-- 월 구독료 -->
+      <!-- 안심케어 -->
+      ${carePlan ? `
+      <div class="mx-3 mt-2 px-2 py-2 rounded-lg" style="background:rgba(29,78,216,0.08); border:1px solid rgba(59,130,246,0.2);">
+        <div class="flex items-center gap-1 mb-1">
+          <iconify-icon icon="solar:shield-check-bold" style="font-size:12px;color:#60a5fa;"></iconify-icon>
+          <span class="text-[11px] font-bold" style="color:#60a5fa;">${carePlan}</span>
+        </div>
+        ${careDesc ? `<p class="text-[10px] leading-relaxed" style="color:#6b7280;">${careDesc}</p>` : ''}
+      </div>` : ''}
+
+      <!-- 가격 정보 -->
+      <div class="px-3 mt-auto pt-2 pb-3 space-y-1.5 flex-1 flex flex-col justify-end">
+        <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="text-xs" style="color:#6b7280;">월 구독료</span>
-            <span class="text-sm font-bold" style="color:#9ca3af;">
-              ₩${monthly.toLocaleString('ko-KR')}
-            </span>
+            <span class="text-xs" style="color:#4b5563;">월 구독료</span>
+            <span class="text-sm font-bold" style="color:#6b7280;">₩${monthly.toLocaleString('ko-KR')}</span>
           </div>
-          <!-- 구분선 -->
-          <div style="height:1px;background:#1f2937;"></div>
-          <!-- 카드 최대혜택 -->
+          <div style="height:1px;background:#141628;"></div>
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold" style="color:#818cf8;">
+            <span class="text-xs font-bold" style="color:#3b82f6;">
               <iconify-icon icon="solar:card-bold" style="font-size:12px;vertical-align:-2px;"></iconify-icon>
               카드 최대혜택
             </span>
             <div class="text-right">
-              <div class="text-lg font-black" style="color:#a78bfa;">
-                ₩${cardMonthly.toLocaleString('ko-KR')}
-                <span class="text-xs font-normal">/월</span>
-              </div>
-              ${cardDiscount > 0
-                ? `<div class="text-[10px]" style="color:#6366f1;">월 ₩${cardDiscount.toLocaleString('ko-KR')} (${cardDiscPct}%) 절약</div>`
-                : ''}
+              <div class="text-lg font-black" style="color:#60a5fa;">₩${cardMonthly.toLocaleString('ko-KR')}<span class="text-xs font-normal">/월</span></div>
+              ${cardDiscount > 0 ? `<div class="text-[10px]" style="color:#2563eb;">₩${cardDiscount.toLocaleString('ko-KR')} (${cardDiscPct}%) 절약</div>` : ''}
             </div>
           </div>
         </div>
 
-        <!-- 온라인몰 버튼 -->
         ${item.product_url
           ? `<a href="${item.product_url}" target="_blank"
-               class="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
-               style="background:rgba(99,102,241,0.08);color:#818cf8;border:1px solid rgba(99,102,241,0.2);"
-               onmouseover="this.style.background='rgba(99,102,241,0.18)'"
-               onmouseout="this.style.background='rgba(99,102,241,0.08)'">
+               class="mt-1 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
+               style="background:rgba(29,78,216,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.25);"
+               onmouseover="this.style.background='rgba(29,78,216,0.25)'"
+               onmouseout="this.style.background='rgba(29,78,216,0.12)'">
                <iconify-icon icon="solar:external-link-bold" style="font-size:12px;"></iconify-icon>
                구독 신청하기
              </a>` : ''}
@@ -671,6 +1060,54 @@ async function triggerSubscriptionCrawl() {
   } catch {
     btn.style.opacity = '1'; btn.style.pointerEvents = '';
   }
+}
+
+function toggleSubSelection(id, el) {
+  const subItem = _findSubItemById(id);
+  if (!subItem) return;
+
+  if (state.selectedSubs.has(id)) {
+    state.selectedSubs.delete(id);
+    state.selectedSubItems.delete(id);
+    el.style.background = 'transparent';
+    el.style.borderColor = '#1e3a6e';
+    el.innerHTML = '';
+  } else {
+    state.selectedSubs.add(id);
+    state.selectedSubItems.set(id, { ...subItem, _isSubscription: true });
+    el.style.background = '#1d4ed8';
+    el.style.borderColor = '#3b82f6';
+    el.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`;
+  }
+  updatePopBar();
+}
+
+function _findSubItemById(id) {
+  for (const [, catData] of Object.entries(_subData)) {
+    for (const item of (catData.items || [])) {
+      if ((item.model_no || item.id) === id) return item;
+    }
+  }
+  return null;
+}
+
+function clearSubSelection() {
+  state.selectedSubs.clear();
+  state.selectedSubItems.clear();
+  document.querySelectorAll('.sub-check-box').forEach(el => {
+    el.style.background = 'transparent';
+    el.style.borderColor = '#1e3a6e';
+    el.innerHTML = '';
+  });
+  updatePopBar();
+}
+
+function updatePopBar() {
+  const total = state.selected.size + state.selectedSubs.size;
+  const countEl = document.getElementById('selected-count');
+  if (countEl) countEl.textContent = total;
+  const bar = document.getElementById('pop-bar');
+  if (bar) bar.classList.toggle('visible', total > 0);
 }
 
 // ── 필터 설정 로드 ────────────────────────────────────────────────────────────
@@ -706,23 +1143,43 @@ function makeTab(key, label, active, count) {
   const btn = document.createElement('button');
   btn.dataset.key = key;
   btn.onclick = () => selectTab(key);
-  btn.className = `shrink-0 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-    active ? 'text-white' : 'text-gray-500 hover:text-gray-300 hover:bg-[#1a1a24]'
-  }`;
-  if (active) btn.style.cssText = 'background:linear-gradient(135deg,#e60012,#b0000e);';
+  const BASE = 'display:inline-flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;min-width:78px;padding:6px 16px;border-radius:8px;font-size:14px;font-weight:600;line-height:20px;white-space:nowrap;transition:all 0.15s;cursor:pointer;border:none;text-align:center;';
+  btn.style.cssText = BASE + (active
+    ? 'background:linear-gradient(135deg,#e60012,#b0000e);color:#fff;'
+    : 'background:transparent;color:#6b7280;');
   btn.innerHTML = label;
   if (count !== undefined)
-    btn.innerHTML += `<span class="text-[10px] px-1.5 py-0.5 rounded-md ${active?'bg-white/20 text-white':'bg-[#1a1a24] text-gray-600'}">${count}</span>`;
+    btn.innerHTML += `<span style="font-size:10px;padding:2px 6px;border-radius:4px;${active?'background:rgba(255,255,255,0.2);color:#fff;':'background:#1a1a24;color:#4b5563;'}">${count}</span>`;
   return btn;
 }
 
 function selectTab(key) {
-  state.activeCategory = key === 'all' ? null : key;
-  state.activeFilters  = {};   // 탭 변경 시 필터 초기화
-  buildTabs();
-  renderFilterBar();
-  renderAll();
-  loadSubscriptionSection();  // 구독 섹션도 갱신
+  state.activeFilters = {};
+  if (key === 'all') {
+    state.activeCategory = null;
+    buildTabs();
+    renderFilterBar();
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  // 전체 뷰에서 해당 카테고리 섹션으로 스크롤
+  if (state.activeCategory !== null) {
+    state.activeCategory = null;
+    buildTabs();
+    renderFilterBar();
+    renderAll();
+  } else {
+    buildTabs();
+    renderFilterBar();
+  }
+  setTimeout(() => {
+    const el = document.getElementById(`section-${key}`);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }, 80);
 }
 
 // ── 서브 필터 바 렌더링 ───────────────────────────────────────────────────────
@@ -831,7 +1288,7 @@ function renderAll() {
 
   document.getElementById('section-title').textContent =
     state.activeCategory ? (state.data[state.activeCategory]?.category_name + ' 추천') : '전체 추천';
-  document.getElementById('section-subtitle').textContent = '가성비 기준 TOP 5 추천 상품';
+  document.getElementById('section-subtitle').textContent = '가성비 기준 TOP 10 추천 상품';
 
   const keysToShow = state.activeCategory
     ? [state.activeCategory]
@@ -846,6 +1303,7 @@ function renderAll() {
 
     if (!state.activeCategory) {
       const hdr = document.createElement('div');
+      hdr.id = `section-${key}`;
       hdr.className = 'col-span-full flex items-center gap-3 mt-6 first:mt-0';
       hdr.innerHTML = `
         <div class="w-1 h-6 rounded-full" style="background:linear-gradient(135deg,#e60012,#b0000e);"></div>
@@ -906,6 +1364,7 @@ function createProductCard(item, idx) {
           : `<iconify-icon icon="solar:box-bold" style="font-size:40px;color:#ccc;"></iconify-icon>`}
       </div>
       <div class="px-3 pt-2 flex flex-wrap gap-1 min-h-[28px]">${badgesHtml}</div>
+      ${item.reason ? `<div class="px-3 pb-1" style="font-size:10px;color:#9ca3af;margin-top:2px;">💡 ${item.reason}</div>` : ''}
       <div class="px-3 pt-1 pb-3 flex-1 flex flex-col justify-between">
         <div>
           <p class="text-sm font-semibold text-white line-clamp-2 leading-snug">${item.product_name}</p>
@@ -959,7 +1418,6 @@ function toggleSelect(modelNo, cardEl, item) {
     const chk = document.getElementById(`chk-${modelNo}`);
     if (chk) { chk.classList.remove('bg-[#e60012]','border-[#e60012]'); chk.innerHTML = ''; }
   } else {
-    if (state.selected.size >= 5) { showToast('최대 5개까지 선택할 수 있습니다.'); return; }
     state.selected.add(modelNo);
     state.selectedItems.set(modelNo, item);
     cardEl.classList.add('selected');
@@ -979,12 +1437,7 @@ function clearSelection() {
     const chk = el.querySelector('[id^="chk-"]');
     if (chk) { chk.classList.remove('bg-[#e60012]','border-[#e60012]'); chk.innerHTML = ''; }
   });
-  updatePopBar();
-}
-
-function updatePopBar() {
-  document.getElementById('selected-count').textContent = state.selected.size;
-  document.getElementById('pop-bar').classList.toggle('visible', state.selected.size > 0);
+  clearSubSelection();
 }
 
 // ── 크롤러 트리거 ─────────────────────────────────────────────────────────────
@@ -1050,33 +1503,175 @@ function generateQR(url) {
   });
 }
 
+const autoFitRegistry = new WeakMap();
+const autoFitObservers = new WeakMap();
+
+function isTextOverflowing(el, maxWidth = null, maxHeight = null) {
+  if (!el) return false;
+  const widthLimit = maxWidth ?? el.clientWidth;
+  const heightLimit = maxHeight ?? el.clientHeight;
+  return el.scrollWidth > widthLimit + 1 || el.scrollHeight > heightLimit + 1;
+}
+
+function autoScaleText(el, {
+  maxFont = 32,
+  minFont = 10,
+  step = 1,
+  maxWidth = null,
+  maxHeight = null,
+  maxLines = 1,
+  baseLineHeight = 1.1,
+  minLineHeight = 0.92,
+  baseLetterSpacing = 0,
+  minLetterSpacing = -2,
+  ellipsis = false,
+} = {}) {
+  if (!el) return;
+
+  el.style.fontSize = `${maxFont}px`;
+  el.style.lineHeight = String(baseLineHeight);
+  el.style.letterSpacing = `${baseLetterSpacing}px`;
+  el.style.whiteSpace = maxLines === 1 ? 'nowrap' : 'normal';
+  el.style.overflow = 'visible';
+  el.style.textOverflow = 'clip';
+  el.style.display = maxLines > 1 ? '-webkit-box' : 'block';
+  el.style.webkitBoxOrient = maxLines > 1 ? 'vertical' : 'initial';
+  el.style.webkitLineClamp = maxLines > 1 ? String(maxLines) : 'unset';
+
+  let fontSize = maxFont;
+  while (fontSize >= minFont) {
+    el.style.fontSize = `${fontSize}px`;
+    if (!isTextOverflowing(el, maxWidth, maxHeight)) break;
+    fontSize -= step;
+  }
+
+  let lineHeight = baseLineHeight;
+  while (isTextOverflowing(el, maxWidth, maxHeight) && lineHeight > minLineHeight) {
+    lineHeight = Math.max(minLineHeight, +(lineHeight - 0.04).toFixed(2));
+    el.style.lineHeight = String(lineHeight);
+  }
+
+  let letterSpacing = baseLetterSpacing;
+  while (isTextOverflowing(el, maxWidth, maxHeight) && letterSpacing > minLetterSpacing) {
+    letterSpacing = Math.max(minLetterSpacing, +(letterSpacing - 0.2).toFixed(1));
+    el.style.letterSpacing = `${letterSpacing}px`;
+  }
+
+  if (ellipsis && isTextOverflowing(el, maxWidth, maxHeight)) {
+    if (maxLines === 1) {
+      el.style.overflow = 'hidden';
+      el.style.textOverflow = 'ellipsis';
+      el.style.whiteSpace = 'nowrap';
+    } else {
+      el.style.overflow = 'hidden';
+      el.style.display = '-webkit-box';
+      el.style.webkitBoxOrient = 'vertical';
+      el.style.webkitLineClamp = String(maxLines);
+    }
+  }
+}
+
+function bindAutoFitText(el, options) {
+  if (!el) return;
+  autoFitRegistry.set(el, options);
+  autoScaleText(el, options);
+
+  if (typeof ResizeObserver !== 'undefined' && !autoFitObservers.has(el)) {
+    const observer = new ResizeObserver(() => {
+      const saved = autoFitRegistry.get(el);
+      if (saved) autoScaleText(el, saved);
+    });
+    observer.observe(el);
+    if (el.parentElement) observer.observe(el.parentElement);
+    autoFitObservers.set(el, observer);
+  }
+}
+
+function tuneGeneralPopLayout() {
+  autoScaleText(document.getElementById('pop-headline'),     { maxFont: 56, minFont: 40, maxHeight: 66, maxLines: 1, ellipsis: true });
+  autoScaleText(document.getElementById('pop-subtitle'),     { maxFont: 18, minFont: 12, maxHeight: 46, maxLines: 2, ellipsis: true });
+  autoScaleText(document.getElementById('pop-product-name'), { maxFont: 24, minFont: 13, maxHeight: 112, maxLines: 2, ellipsis: true, baseLineHeight: 1.1 });
+  autoScaleText(document.getElementById('pop-model-no'),     { maxFont: 14, minFont: 10, maxWidth: 260, maxHeight: 24, maxLines: 1, ellipsis: true });
+  autoScaleText(document.getElementById('pop-badge'),        { maxFont: 16, minFont: 11, maxWidth: 214, maxHeight: 36, maxLines: 1, ellipsis: true });
+  autoScaleText(document.getElementById('pop-orig-price'),   { maxFont: 24, minFont: 14, maxWidth: 180, maxLines: 1, ellipsis: true });
+  autoScaleText(document.getElementById('pop-sale-price'),   { maxFont: 74, minFont: 40, maxWidth: 320, maxHeight: 100, maxLines: 1, ellipsis: true });
+  autoScaleText(document.getElementById('pop-benefit-note'), { maxFont: 11, minFont: 8, maxHeight: 30, maxLines: 2, ellipsis: true });
+}
+
+function tuneSubscriptionPopLayout() {
+  bindAutoFitText(document.getElementById('sub-copy-line'),         { maxFont: 24, minFont: 15, maxLines: 1, baseLineHeight: 1.05, baseLetterSpacing: -0.7, minLetterSpacing: -1.4, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-main-title'),        { maxFont: 72, minFont: 34, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -2.6, minLetterSpacing: -4, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-period'),            { maxFont: 16, minFont: 10, maxLines: 1, baseLineHeight: 1, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-brand'),             { maxFont: 44, minFont: 22, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -2.6, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-product-name'),      { maxFont: 44, minFont: 18, maxLines: 2, baseLineHeight: 1.06, minLineHeight: 0.92, baseLetterSpacing: -1.7, minLetterSpacing: -2.6, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-model-no'),          { maxFont: 14, minFont: 9, maxLines: 1, baseLineHeight: 1, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-months'),            { maxFont: 30, minFont: 15, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -0.9, minLetterSpacing: -1.6, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-monthly-fee'),       { maxFont: 30, minFont: 15, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -0.9, minLetterSpacing: -1.6, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-lotte-price-group'), { maxFont: 78, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -3, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-hybrid-price-group'),{ maxFont: 78, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -3, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-cashback'),          { maxFont: 15, minFont: 8, maxLines: 1, baseLineHeight: 1, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-benefit-desc'),      { maxFont: 10, minFont: 7, maxLines: 1, baseLineHeight: 1, ellipsis: true });
+}
+
+function extractCareMonths(text, fallback = 24) {
+  const m = String(text || '').match(/(\d+)\s*개월/);
+  return m ? parseInt(m[1], 10) : fallback;
+}
+
+function cleanCareDetail(text) {
+  return String(text || '')
+    .replace(/\s*·\s*\d+\s*개월\s*\d+\s*회/g, '')
+    .replace(/\s*·\s*연\s*\d+\s*회/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /** POP 카드에 상품 데이터 삽입 */
 async function fillPopCard(product) {
-  // 텍스트 데이터
+  // ── 가격 계산
+  const orig    = parseInt(product.original_price) || 0;
+  const sale    = parseInt(product.sale_price)     || 0;
+  const benefit = parseInt(product.benefit_price)  || 0;
+
+  let mainPrice  = sale;
+  if (benefit > 0 && benefit < sale) {
+    mainPrice  = benefit;
+  } else if (benefit > 0 && benefit < orig) {
+    mainPrice = benefit;
+  }
+  const cardSaving = orig > 0 && mainPrice > 0 && orig > mainPrice ? orig - mainPrice : 0;
+
+  // ── DOM 채우기
   document.getElementById('pop-product-name').textContent = product.product_name || '';
   document.getElementById('pop-model-no').textContent     = product.model_no     || '';
 
-  const origPrice = product.original_price || product.sale_price || 0;
-  const salePrice = product.sale_price     || product.benefit_price || 0;
+  // 기존가 (취소선)
   document.getElementById('pop-orig-price').textContent =
-    Number(origPrice).toLocaleString('ko-KR') + '원';
-  document.getElementById('pop-sale-price').textContent =
-    Number(salePrice).toLocaleString('ko-KR');
+    orig > 0 ? orig.toLocaleString('ko-KR') + '원' : '';
 
-  const beneDiff = origPrice - salePrice;
-  document.getElementById('pop-benefit-note').textContent =
-    beneDiff > 0
-      ? `추가 혜택 적용 시 최대 ₩${Number(beneDiff).toLocaleString()}원 절약`
-      : '카드 사용조건 부 총 혜택가: 0원';
+  // 혜택가 (메인, 우측 정렬)
+  document.getElementById('pop-sale-price').textContent =
+    mainPrice > 0 ? mainPrice.toLocaleString('ko-KR') : '';
+
+  // 카드 사용조건 문구
+  document.getElementById('pop-benefit-note').textContent = cardSaving > 0
+    ? `카드 추가할인 ₩${cardSaving.toLocaleString('ko-KR')}원 적용가`
+    : '';
+
+  // 매장명
+  const storeFull = document.getElementById('store-name')?.textContent?.trim() || '롯데하이마트 광복롯데점';
+  document.getElementById('pop-subtitle').textContent     = '온오프 통합매장인 우리매장 단독 특가';
+  document.getElementById('pop-footer-store').textContent = storeFull;
 
   // 날짜 / 시각
   const now = new Date();
-  const ymd = now.toLocaleDateString('ko-KR', {year:'numeric', month:'long', day:'numeric'});
-  const hh  = String(now.getHours()).padStart(2,'0');
-  const mm2 = String(now.getMinutes()).padStart(2,'0');
-  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-  document.getElementById('pop-date').textContent          = `출력일: ${ymd}`;
-  document.getElementById('pop-criteria-date').textContent = `${ymd} ${hh}:${mm2} 기준`;
+  const yyyy = now.getFullYear();
+  const mm   = String(now.getMonth() + 1).padStart(2, '0');
+  const dd   = String(now.getDate()).padStart(2, '0');
+  const hh   = String(now.getHours()).padStart(2, '0');
+  const dateStr = `${yyyy}${mm}${dd}`;
+  document.getElementById('pop-date').textContent          = `출력일: ${yyyy}.${mm}.${dd}`;
+  document.getElementById('pop-criteria-date').textContent = `${yyyy}년 ${parseInt(mm)}월 ${parseInt(dd)}일 ${hh}시 기준`;
 
   // 이미지 (base64 via proxy → CORS 없음)
   const b64 = await loadImageBase64(product.image_url);
@@ -1088,14 +1683,15 @@ async function fillPopCard(product) {
 
   // 폰트 + QR DOM 안정화 대기
   await document.fonts.ready;
-  await new Promise(r => setTimeout(r, 900));
+  tuneGeneralPopLayout();
+  await new Promise(r => setTimeout(r, 1200));
 
   return dateStr;
 }
 
 /** html2canvas로 PNG 캡처 후 다운로드 */
 async function captureAndDownload(product, dateStr) {
-  const card = document.getElementById('pop-render-zone');
+  const card = document.getElementById('pop-card');
 
   const canvas = await html2canvas(card, {
     scale: 2.4,
@@ -1103,9 +1699,27 @@ async function captureAndDownload(product, dateStr) {
     useCORS: true,
     allowTaint: false,
     logging: false,
-    width: 520,
-    height: card.scrollHeight,
-    windowWidth: 520,
+    width:  560,
+    height: 792,
+    windowWidth: 560,
+    windowHeight: 792,
+    scrollX: 0,
+    scrollY: -window.scrollY,
+    onclone: (clonedDoc) => {
+      const clonedCard = clonedDoc.getElementById('pop-card');
+      clonedCard.style.height    = '792px';
+      clonedCard.style.maxHeight = '792px';
+      clonedCard.style.overflow  = 'hidden';
+      clonedCard.style.position  = 'fixed';
+      clonedCard.style.left      = '0';
+      clonedCard.style.top       = '0';
+      const style = clonedDoc.createElement('style');
+      style.textContent = `
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css');
+        * { font-family: 'Pretendard', 'Noto Sans KR', sans-serif !important; }
+      `;
+      clonedDoc.head.appendChild(style);
+    },
   });
 
   const modelSafe = (product.model_no || 'unknown').replace(/[\/\\:*?"<>|]/g, '_');
@@ -1115,16 +1729,189 @@ async function captureAndDownload(product, dateStr) {
   link.click();
 }
 
-/** 선택된 상품 배열 반환 */
+/** 선택된 상품 배열 반환 (일반 + 구독) */
 function getSelectedItems() {
   const items = [];
   for (const [key, cat] of Object.entries(state.data)) {
     for (const item of cat.items) {
       if (state.selected.has(item.model_no))
-        items.push({ ...item, category_name: cat.category_name });
+        items.push({ ...item, category_name: cat.category_name, _isSubscription: false });
     }
   }
+  for (const [, item] of state.selectedSubItems) {
+    items.push({ ...item, _isSubscription: true });
+  }
   return items;
+}
+
+/** 구독 POP 채우기 + 캡처 */
+async function generateSubscriptionPOP(product) {
+  const d    = new Date();
+  const yyyy = d.getFullYear();
+  const mm   = String(d.getMonth()+1).padStart(2,'0');
+  const dd   = String(d.getDate()).padStart(2,'0');
+  const hh   = String(d.getHours()).padStart(2,'0');
+  const dateStr = `${yyyy}${mm}${dd}`;
+
+  const monthly     = parseInt(product.monthly_fee || 0);
+  const cardMonthly = Math.max(0, monthly - 14000);
+  const hybridPrice = Math.max(0, monthly - 18000);
+  const months      = product.contract_months || 36;
+  const category    = product.category || '';
+  const carePlan    = product.care_plan || '';
+
+  document.getElementById('sub-product-name').textContent = (product.product_name || '').trim();
+  document.getElementById('sub-model-no').textContent     = product.model_no || '';
+  document.getElementById('sub-months').textContent       = `${months}개월 구독`;
+  document.getElementById('sub-monthly-fee').textContent  = `${monthly.toLocaleString('ko-KR')}원`;
+
+  const period = (product.period_start && product.period_end)
+    ? `${product.period_start} ~ ${product.period_end}` : '';
+  document.getElementById('sub-period').textContent = period;
+
+  document.getElementById('sub-lotte-price').textContent  = cardMonthly.toLocaleString('ko-KR');
+  document.getElementById('sub-hybrid-price').textContent = hybridPrice.toLocaleString('ko-KR');
+
+  const cb = parseInt(product.cashback_amount || 0);
+  document.getElementById('sub-cashback').textContent =
+    cb > 0 ? `캐시백 : ${cb.toLocaleString('ko-KR')}원` : '';
+
+  document.getElementById('sub-benefit-desc').textContent =
+    product.benefit_desc ? `※ ${product.benefit_desc}` : '※ 제휴카드 월 30만원 사용조건 포함';
+
+  const careDescMap = CARE_PLAN_DESC[category] || {};
+  const careDesc = product.care_benefit ||
+    (carePlan && careDescMap[carePlan] ? careDescMap[carePlan] : '');
+  const warrantyMonths = extractCareMonths(careDesc, 36);
+  const cleaningDetail = cleanCareDetail(careDesc) || '제품 외관 및 내부 클리닝 서비스';
+  document.getElementById('sub-care-benefit').innerHTML = `
+    <div class="sub-care-list">
+      <div class="sub-care-item">
+        <span class="sub-care-bullet">-</span>
+        <span class="sub-care-text">${warrantyMonths}개월 무상보증기간 연장</span>
+      </div>
+      <div class="sub-care-item">
+        <span class="sub-care-bullet">-</span>
+        <span class="sub-care-text">${cleaningDetail}</span>
+      </div>
+    </div>`;
+
+  const storeFull = document.getElementById('store-name')?.textContent?.trim() || '롯데하이마트';
+  document.getElementById('sub-store-name').textContent    = storeFull;
+  document.getElementById('sub-print-date').textContent    = `출력일: ${yyyy}.${mm}.${dd}`;
+  document.getElementById('sub-criteria-date').textContent = `${yyyy}년 ${parseInt(mm)}월 ${parseInt(dd)}일 ${hh}시 기준`;
+
+  const qrWrap = document.getElementById('sub-qr');
+  if (qrWrap) {
+    qrWrap.innerHTML = '';
+    new QRCode(qrWrap, {
+      text: product.product_url || 'https://www.e-himart.co.kr',
+      width: 80, height: 80,
+      colorDark: '#000000', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 1500));
+
+  const card = document.getElementById('pop-card-subscription');
+  const W = 560;
+  const H = 792;
+
+  // 캡처 전 카드를 화면에 보이는 위치로 임시 이동
+  card.style.position = 'fixed';
+  card.style.left = '0';
+  card.style.top = '0';
+  card.style.zIndex = '-1';
+  card.style.width = '560px';
+  card.style.height = '792px';
+  card.style.maxHeight = '792px';
+  card.style.overflow = 'hidden';
+
+  const canvas = await html2canvas(card, {
+    scale: 2.0,
+    backgroundColor: '#b3d9ee',
+    useCORS: true, allowTaint: false, logging: false,
+    width: W, height: H, windowWidth: W, windowHeight: H,
+    scrollX: 0, scrollY: 0,
+    onclone: (clonedDoc) => {
+      const cc = clonedDoc.getElementById('pop-card-subscription');
+      cc.style.cssText = `
+        position: absolute !important; left: 0 !important; top: 0 !important;
+        width: 560px !important; height: 792px !important; max-height: 792px !important; overflow: hidden !important;
+        display: flex !important; flex-direction: column !important;
+        background: linear-gradient(175deg,#b3d9ee 0%,#c8e5f3 20%,#daeef8 45%,#eaf5fb 70%,#f4f9fd 100%) !important;
+        font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif !important;
+      `;
+      const style = clonedDoc.createElement('style');
+      style.textContent = `
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css');
+        * { font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif !important; -webkit-font-smoothing: antialiased; box-sizing: border-box !important; }
+        .sub-topbar { height:38px !important; flex-shrink:0 !important; background:rgba(255,255,255,0.55) !important; border-bottom:1px solid rgba(220,235,245,0.8) !important; display:flex !important; align-items:center !important; justify-content:flex-start !important; padding:0 16px !important; position:relative !important; z-index:1 !important; }
+        .sub-topbar-left { font-size:12px !important; color:#333 !important; font-weight:500 !important; }
+        .sub-title-area { flex-shrink:0 !important; position:relative !important; padding:14px 110px 0 18px !important; z-index:1 !important; }
+        .sub-copy-line { font-size:14px !important; color:#333 !important; font-weight:500 !important; }
+        .sub-copy-line strong { font-weight:900 !important; }
+        .sub-main-title { font-size:52px !important; font-weight:900 !important; color:#e60012 !important; letter-spacing:-2px !important; line-height:1.0 !important; white-space:nowrap !important; margin-top:6px !important; }
+        .sub-title-divider { display:none !important; }
+        .sub-qr-wrap { position:absolute !important; right:14px !important; top:10px !important; z-index:2 !important; display:flex !important; flex-direction:column !important; align-items:center !important; gap:4px !important; }
+        .sub-qr-label { font-size:10px !important; color:#444 !important; font-weight:600 !important; }
+        .sub-product-area { flex-shrink:0 !important; padding:24px 16px 10px !important; position:relative !important; z-index:1 !important; }
+        .sub-period { font-size:12px !important; color:#555 !important; text-align:right !important; margin-bottom:4px !important; }
+        .sub-product-name { font-size:28px !important; font-weight:900 !important; color:#111 !important; word-break:keep-all !important; line-height:1.25 !important; }
+        .sub-model-no { font-size:12px !important; color:#888 !important; margin-top:4px !important; }
+        .sub-summary-row { display:flex !important; align-items:center !important; gap:10px !important; min-height:32px !important; margin-top:8px !important; }
+        .sub-summary-label { flex:0 0 auto !important; font-size:16px !important; font-weight:700 !important; color:#55626d !important; line-height:1 !important; }
+        .sub-summary-sep { flex:0 0 auto !important; font-size:16px !important; font-weight:700 !important; color:#6d7d88 !important; line-height:1 !important; }
+        .sub-summary-value { min-width:0 !important; font-size:30px !important; font-weight:900 !important; color:#111 !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
+        .sub-price-box { background:#e60012 !important; border-radius:16px !important; margin:24px 14px 16px !important; padding:20px 20px 18px !important; position:relative !important; z-index:1 !important; }
+        .sub-price-row { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; align-items:start !important; column-gap:10px !important; }
+        .sub-price-box > .sub-price-row { position:relative !important; z-index:1 !important; }
+        .sub-price-box > .sub-price-row:first-of-type { padding-bottom:12px !important; }
+        .sub-price-box > .sub-price-row:last-of-type  { padding-top:12px !important; }
+        .sub-price-label-wrap { display:flex !important; flex-direction:column !important; justify-content:flex-start !important; flex-shrink:0 !important; gap:2px !important; transform:translateY(-4px) !important; }
+        .sub-price-right { display:flex !important; flex-direction:column !important; align-items:flex-end !important; justify-self:end !important; transform:translateY(-6px) !important; }
+        .sub-price-label-main { font-size:28px !important; font-weight:800 !important; color:#fff !important; line-height:1.2 !important; }
+        .sub-price-label-sub { font-size:22px !important; color:rgba(255,255,255,0.85) !important; line-height:1.2 !important; }
+        .sub-price-amount { display:flex !important; align-items:baseline !important; gap:4px !important; }
+        .sub-price-unit { font-size:20px !important; font-weight:700 !important; color:#fff !important; line-height:1 !important; transform:translateY(-2px) !important; }
+        .sub-price-num { font-size:52px !important; font-weight:900 !important; color:#fff !important; letter-spacing:-2px !important; line-height:1 !important; }
+        .sub-price-won { font-size:22px !important; font-weight:700 !important; color:#fff !important; line-height:1 !important; transform:translateY(-1px) !important; }
+        .sub-cashback { font-size:11px !important; color:rgba(255,255,255,0.8) !important; text-align:right !important; margin-top:2px !important; }
+        .sub-price-divider { position:absolute !important; left:20px !important; right:20px !important; top:50% !important; height:1px !important; background:rgba(255,255,255,0.3) !important; transform:translateY(-0.5px) !important; margin:0 !important; display:block !important; pointer-events:none !important; }
+        .sub-benefit-desc { font-size:10px !important; color:rgba(255,255,255,0.75) !important; margin-top:8px !important; line-height:1.4 !important; }
+        .sub-care-section { flex-shrink:0 !important; padding:18px 14px 6px !important; position:relative !important; z-index:1 !important; }
+        .sub-care-title { font-size:16px !important; font-weight:900 !important; color:#e60012 !important; margin-bottom:6px !important; }
+        .sub-care-box { border:1.5px solid #ddd !important; border-radius:10px !important; padding:10px 16px !important; background:#fff !important; display:flex !important; align-items:center !important; min-height:80px !important; }
+        .sub-care-content { width:100% !important; display:flex !important; align-items:center !important; }
+        .sub-care-list { display:flex !important; flex-direction:column !important; gap:4px !important; width:100% !important; justify-content:center !important; }
+        .sub-care-item { display:grid !important; grid-template-columns:10px minmax(0,1fr) !important; align-items:center !important; column-gap:4px !important; }
+        .sub-care-bullet { font-size:16px !important; line-height:1.3 !important; color:#333 !important; text-align:center !important; }
+        .sub-care-text { font-size:15px !important; color:#333 !important; line-height:1.3 !important; word-break:keep-all !important; }
+        .sub-notes-section { flex-shrink:0 !important; padding:16px 14px 4px !important; position:relative !important; z-index:1 !important; }
+        .sub-notes-section p { font-size:9px !important; color:#999 !important; line-height:1.6 !important; }
+        .sub-footer-section { flex-shrink:0 !important; background:rgba(255,255,255,0.45) !important; border-top:1px solid rgba(200,220,230,0.6) !important; margin-top:auto !important; padding:8px 14px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; position:relative !important; z-index:1 !important; }
+        .sub-footer-left { display:flex !important; flex-direction:column !important; gap:2px !important; }
+        .sub-footer-store { font-size:11px !important; font-weight:700 !important; color:#555 !important; }
+        .sub-footer-date2 { font-size:10px !important; color:#bbb !important; }
+        .sub-footer-right { font-size:10px !important; color:#bbb !important; }
+      `;
+      clonedDoc.head.appendChild(style);
+    }
+  });
+
+  // 캡처 후 원위치 복구
+  card.style.position = 'fixed';
+  card.style.left = '-9999px';
+  card.style.top = '0';
+  card.style.zIndex = '';
+
+  const modelSafe = (product.model_no || 'sub').replace(/[.\s\/\\:*?"<>|]/g, '_');
+  const link = document.createElement('a');
+  link.download = `himart_sub_pop_${modelSafe}_${dateStr}.png`;
+  link.href = canvas.toDataURL('image/png', 1.0);
+  link.click();
 }
 
 /** 메인: 선택된 상품 모두 PNG 순차 다운로드 */
@@ -1132,15 +1919,24 @@ async function downloadSelectedPOPs() {
   const items = getSelectedItems();
   if (!items.length) return;
 
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+
   showLoading('POP 생성 중...', `총 ${items.length}개`);
 
   try {
     for (let i = 0; i < items.length; i++) {
-      showLoading(`POP 생성 중... (${i+1}/${items.length})`, items[i].product_name?.slice(0,30));
-      const dateStr = await fillPopCard(items[i]);
-      await captureAndDownload(items[i], dateStr);
+      const product = items[i];
+      showLoading(`POP 생성 중... (${i+1}/${items.length})`, product.product_name?.slice(0,30));
+
+      if (product._isSubscription) {
+        await generateSubscriptionPOP(product);
+      } else {
+        const ds = await fillPopCard(product);
+        await captureAndDownload(product, ds);
+      }
       if (i < items.length - 1)
-        await new Promise(r => setTimeout(r, 600)); // 브라우저 다운로드 간격
+        await new Promise(r => setTimeout(r, 600));
     }
     showToast(`✅ ${items.length}개 POP 파일이 다운로드되었습니다.`, 3500);
   } catch (e) {

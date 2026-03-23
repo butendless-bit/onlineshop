@@ -119,6 +119,21 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
 
     for i, item in enumerate(result, 1):
         item["rank"] = i
+        breakdown = item["score_breakdown"]
+        reasons = []
+        if breakdown["alltime_low"] > 0:
+            reasons.append("역대 최저가 달성")
+        if breakdown["price_drop"] >= 30:
+            reasons.append("최근 대폭 가격 인하")
+        elif breakdown["price_drop"] > 0:
+            reasons.append("최근 가격 인하")
+        if breakdown["discount"] >= 30:
+            reasons.append(f"할인율 {item['discount_rate']:.0f}%")
+        elif breakdown["discount"] >= 20:
+            reasons.append(f"할인율 {item['discount_rate']:.0f}%")
+        if not reasons:
+            reasons.append("가성비 추천 상품")
+        item["reason"] = " · ".join(reasons)
 
     return result
 

@@ -39,7 +39,7 @@ FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
 FLASK_DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
 
 # ── 랭킹 알고리즘 가중치 ──────────────────────────────────────────────────────
-TOP_N = 5                    # 카테고리별 추천 수
+TOP_N = 10                   # 카테고리별 추천 수
 SCORE_DISCOUNT_MAX = 40      # 할인율 점수 상한
 SCORE_PRICE_DROP_MAX = 40    # 가격 하락 점수 상한
 SCORE_ALLTIME_LOW = 20       # 역대 최저가 보너스
