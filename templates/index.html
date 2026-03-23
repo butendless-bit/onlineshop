@@ -463,7 +463,7 @@
 </main>
 
 <!-- ══════════════════════ 구독전용 섹션 ══════════════════════ -->
-<section id="subscription-section" class="hidden border-t border-[#1a1a2e] pb-16"
+<section id="subscription-section" class="border-t border-[#1a1a2e] pb-16"
          style="background:linear-gradient(180deg,#08080f 0%,#0a0a14 100%);">
   <!-- 구독 카테고리 탭 (sticky) -->
   <div class="sticky top-[108px] z-20 border-b border-[#1a1a2e]"
@@ -811,6 +811,12 @@ const CATEGORIES_ORDER = [
   'aircon','airpurifier','vacuum','dishwasher','range',
   'laptop','tablet'
 ];
+const CATEGORY_NAMES = {
+  tv:'TV', refrigerator:'냉장고', washer:'세탁기', dryer:'건조기',
+  kimchi:'김치냉장고', aircon:'에어컨', airpurifier:'공기청정기',
+  vacuum:'청소기', dishwasher:'식기세척기', range:'전기레인지',
+  laptop:'노트북', tablet:'태블릿'
+};
 
 // ── 초기화 ────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -853,9 +859,9 @@ function buildSubTabs() {
   c.appendChild(allBtn);
 
   for (const key of CATEGORIES_ORDER) {
-    const catData = _subData[key];
-    if (!catData?.items?.length) continue;
-    c.appendChild(makeSubTab(key, catData.category_name, state.activeSubCategory === key, catData.items.length, false));
+    const name  = _subData[key]?.category_name || CATEGORY_NAMES[key];
+    const count = _subData[key]?.items?.length;
+    c.appendChild(makeSubTab(key, name, state.activeSubCategory === key, count, false));
   }
 }
 
@@ -904,38 +910,35 @@ async function loadSubscriptionSection() {
 }
 
 function renderSubscriptionSection() {
-  const section = document.getElementById('subscription-section');
-  const grid    = document.getElementById('subscription-grid');
-  const subCat  = null;  // 항상 전체 표시
-  const keys    = Object.keys(_subData);
-  const hasItems = keys.some(k => (_subData[k]?.items?.length > 0));
-
-  if (!hasItems) { section.classList.add('hidden'); return; }
-  section.classList.remove('hidden');
+  const grid = document.getElementById('subscription-grid');
   grid.innerHTML = '';
 
-  const orderedKeys = CATEGORIES_ORDER.filter(k => keys.includes(k));
-
-  orderedKeys.forEach(key => {
+  for (const key of CATEGORIES_ORDER) {
     const catData = _subData[key];
-    if (!catData?.items?.length) return;
+    const name    = catData?.category_name || CATEGORY_NAMES[key];
 
-    if (!subCat) {
-      // 전체 보기 — 카테고리 헤더
-      const hdr = document.createElement('div');
-      hdr.id = `sub-section-${key}`;
-      hdr.className = 'col-span-full flex items-center gap-3 mt-4 first:mt-0';
-      hdr.innerHTML = `
-        <div class="w-1 h-5 rounded-full" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);"></div>
-        <span class="text-sm font-bold" style="color:#93c5fd;">${catData.category_name}</span>
-        <div class="flex-1 h-px" style="background:#1a1a2e;"></div>`;
-      grid.appendChild(hdr);
+    // 카테고리 헤더
+    const hdr = document.createElement('div');
+    hdr.id = `sub-section-${key}`;
+    hdr.className = 'col-span-full flex items-center gap-3 mt-4 first:mt-0';
+    hdr.innerHTML = `
+      <div class="w-1 h-5 rounded-full" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);"></div>
+      <span class="text-sm font-bold" style="color:#93c5fd;">${name}</span>
+      <div class="flex-1 h-px" style="background:#1a1a2e;"></div>`;
+    grid.appendChild(hdr);
+
+    if (!catData?.items?.length) {
+      const empty = document.createElement('div');
+      empty.className = 'col-span-full flex items-center justify-center py-6 text-gray-600 text-sm';
+      empty.textContent = '데이터 없음 — 구독상품 업데이트를 실행하세요.';
+      grid.appendChild(empty);
+      continue;
     }
 
     catData.items.forEach((item, idx) => {
       grid.appendChild(createSubscriptionCard(item, idx, key));
     });
-  });
+  }
 }
 
 function createSubscriptionCard(item, idx, catKey) {
@@ -1143,8 +1146,9 @@ function buildTabs() {
   c.innerHTML = '';
   c.appendChild(makeTab('all', '전체', !state.activeCategory));
   for (const key of CATEGORIES_ORDER) {
-    if (!state.data[key]) continue;
-    c.appendChild(makeTab(key, state.data[key].category_name, state.activeCategory === key, state.data[key].items.length));
+    const name  = state.data[key]?.category_name || CATEGORY_NAMES[key];
+    const count = state.data[key]?.items?.length;
+    c.appendChild(makeTab(key, name, state.activeCategory === key, count));
   }
 }
 
@@ -1299,16 +1303,14 @@ function renderAll() {
     state.activeCategory ? (state.data[state.activeCategory]?.category_name + ' 추천') : '전체 추천';
   document.getElementById('section-subtitle').textContent = '가성비 기준 TOP 10 추천 상품';
 
-  const keysToShow = state.activeCategory
-    ? [state.activeCategory]
-    : CATEGORIES_ORDER.filter(k => state.data[k]);
+  const keysToShow = state.activeCategory ? [state.activeCategory] : CATEGORIES_ORDER;
 
   grid.innerHTML = '';
   let total = 0;
 
   for (const key of keysToShow) {
-    const cat = state.data[key];
-    if (!cat?.items?.length) continue;
+    const cat  = state.data[key];
+    const name = cat?.category_name || CATEGORY_NAMES[key];
 
     if (!state.activeCategory) {
       const hdr = document.createElement('div');
@@ -1316,9 +1318,17 @@ function renderAll() {
       hdr.className = 'col-span-full flex items-center gap-3 mt-6 first:mt-0';
       hdr.innerHTML = `
         <div class="w-1 h-6 rounded-full" style="background:linear-gradient(135deg,#e60012,#b0000e);"></div>
-        <h3 class="font-bold text-white">${cat.category_name}</h3>
+        <h3 class="font-bold text-white">${name}</h3>
         <div class="flex-1 h-px bg-[#2a2a3a]"></div>`;
       grid.appendChild(hdr);
+    }
+
+    if (!cat?.items?.length) {
+      const empty = document.createElement('div');
+      empty.className = 'col-span-full flex items-center justify-center py-8 text-gray-600 text-sm';
+      empty.textContent = '데이터 없음 — 크롤링을 실행하세요.';
+      grid.appendChild(empty);
+      continue;
     }
 
     cat.items.forEach((item, idx) => {
@@ -1327,8 +1337,7 @@ function renderAll() {
     });
   }
 
-  if (total === 0) showEmpty();
-  else document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('empty-state').classList.add('hidden');
 }
 
 // ── 상품 카드 ─────────────────────────────────────────────────────────────────
