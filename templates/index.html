@@ -252,7 +252,7 @@
   }
   .sub-price-box > .sub-price-row { position: relative; z-index: 1; }
   .sub-price-box > .sub-price-row:first-of-type { padding-bottom: 12px; }
-  .sub-price-box > .sub-price-row:last-of-type  { padding-top: 12px; }
+  .sub-price-box > .sub-price-row:last-of-type  { padding-top: 22px; }
   .sub-price-label-wrap {
     display: flex; flex-direction: column; justify-content: flex-start; flex-shrink: 0; gap: 2px;
     transform: translateY(-4px);
@@ -657,7 +657,6 @@
         </div>
       </div>
     </div>
-    <div id="sub-benefit-desc" class="sub-benefit-desc"></div>
   </div>
 
   <!-- ⑤ 안심케어 -->
@@ -1629,7 +1628,6 @@ function tuneSubscriptionPopLayout() {
   bindAutoFitText(document.getElementById('sub-lotte-price-group'), { maxFont: 78, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -3, ellipsis: true });
   bindAutoFitText(document.getElementById('sub-hybrid-price-group'),{ maxFont: 78, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -3, ellipsis: true });
   bindAutoFitText(document.getElementById('sub-cashback'),          { maxFont: 15, minFont: 8, maxLines: 1, baseLineHeight: 1, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-benefit-desc'),      { maxFont: 10, minFont: 7, maxLines: 1, baseLineHeight: 1, ellipsis: true });
 }
 
 function extractCareMonths(text, fallback = 24) {
@@ -1795,8 +1793,6 @@ async function generateSubscriptionPOP(product) {
   document.getElementById('sub-cashback').textContent =
     cb > 0 ? `캐시백 : ${cb.toLocaleString('ko-KR')}원` : '';
 
-  document.getElementById('sub-benefit-desc').textContent =
-    product.benefit_desc ? `※ ${product.benefit_desc}` : '※ 제휴카드 월 30만원 사용조건 포함';
 
   const careDescMap = CARE_PLAN_DESC[category] || {};
   const careDesc = product.care_benefit ||
@@ -1893,7 +1889,7 @@ async function generateSubscriptionPOP(product) {
         .sub-price-row { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; align-items:start !important; column-gap:10px !important; }
         .sub-price-box > .sub-price-row { position:relative !important; z-index:1 !important; }
         .sub-price-box > .sub-price-row:first-of-type { padding-bottom:12px !important; }
-        .sub-price-box > .sub-price-row:last-of-type  { padding-top:12px !important; }
+        .sub-price-box > .sub-price-row:last-of-type  { padding-top:22px !important; }
         .sub-price-label-wrap { display:flex !important; flex-direction:column !important; justify-content:flex-start !important; flex-shrink:0 !important; gap:2px !important; transform:translateY(-4px) !important; }
         .sub-price-right { display:flex !important; flex-direction:column !important; align-items:flex-end !important; justify-self:end !important; transform:translateY(-6px) !important; }
         .sub-price-label-main { font-size:28px !important; font-weight:800 !important; color:#fff !important; line-height:1.2 !important; }
