@@ -87,6 +87,13 @@ def init_db():
             "ALTER TABLE subscription_products ADD COLUMN care_plan TEXT",
             "ALTER TABLE subscription_products ADD COLUMN card_benefit_monthly INTEGER",
             "ALTER TABLE subscription_products ADD COLUMN goods_attrs TEXT DEFAULT '[]'",
+            "ALTER TABLE subscription_products ADD COLUMN lotte_card_price INTEGER DEFAULT 0",
+            "ALTER TABLE subscription_products ADD COLUMN hybrid_price INTEGER DEFAULT 0",
+            "ALTER TABLE subscription_products ADD COLUMN cashback_amount INTEGER DEFAULT 0",
+            "ALTER TABLE subscription_products ADD COLUMN benefit_desc TEXT DEFAULT ''",
+            "ALTER TABLE subscription_products ADD COLUMN care_benefit TEXT DEFAULT ''",
+            "ALTER TABLE subscription_products ADD COLUMN period_start TEXT DEFAULT ''",
+            "ALTER TABLE subscription_products ADD COLUMN period_end TEXT DEFAULT ''",
         ]:
             try:
                 conn.execute(col_sql)
@@ -306,7 +313,7 @@ def get_subscription_recommendations(category: str | None = None) -> dict:
     grouped: dict[str, list] = defaultdict(list)
     for item in items:
         cat_key = item.get("category") or "etc"
-        if len(grouped[cat_key]) < 5:
+        if len(grouped[cat_key]) < 10:
             grouped[cat_key].append(item)
 
     if category:

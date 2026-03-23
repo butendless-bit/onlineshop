@@ -419,14 +419,6 @@
   </div>
 </div>
 
-<!-- ══════════════════════ SUBSCRIPTION TABS ══════════════════════ -->
-<div class="fixed top-[120px] left-0 right-0 z-30 border-b border-[#1a1a2e]"
-     style="background:rgba(8,8,18,0.97); backdrop-filter:blur(8px);">
-  <div class="max-w-screen-xl mx-auto px-4">
-    <div class="tab-scroll flex gap-1 overflow-x-auto py-3" id="sub-tab-container"></div>
-  </div>
-</div>
-
 <!-- ══════════════════════ MAIN CONTENT ══════════════════════ -->
 <main class="max-w-screen-xl mx-auto px-4 py-8" style="padding-top: calc(2rem + 44px);">
   <div class="flex items-center justify-between mb-4">
@@ -473,6 +465,13 @@
 <!-- ══════════════════════ 구독전용 섹션 ══════════════════════ -->
 <section id="subscription-section" class="hidden border-t border-[#1a1a2e] pb-16"
          style="background:linear-gradient(180deg,#08080f 0%,#0a0a14 100%);">
+  <!-- 구독 카테고리 탭 (sticky) -->
+  <div class="sticky top-[108px] z-20 border-b border-[#1a1a2e]"
+       style="background:rgba(8,8,18,0.97); backdrop-filter:blur(8px);">
+    <div class="max-w-screen-xl mx-auto px-4">
+      <div class="tab-scroll flex gap-1 overflow-x-auto py-3" id="sub-tab-container"></div>
+    </div>
+  </div>
   <div class="max-w-screen-xl mx-auto px-4 pt-8">
     <div class="flex items-center gap-3 mb-6">
       <div class="w-1 h-6 rounded-full" style="background:linear-gradient(135deg,#3b82f6,#6366f1);"></div>
@@ -873,12 +872,17 @@ function makeSubTab(key, label, active, count, isAll) {
 }
 
 function selectSubTab(key) {
-  state.activeSubCategory = key === 'all' ? null : key;
-  buildSubTabs();
-  renderSubscriptionSection();
-  // 구독 섹션으로 부드럽게 스크롤
+  if (key === 'all') {
+    window.scrollTo({ top: document.getElementById('subscription-section').offsetTop - 120, behavior: 'smooth' });
+    return;
+  }
+  // 전체 뷰 유지, 해당 카테고리 섹션으로 스크롤
   setTimeout(() => {
-    document.getElementById('subscription-section')?.scrollIntoView({behavior:'smooth', block:'start'});
+    const el = document.getElementById(`sub-section-${key}`);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 160;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
   }, 60);
 }
 
@@ -899,8 +903,8 @@ async function loadSubscriptionSection() {
 function renderSubscriptionSection() {
   const section = document.getElementById('subscription-section');
   const grid    = document.getElementById('subscription-grid');
-  const subCat  = state.activeSubCategory;
-  const keys    = subCat ? [subCat] : Object.keys(_subData);
+  const subCat  = null;  // 항상 전체 표시
+  const keys    = Object.keys(_subData);
   const hasItems = keys.some(k => (_subData[k]?.items?.length > 0));
 
   if (!hasItems) { section.classList.add('hidden'); return; }
@@ -916,6 +920,7 @@ function renderSubscriptionSection() {
     if (!subCat) {
       // 전체 보기 — 카테고리 헤더
       const hdr = document.createElement('div');
+      hdr.id = `sub-section-${key}`;
       hdr.className = 'col-span-full flex items-center gap-3 mt-4 first:mt-0';
       hdr.innerHTML = `
         <div class="w-1 h-5 rounded-full" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);"></div>
