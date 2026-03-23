@@ -221,6 +221,50 @@ def _extract_range(name: str, model_no: str) -> dict:
     return spec
 
 
+# ── 노트북 ─────────────────────────────────────────────────────────────────────
+def _extract_laptop(name: str, model_no: str) -> dict:
+    spec = {}
+    combined = name + " " + model_no
+
+    if any(k in combined for k in ["삼성", "갤럭시북", "Galaxy Book"]):
+        spec["laptop_brand"] = "삼성"
+    elif any(k in combined for k in ["LG", "그램", "gram"]):
+        spec["laptop_brand"] = "LG"
+    elif any(k in combined for k in ["애플", "맥북", "MacBook", "Apple"]):
+        spec["laptop_brand"] = "애플"
+    else:
+        spec["laptop_brand"] = "기타"
+
+    inch = _inch(name, model_no)
+    if inch:
+        if inch >= 16:    spec["laptop_size"] = "16+"
+        elif inch >= 14:  spec["laptop_size"] = "14s"
+        else:             spec["laptop_size"] = "small"
+
+    return spec
+
+
+# ── 태블릿 ─────────────────────────────────────────────────────────────────────
+def _extract_tablet(name: str, model_no: str) -> dict:
+    spec = {}
+    combined = name + " " + model_no
+
+    if any(k in combined for k in ["삼성", "갤럭시탭", "Galaxy Tab"]):
+        spec["tablet_brand"] = "삼성"
+    elif any(k in combined for k in ["애플", "아이패드", "iPad", "Apple"]):
+        spec["tablet_brand"] = "애플"
+    else:
+        spec["tablet_brand"] = "기타"
+
+    inch = _inch(name, model_no)
+    if inch:
+        if inch >= 12:    spec["tablet_size"] = "12+"
+        elif inch >= 10:  spec["tablet_size"] = "10s"
+        else:             spec["tablet_size"] = "small"
+
+    return spec
+
+
 # ── 통합 추출 ─────────────────────────────────────────────────────────────────
 _EXTRACTORS = {
     "tv":           _extract_tv,
@@ -233,6 +277,8 @@ _EXTRACTORS = {
     "vacuum":       _extract_vacuum,
     "dishwasher":   _extract_dishwasher,
     "range":        _extract_range,
+    "laptop":       _extract_laptop,
+    "tablet":       _extract_tablet,
 }
 
 

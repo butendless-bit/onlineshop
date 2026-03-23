@@ -102,8 +102,8 @@ def _parse_product(p: dict, category_key: str) -> bool:
     try:
         price_info = p.get("priceInfo") or {}
 
-        # 렌탈/구독 상품 제외
-        if price_info.get("prcPrefix"):
+        # 렌탈/구독 상품 제외 (월 구독료 상품만 제외)
+        if price_info.get("prcPrefix") == "월 구독료":
             return False
 
         model_no     = (p.get("mdlNm") or p.get("goodsNo") or "UNKNOWN").strip()
