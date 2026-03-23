@@ -89,7 +89,7 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
         benefit = r.get("benefit_price") or r.get("sale_price") or 0
         prev = r.get("prev_benefit_price")
 
-        if benefit == 0:
+        if benefit == 0 or benefit <= 200_000:
             continue
 
         s_discount = _discount_score(original, benefit)
