@@ -7,4 +7,5 @@ output/
 data/*.db-shm
 data/*.db-wal
 inspect_*.py
-badge_calculator.py
+
+.vercel
