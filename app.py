@@ -2,6 +2,8 @@
 HiMart Intelligence — Flask 애플리케이션
 """
 import os
+import time
+import requests
 from flask import Flask, jsonify, render_template, request
 from config import FLASK_HOST, FLASK_PORT, FLASK_DEBUG, STORE_NAME, CATEGORIES, SUB_FILTERS
 from database import (
@@ -13,7 +15,34 @@ from database import (
 from ranker import get_all_recommendations, rank_category
 import threading
 
+_crawl_lock = threading.Lock()
+_crawl_last_run: float = 0.0
+_CRAWL_COOLDOWN = 300  # 5분 쿨다운
+
 app = Flask(__name__)
+
+
+def _dispatch_github_actions_crawl():
+    token = os.environ.get("GITHUB_ACTIONS_TRIGGER_TOKEN", "").strip()
+    repo = os.environ.get("GITHUB_ACTIONS_REPO", "youngjaelee33333/onlineshop").strip()
+    workflow = os.environ.get("GITHUB_ACTIONS_WORKFLOW", "daily-crawl.yml").strip()
+    ref = os.environ.get("GITHUB_ACTIONS_REF", "main").strip()
+
+    if not token:
+        raise RuntimeError("GITHUB_ACTIONS_TRIGGER_TOKEN is not configured")
+
+    resp = requests.post(
+        f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "onlineshop-vercel-trigger",
+        },
+        json={"ref": ref},
+        timeout=15,
+    )
+    if resp.status_code not in (201, 204):
+        raise RuntimeError(f"GitHub Actions dispatch failed ({resp.status_code})")
 
 # Vercel 서버리스: 모듈 임포트 시점에 DB 초기화 (main 블록이 실행되지 않으므로)
 if os.environ.get("VERCEL"):
@@ -80,10 +109,36 @@ def api_status():
 # ── API: 크롤러 수동 실행 ──────────────────────────────────────────────────────
 @app.route("/api/crawl", methods=["POST"])
 def api_crawl():
+    if os.environ.get("VERCEL"):
+        try:
+            _dispatch_github_actions_crawl()
+            return jsonify({
+                "mode": "github_actions",
+                "message": "즉시 새로 수집을 시작했습니다. 완료 후 자동 재배포됩니다.",
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 503
+
+    global _crawl_last_run
+    if not _crawl_lock.acquire(blocking=False):
+        return jsonify({"error": "이미 크롤링이 실행 중입니다."}), 429
+    now = time.time()
+    if now - _crawl_last_run < _CRAWL_COOLDOWN:
+        _crawl_lock.release()
+        remain = int(_CRAWL_COOLDOWN - (now - _crawl_last_run))
+        return jsonify({"error": f"너무 자주 실행할 수 없습니다. {remain}초 후 재시도하세요."}), 429
+    _crawl_last_run = now
     from crawler import run_crawler
     def _run():
-        run_crawler()
+        try:
+            run_crawler()
+        finally:
+            _crawl_lock.release()
     threading.Thread(target=_run, daemon=True).start()
+    return jsonify({
+        "mode": "local",
+        "message": "즉시 새로 수집을 시작했습니다. 잠시 후 새로고침하세요.",
+    })
     return jsonify({"message": "크롤링 시작됨. 잠시 후 새로고침하세요."})
 
 
@@ -207,7 +262,9 @@ def proxy_image():
         resp.raise_for_status()
         mime = resp.headers.get("Content-Type", "image/jpeg").split(";")[0]
         b64  = base64.b64encode(resp.content).decode()
-        return jsonify({"data": f"data:{mime};base64,{b64}"})
+        json_resp = jsonify({"data": f"data:{mime};base64,{b64}"})
+        json_resp.headers["Cache-Control"] = "public, max-age=86400"
+        return json_resp
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

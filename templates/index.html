@@ -1614,11 +1614,52 @@ async function triggerCrawl() {
   const btn = document.getElementById('crawl-btn');
   btn.disabled = true; btn.style.opacity = '0.7';
   try {
-    await fetch('/api/crawl', {method:'POST'});
+    const res = await fetch('/api/crawl', {method:'POST'});
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || '즉시 새로 수집에 실패했습니다.');
     showToast('크롤링이 시작됐습니다. 잠시 후 새로고침됩니다.');
     setTimeout(() => location.reload(), 8000);
   } catch {
     btn.disabled = false; btn.style.opacity = '1';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const crawlBtn = document.getElementById('crawl-btn');
+  if (crawlBtn) {
+    const icon = crawlBtn.querySelector('#crawl-icon');
+    crawlBtn.textContent = '즉시 새로 수집';
+    if (icon) {
+      crawlBtn.prepend(icon);
+      crawlBtn.style.display = 'flex';
+      crawlBtn.style.alignItems = 'center';
+      crawlBtn.style.gap = '0.5rem';
+    }
+  }
+});
+
+async function triggerCrawl() {
+  const btn = document.getElementById('crawl-btn');
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+
+  try {
+    const res = await fetch('/api/crawl', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error || '즉시 새로 수집에 실패했습니다.');
+    }
+
+    showToast(data.message || '즉시 새로 수집을 시작했습니다.');
+
+    if (data.mode === 'local') {
+      setTimeout(() => location.reload(), 8000);
+    }
+  } catch (err) {
+    showToast(err?.message || '즉시 새로 수집에 실패했습니다.');
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
   }
 }
 
