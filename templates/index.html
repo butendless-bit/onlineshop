@@ -513,6 +513,12 @@
         class="px-4 py-2 rounded-xl text-sm font-medium text-gray-400 border border-[#2a2a3a] hover:border-gray-600 transition-colors">
         선택 해제
       </button>
+      <button id="compare-btn" onclick="openCompareModal()"
+        class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all hover:brightness-110 active:scale-95"
+        style="display:none;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;">
+        <iconify-icon icon="solar:chart-bar-bold" style="font-size:16px;"></iconify-icon>
+        비교 분석
+      </button>
       <button onclick="downloadSelectedPOPs()"
         class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95"
         style="background:linear-gradient(135deg,#e60012,#b0000e);">
@@ -775,6 +781,131 @@
 <!-- /history-modal -->
 
 
+<!-- ══════════════════════ 비교 분석 모달 ══════════════════════ -->
+<div id="compare-modal" style="
+  display:none; position:fixed; inset:0; z-index:9100;
+  background:rgba(0,0,0,0.78); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; padding:16px;
+">
+  <div style="
+    background:#fff; border-radius:20px;
+    width:min(860px, 96vw); max-height:92vh;
+    overflow-y:auto; padding:28px 24px 24px;
+    position:relative;
+    box-shadow:0 32px 80px rgba(0,0,0,0.45);
+    font-family:'Pretendard','Noto Sans KR',sans-serif;
+  ">
+
+    <!-- 닫기 -->
+    <button onclick="closeCompareModal()" style="
+      position:absolute; top:14px; right:14px;
+      background:#f1f1f1; border:none; border-radius:50%;
+      width:34px; height:34px; font-size:17px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      color:#555; transition:background 0.15s;
+    " onmouseover="this.style.background='#e2e2e2'" onmouseout="this.style.background='#f1f1f1'">✕</button>
+
+    <!-- 헤더 -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:700;color:#e60012;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;">제품 비교 분석</div>
+      <div style="font-size:20px;font-weight:900;color:#111;">어떤 제품이 더 가치 있을까요?</div>
+    </div>
+
+    <!-- 제품 2개 나란히 -->
+    <div id="cmp-products" style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-bottom:24px;">
+
+      <!-- A 제품 -->
+      <div id="cmp-a" style="border-radius:14px;border:2px solid #e5e7eb;padding:16px;text-align:center;">
+        <img id="cmp-a-img" src="" style="width:90px;height:90px;object-fit:contain;margin:0 auto 10px;display:block;" onerror="this.style.display='none'">
+        <div id="cmp-a-name" style="font-size:13px;font-weight:700;color:#111;line-height:1.4;word-break:keep-all;margin-bottom:6px;"></div>
+        <div id="cmp-a-model" style="font-size:11px;color:#aaa;margin-bottom:10px;font-family:monospace;"></div>
+        <div id="cmp-a-price" style="font-size:22px;font-weight:900;color:#111;"></div>
+        <div id="cmp-a-orig" style="font-size:12px;color:#aaa;text-decoration:line-through;margin-top:2px;"></div>
+        <div id="cmp-a-discount" style="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;background:#fff0f0;color:#e60012;"></div>
+      </div>
+
+      <!-- VS -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:40px;gap:8px;">
+        <div style="font-size:22px;font-weight:900;color:#cbd5e1;">VS</div>
+        <div id="cmp-diff-badge" style="
+          padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;
+          background:#fef3c7;color:#92400e;text-align:center;white-space:nowrap;
+        "></div>
+      </div>
+
+      <!-- B 제품 -->
+      <div id="cmp-b" style="border-radius:14px;border:2px solid #e5e7eb;padding:16px;text-align:center;">
+        <img id="cmp-b-img" src="" style="width:90px;height:90px;object-fit:contain;margin:0 auto 10px;display:block;" onerror="this.style.display='none'">
+        <div id="cmp-b-name" style="font-size:13px;font-weight:700;color:#111;line-height:1.4;word-break:keep-all;margin-bottom:6px;"></div>
+        <div id="cmp-b-model" style="font-size:11px;color:#aaa;margin-bottom:10px;font-family:monospace;"></div>
+        <div id="cmp-b-price" style="font-size:22px;font-weight:900;color:#111;"></div>
+        <div id="cmp-b-orig" style="font-size:12px;color:#aaa;text-decoration:line-through;margin-top:2px;"></div>
+        <div id="cmp-b-discount" style="display:inline-block;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;background:#fff0f0;color:#e60012;"></div>
+      </div>
+    </div>
+
+    <!-- 스펙 비교 표 -->
+    <div id="cmp-spec-section" style="margin-bottom:22px;">
+      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <iconify-icon icon="solar:chart-bar-bold" style="color:#6366f1;font-size:16px;"></iconify-icon>
+        스펙 비교
+      </div>
+      <div id="cmp-spec-rows" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="cmp-spec-empty" style="display:none;font-size:13px;color:#9ca3af;text-align:center;padding:16px 0;">
+        이 카테고리는 스펙 비교 데이터가 없습니다.
+      </div>
+    </div>
+
+    <!-- 가성비 판정 -->
+    <div id="cmp-verdict-section" style="
+      background:linear-gradient(135deg,#f8faff,#f0f4ff);
+      border-radius:14px; border:1.5px solid #e0e7ff;
+      padding:18px 20px;
+    ">
+      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+        <iconify-icon icon="solar:medal-star-bold" style="color:#f59e0b;font-size:16px;"></iconify-icon>
+        가성비 판정
+      </div>
+
+      <!-- 가성비 미터 -->
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-bottom:4px;">
+          <span>가성비 낮음</span><span>적정</span><span>가성비 우수</span>
+        </div>
+        <div style="position:relative;height:10px;background:#e5e7eb;border-radius:20px;overflow:visible;">
+          <div id="cmp-meter-fill" style="
+            height:100%;border-radius:20px;transition:width 0.6s ease;
+            background:linear-gradient(90deg,#f87171,#fbbf24,#34d399);
+          "></div>
+          <div id="cmp-meter-dot" style="
+            position:absolute;top:50%;transform:translate(-50%,-50%);
+            width:18px;height:18px;border-radius:50%;border:3px solid #fff;
+            box-shadow:0 2px 6px rgba(0,0,0,0.25);transition:left 0.6s ease;
+            background:#6366f1;
+          "></div>
+        </div>
+      </div>
+
+      <!-- 판정 결과 -->
+      <div id="cmp-verdict-badge" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 18px;border-radius:30px;font-size:15px;font-weight:800;
+        margin-bottom:12px;
+      "></div>
+
+      <!-- 상세 설명 -->
+      <div id="cmp-verdict-detail" style="
+        font-size:13px;color:#4b5563;line-height:1.7;
+        padding:12px 14px;background:rgba(255,255,255,0.7);
+        border-radius:10px;
+      "></div>
+    </div>
+
+  </div>
+</div>
+<!-- /compare-modal -->
+
+
 <!-- ══════════════════════ SCRIPTS ══════════════════════ -->
 <script>
 // ── 전역 상태 ─────────────────────────────────────────────────────────────────
@@ -841,13 +972,24 @@ async function loadStatus() {
     const r = await fetch('/api/status');
     const d = await r.json();
     if (d.last_crawled) {
-      const dt = new Date(d.last_crawled);
-      document.getElementById('last-updated').textContent =
-        dt.toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      document.getElementById('last-updated').textContent = formatShortDateTime(d.last_crawled);
     }
     if (d.total_products !== undefined)
       document.getElementById('total-products').textContent = d.total_products.toLocaleString();
   } catch {}
+}
+
+function formatShortDateTime(value) {
+  if (!value) return '--';
+  const normalized = String(value).replace(' ', 'T');
+  const dt = new Date(normalized);
+  if (Number.isNaN(dt.getTime())) return String(value);
+  return dt.toLocaleString('ko-KR', {
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 // ── 구독 탭 바 ───────────────────────────────────────────────────────────────
@@ -952,6 +1094,7 @@ function createSubscriptionCard(item, idx, catKey) {
   const cardDiscPct  = monthly > 0 ? Math.round(cardDiscount / monthly * 100) : 0;
   const months      = item.contract_months || 60;
   const carePlan    = item.care_plan || '';
+  const updatedAt   = item.updated_at || item.created_at || '';
 
   // 안심케어 설명
   const category   = catKey || item.category || '';
@@ -1010,6 +1153,7 @@ function createSubscriptionCard(item, idx, catKey) {
       <div class="px-3 pt-2">
         <p class="text-sm font-semibold text-white line-clamp-2 leading-snug">${item.product_name}</p>
         <p class="text-[10px] mt-0.5 font-mono" style="color:#374151;">${item.model_no || ''}</p>
+        <p class="text-[10px] mt-1" style="color:#6b7280;">갱신 ${formatShortDateTime(updatedAt)}</p>
       </div>
 
       <!-- 스펙 테이블 -->
@@ -1120,6 +1264,9 @@ function updatePopBar() {
   if (countEl) countEl.textContent = total;
   const bar = document.getElementById('pop-bar');
   if (bar) bar.classList.toggle('visible', total > 0);
+  // 일반 상품 2개 선택 시에만 비교 버튼 노출
+  const compareBtn = document.getElementById('compare-btn');
+  if (compareBtn) compareBtn.style.display = state.selected.size === 2 ? 'flex' : 'none';
 }
 
 // ── 필터 설정 로드 ────────────────────────────────────────────────────────────
@@ -1387,6 +1534,7 @@ function createProductCard(item, idx) {
         <div>
           <p class="text-sm font-semibold text-white line-clamp-2 leading-snug">${item.product_name}</p>
           <p class="text-[11px] text-gray-600 mt-0.5 font-mono">${item.model_no}</p>
+          <p class="text-[10px] mt-1" style="color:#6b7280;">갱신 ${formatShortDateTime(item.crawled_at)}</p>
         </div>
         <div class="mt-3 space-y-0.5">
           ${item.original_price && item.sale_price && item.original_price > item.sale_price
@@ -2179,6 +2327,294 @@ function _renderHistoryInsight(data, days) {
 
   document.getElementById('modal-insight').innerHTML = msg;
 }
+
+// ══════════════════════════════════════════════════════════════
+// 제품 비교 분석 모달
+// ══════════════════════════════════════════════════════════════
+
+const SPEC_SCORES = {
+  tv_type:      { LED:1, QLED:2, QNED:3, OLED:4 },
+  size_group:   { small:1, '30s':2, '40s':3, '50s':4, '60s':5, '70s':6, '80+':7 },
+  fridge_type:  { '소형':1, '일반형':2, '4도어':3, '양문형':4 },
+  fridge_size:  { small:1, '400s':2, '600s':3, '800+':4 },
+  washer_type:  { '통돌이':1, '드럼':2 },
+  washer_cap:   { small:1, '12s':2, '15s':3, '20+':4 },
+  dryer_type:   { '전기히터':1, '히트펌프':2 },
+  dryer_cap:    { small:1, '12s':2, '16+':3 },
+  kimchi_type:  { '뚜껑':1, '스탠드':2 },
+  kimchi_size:  { small:1, '300s':2, '500+':3 },
+  aircon_type:  { '벽걸이':1, '스탠드':2, '시스템':3 },
+  aircon_size:  { small:1, '10s':2, '15s':3, '20+':4 },
+  purifier_size:{ small:1, '20s':2, '40s':3, '60+':4 },
+  vacuum_type:  { '유선':1, '무선':2, '로봇':3 },
+  dish_type:    { '카운터탑':1, '프리스탠딩':2, '빌트인':3 },
+  range_type:   { '하이라이트':1, '하이브리드':2, '인덕션':3 },
+  range_burner: { '1':1, '2':2, '3+':3 },
+  laptop_size:  { small:1, '14s':2, '16+':3 },
+  tablet_size:  { small:1, '10s':2, '12+':3 },
+};
+
+const SPEC_LABELS = {
+  tv_type:      'TV 패널 타입',
+  size_group:   '화면 크기',
+  fridge_type:  '냉장고 타입',
+  fridge_size:  '용량',
+  washer_type:  '세탁 방식',
+  washer_cap:   '세탁 용량',
+  dryer_type:   '건조 방식',
+  dryer_cap:    '건조 용량',
+  kimchi_type:  '김치냉장고 타입',
+  kimchi_size:  '용량',
+  aircon_type:  '에어컨 타입',
+  aircon_size:  '냉방 평수',
+  purifier_size:'적용 평수',
+  vacuum_type:  '청소기 타입',
+  dish_type:    '식기세척기 타입',
+  range_type:   '레인지 타입',
+  range_burner: '버너 수',
+  laptop_size:  '화면 크기',
+  tablet_size:  '화면 크기',
+};
+
+function openCompareModal() {
+  const items = [...state.selectedItems.values()];
+  if (items.length !== 2) return;
+
+  const [raw0, raw1] = items;
+  const price0 = raw0.benefit_price || raw0.sale_price || 0;
+  const price1 = raw1.benefit_price || raw1.sale_price || 0;
+
+  // 저렴한 쪽 = A, 비싼 쪽 = B
+  const [a, b] = price0 <= price1 ? [raw0, raw1] : [raw1, raw0];
+  const priceA = a.benefit_price || a.sale_price || 0;
+  const priceB = b.benefit_price || b.sale_price || 0;
+  const priceDiff = priceB - priceA;
+  const premiumPct = priceA > 0 ? Math.round(priceDiff / priceA * 100) : 0;
+
+  // 제품 카드 채우기
+  _fillCmpCard('a', a);
+  _fillCmpCard('b', b);
+
+  // A = 저렴 강조, B = 비쌈 강조
+  document.getElementById('cmp-a').style.border = '2px solid #34d399';
+  document.getElementById('cmp-b').style.border = '2px solid #f59e0b';
+
+  const diffBadge = document.getElementById('cmp-diff-badge');
+  diffBadge.textContent = `₩${priceDiff.toLocaleString('ko-KR')} (+${premiumPct}%) 더 비쌈`;
+
+  // 스펙 비교
+  const specA = _parseSpec(a.spec);
+  const specB = _parseSpec(b.spec);
+  _renderSpecRows(specA, specB, priceA, priceB);
+
+  // 가성비 판정
+  _renderVerdict(specA, specB, priceA, priceB, a.product_name, b.product_name);
+
+  const modal = document.getElementById('compare-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCompareModal() {
+  document.getElementById('compare-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function _parseSpec(specRaw) {
+  if (!specRaw) return {};
+  try { return typeof specRaw === 'string' ? JSON.parse(specRaw) : specRaw; }
+  catch { return {}; }
+}
+
+function _fillCmpCard(side, item) {
+  const price = item.benefit_price || item.sale_price || 0;
+  const orig  = item.original_price || 0;
+  const disc  = orig > 0 ? Math.round((orig - price) / orig * 100) : 0;
+
+  document.getElementById(`cmp-${side}-name`).textContent  = item.product_name || '';
+  document.getElementById(`cmp-${side}-model`).textContent = item.model_no || '';
+  document.getElementById(`cmp-${side}-price`).textContent = `₩${price.toLocaleString('ko-KR')}`;
+  document.getElementById(`cmp-${side}-orig`).textContent  = orig > 0 ? `정상가 ₩${orig.toLocaleString('ko-KR')}` : '';
+  document.getElementById(`cmp-${side}-discount`).textContent = disc > 0 ? `${disc}% 할인` : '';
+
+  const imgEl = document.getElementById(`cmp-${side}-img`);
+  if (item.image_url) {
+    fetch(`/proxy/image?url=${encodeURIComponent(item.image_url)}`)
+      .then(r => r.json())
+      .then(j => { if (j.data) { imgEl.src = j.data; imgEl.style.display = 'block'; } })
+      .catch(() => { imgEl.style.display = 'none'; });
+  } else {
+    imgEl.style.display = 'none';
+  }
+}
+
+function _renderSpecRows(specA, specB, priceA, priceB) {
+  const container = document.getElementById('cmp-spec-rows');
+  const emptyMsg  = document.getElementById('cmp-spec-empty');
+  container.innerHTML = '';
+
+  const allKeys = new Set([...Object.keys(specA), ...Object.keys(specB)]);
+  const rows = [];
+
+  for (const key of allKeys) {
+    if (!SPEC_SCORES[key] || !SPEC_LABELS[key]) continue;
+    const valA = specA[key], valB = specB[key];
+    if (!valA && !valB) continue;
+
+    const scoreMap = SPEC_SCORES[key];
+    const sA = scoreMap[valA] ?? 0;
+    const sB = scoreMap[valB] ?? 0;
+    const maxScore = Math.max(...Object.values(scoreMap));
+
+    rows.push({ key, label: SPEC_LABELS[key], valA, valB, sA, sB, maxScore });
+  }
+
+  if (rows.length === 0) {
+    emptyMsg.style.display = 'block';
+    container.style.display = 'none';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+  container.style.display = 'flex';
+
+  for (const { label, valA, valB, sA, sB, maxScore } of rows) {
+    const pctA = maxScore > 0 ? Math.round(sA / maxScore * 100) : 0;
+    const pctB = maxScore > 0 ? Math.round(sB / maxScore * 100) : 0;
+    const aWins = sA > sB, bWins = sB > sA, tie = sA === sB;
+
+    const row = document.createElement('div');
+    row.style.cssText = 'background:#f9fafb;border-radius:10px;padding:10px 14px;';
+    row.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+        <span style="font-size:12px;font-weight:600;color:#6b7280;">${label}</span>
+        ${tie
+          ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#e5e7eb;color:#6b7280;">동일</span>`
+          : bWins
+            ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#fef3c7;color:#92400e;">비싼 쪽이 우세 ↑</span>`
+            : `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;">저렴한 쪽도 동급</span>`
+        }
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+            <span style="color:#34d399;font-weight:600;">저렴</span>
+            <span style="color:#374151;font-weight:700;">${valA || '-'}</span>
+          </div>
+          <div style="height:7px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+            <div style="height:100%;width:${pctA}%;background:${aWins?'#34d399':tie?'#94a3b8':'#94a3b8'};border-radius:10px;transition:width 0.5s;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+            <span style="color:#f59e0b;font-weight:600;">비쌈</span>
+            <span style="color:#374151;font-weight:700;">${valB || '-'}</span>
+          </div>
+          <div style="height:7px;background:#e5e7eb;border-radius:10px;overflow:hidden;">
+            <div style="height:100%;width:${pctB}%;background:${bWins?'#f59e0b':tie?'#94a3b8':'#94a3b8'};border-radius:10px;transition:width 0.5s;"></div>
+          </div>
+        </div>
+      </div>`;
+    container.appendChild(row);
+  }
+}
+
+function _renderVerdict(specA, specB, priceA, priceB, nameA, nameB) {
+  const priceDiff  = priceB - priceA;
+  const premiumPct = priceA > 0 ? priceDiff / priceA * 100 : 0;
+
+  // 스펙 점수 합산
+  const allKeys = new Set([...Object.keys(specA), ...Object.keys(specB)]);
+  let specAdvantage = 0, totalPossible = 0;
+  const specDetails = [];
+
+  for (const key of allKeys) {
+    if (!SPEC_SCORES[key]) continue;
+    const scoreMap = SPEC_SCORES[key];
+    const vals = Object.values(scoreMap);
+    const minS  = Math.min(...vals);
+    const maxS  = Math.max(...vals);
+    totalPossible += (maxS - minS);
+
+    const sA = scoreMap[specA[key]] ?? minS;
+    const sB = scoreMap[specB[key]] ?? minS;
+    const diff = sB - sA;
+    if (diff > 0) {
+      specAdvantage += diff;
+      specDetails.push({ label: SPEC_LABELS[key], valA: specA[key], valB: specB[key] });
+    } else if (diff < 0) {
+      specDetails.push({ label: SPEC_LABELS[key], valA: specA[key], valB: specB[key], cheaper_wins: true });
+    }
+  }
+
+  // 가성비 점수 계산 (0~100)
+  let valueScore;
+  if (premiumPct <= 0) {
+    valueScore = 90; // 가격 같거나 낮은데 스펙이 다를 수 없음 (동일 가격)
+  } else if (specAdvantage === 0 && totalPossible > 0) {
+    valueScore = 5; // 스펙 동일인데 더 비쌈
+  } else if (totalPossible === 0) {
+    valueScore = 50; // 비교 불가
+  } else {
+    const improvementRatio = specAdvantage / totalPossible; // 0~1
+    // 가격 프리미엄 대비 스펙 향상 비율
+    const rawScore = (improvementRatio * 100) / (premiumPct / 20 + 1);
+    valueScore = Math.min(Math.round(rawScore * 2), 100);
+  }
+
+  // 미터 시각화
+  document.getElementById('cmp-meter-fill').style.width  = `${valueScore}%`;
+  document.getElementById('cmp-meter-dot').style.left    = `${valueScore}%`;
+
+  // 판정 배지
+  const badge = document.getElementById('cmp-verdict-badge');
+  let verdict, color, bg;
+  if (specAdvantage === 0 && totalPossible > 0) {
+    verdict = '⚠️ 스펙 동일 — 저렴한 제품 추천';
+    color = '#92400e'; bg = '#fef3c7';
+  } else if (valueScore >= 70) {
+    verdict = '🔥 추가 비용 대비 높은 성능';
+    color = '#166534'; bg = '#dcfce7';
+  } else if (valueScore >= 40) {
+    verdict = '✅ 적정 수준의 가성비';
+    color = '#1e40af'; bg = '#dbeafe';
+  } else if (valueScore >= 15) {
+    verdict = '🤔 가성비 낮음 — 신중히 검토';
+    color = '#92400e'; bg = '#fef3c7';
+  } else {
+    verdict = '❌ 가격 대비 성능 부족';
+    color = '#991b1b'; bg = '#fee2e2';
+  }
+  badge.textContent = verdict;
+  badge.style.background = bg;
+  badge.style.color = color;
+
+  // 상세 설명 생성
+  const fmtPrice = v => `₩${v.toLocaleString('ko-KR')}`;
+  let detail = `<strong>${nameB?.slice(0,20) || '비싼 제품'}</strong>은 `;
+  detail += `<strong>${fmtPrice(priceDiff)} (${Math.round(premiumPct)}%) 더 비쌉니다.</strong><br><br>`;
+
+  if (specDetails.length === 0) {
+    detail += '두 제품의 추출된 스펙이 동일합니다. 상세 사양은 제조사 페이지를 참고하세요.';
+  } else {
+    const ups   = specDetails.filter(d => !d.cheaper_wins);
+    const downs = specDetails.filter(d => d.cheaper_wins);
+    if (ups.length) {
+      detail += '📈 <strong>비싼 제품이 우세한 항목:</strong><br>';
+      detail += ups.map(d => `&nbsp;&nbsp;• ${d.label}: <em>${d.valA || '?'}</em> → <em>${d.valB || '?'}</em>`).join('<br>');
+      detail += '<br><br>';
+    }
+    if (downs.length) {
+      detail += '📉 <strong>저렴한 제품이 동급 또는 우세한 항목:</strong><br>';
+      detail += downs.map(d => `&nbsp;&nbsp;• ${d.label}: <em>${d.valA || '?'}</em> vs <em>${d.valB || '?'}</em>`).join('<br>');
+    }
+  }
+  document.getElementById('cmp-verdict-detail').innerHTML = detail;
+}
+
+// 모달 바깥 클릭 닫기
+document.getElementById('compare-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCompareModal();
+});
 </script>
 </body>
 </html>
