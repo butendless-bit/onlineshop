@@ -1,0 +1,24 @@
+{% extends "promo/_layout.html" %}
+{% block title %}문의 추적 링크 만들기{% endblock %}
+{% block content %}
+<section class="promo-hero"><div><h1>문의 추적 링크 만들기</h1><p>채널별 URL과 QR을 생성해 유입을 구분하세요.</p></div></section>
+<div class="promo-grid two">
+  <section class="promo-panel">
+    <div class="promo-field">
+      <label for="link-source">유입 채널</label>
+      <select id="link-source"><option>instagram</option><option>blog</option><option>meta</option><option>kakao</option><option>sms</option><option selected>direct</option></select>
+    </div>
+    <div class="promo-actions">
+      <button class="promo-btn primary" id="generate-link-btn">추적 링크 생성</button>
+      <button class="promo-btn" id="copy-link-btn">URL 복사</button>
+    </div>
+    <div class="promo-field" style="margin-top:16px;"><label for="track-link-url">전체 URL</label><input id="track-link-url" readonly></div>
+    <div class="promo-field"><label for="track-link-short">짧은 URL</label><input id="track-link-short" readonly></div>
+  </section>
+  <section class="promo-panel">
+    <h2>QR 코드</h2>
+    <div id="track-link-qr" class="promo-empty" style="display:grid; place-items:center; min-height:220px;">아직 생성된 링크가 없습니다.</div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/promo-links.js', v='20260401-3') }}"></script>{% endblock %}

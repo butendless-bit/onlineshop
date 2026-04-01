@@ -1,0 +1,51 @@
+{% extends "promo/_layout.html" %}
+{% block title %}랜딩페이지 생성{% endblock %}
+{% block content %}
+<section class="promo-hero">
+  <div>
+    <h1>랜딩페이지 생성</h1>
+  </div>
+</section>
+<div class="promo-grid two landing-builder-grid">
+  <section class="promo-panel landing-form-panel">
+    <div class="promo-field">
+      <label for="landing-title">랜딩 타이틀 (수정 가능)</label>
+      <input id="landing-title" placeholder="선택 상품 기준으로 자동 입력됩니다.">
+    </div>
+    <div class="promo-field">
+      <label for="landing-intro">인트로 문구 (수정 가능)</label>
+      <textarea id="landing-intro" placeholder="자동으로 입력됩니다."></textarea>
+    </div>
+    <div class="promo-field-grid landing-toggle-grid">
+      <div class="promo-field">
+        <label><input id="show-phone-cta" type="checkbox" checked> 전화하기 버튼 표시</label>
+      </div>
+      <div class="promo-field">
+        <label><input id="show-kakao-cta" type="checkbox" checked> 카카오채널 버튼 표시</label>
+      </div>
+    </div>
+    <div class="promo-actions landing-actions">
+      <button class="promo-btn primary" id="generate-landing-btn">랜딩 생성</button>
+      <button class="promo-btn blue" id="open-landing-btn">랜딩페이지 열기</button>
+      <button class="promo-btn" id="copy-landing-url-btn">URL 복사</button>
+      <button class="promo-btn" id="download-landing-qr-btn">QR 다운로드</button>
+    </div>
+    <div class="promo-field landing-url-field">
+      <label for="landing-url">공유 URL</label>
+      <input id="landing-url" readonly placeholder="아직 랜딩페이지가 없습니다.">
+    </div>
+    <div class="promo-field">
+      <label for="landing-disclaimer">고지문</label>
+      <textarea id="landing-disclaimer">{{ disclaimer }}</textarea>
+    </div>
+  </section>
+  <section class="promo-panel landing-qr-panel">
+    <div class="landing-qr-head">
+      <h2>QR 코드</h2>
+      <p class="landing-qr-copy">생성된 랜딩페이지를 고객에게 바로 공유할 수 있도록 QR 코드를 함께 제공합니다.</p>
+    </div>
+    <div id="landing-qr" class="promo-empty landing-qr-box" style="display:grid; place-items:center; min-height:220px;">아직 랜딩페이지가 없습니다.</div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/promo-landing-r20260401.js', v='20260401-6') }}"></script>{% endblock %}

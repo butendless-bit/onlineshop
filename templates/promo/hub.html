@@ -1,0 +1,122 @@
+{% extends "promo/_layout.html" %}
+{% block title %}온라인 홍보 허브{% endblock %}
+{% block content %}
+<section class="promo-hero">
+  <div>
+    <h1>온라인 홍보하기</h1>
+    <p>선택한 상품을 기준으로 행사명과 캠페인명을 자동으로 잡고, 바로 홍보 작업으로 이어집니다.</p>
+  </div>
+  <div class="promo-chip-row">
+    <span class="promo-chip" id="promo-selected-chip">선택 상품 0개</span>
+  </div>
+</section>
+
+<section class="promo-panel" style="margin-bottom:18px;">
+  <div id="promo-selection-empty" class="promo-empty">아직 선택한 상품이 없습니다. 메인 화면에서 상품을 선택한 뒤 온라인 홍보하기로 들어와 주세요.</div>
+  <div id="promo-selection-list" class="promo-selected-inline" style="display:none;"></div>
+</section>
+
+<section class="promo-panel">
+  <h2>캠페인 정보</h2>
+  <div class="promo-field-grid">
+    <div class="promo-field">
+      <label for="event-title">행사명 (수정가능)</label>
+      <input id="event-title" value="온라인 가성비 특가상품 기획전">
+    </div>
+    <div class="promo-field">
+      <label for="campaign-name">캠페인명</label>
+      <input id="campaign-name" value="온라인 가성비 특가상품 캠페인">
+    </div>
+    <div class="promo-field">
+      <label for="store-name">매장명</label>
+      <input id="store-name" value="{{ store_info.store_name }}">
+    </div>
+    <div class="promo-field">
+      <label for="phone">전화번호</label>
+      <input id="phone" value="{{ store_info.phone }}">
+    </div>
+    <div class="promo-field">
+      <label for="kakao">카카오 채널 URL</label>
+      <input id="kakao" value="{{ store_info.kakao_channel_url }}">
+    </div>
+  </div>
+  <div class="promo-actions">
+    <button class="promo-btn primary" id="create-campaign-btn">온라인 홍보 도우미 시작</button>
+    <button class="promo-btn ghost" id="restore-selection-btn">선택 상품 다시 불러오기</button>
+  </div>
+</section>
+
+<section class="promo-panel promo-workspace" id="promo-workspace" style="margin-top:18px; display:none;">
+  <div class="promo-workspace-head">
+    <div>
+      <h2>홍보 작업</h2>
+      <p class="promo-workspace-copy">아래 작업이 자동으로 순차 진행됩니다. 완료된 항목은 완성으로 표시됩니다.</p>
+    </div>
+    <div class="promo-chip-row">
+      <span class="promo-chip" id="workspace-campaign-chip">캠페인 준비 중</span>
+    </div>
+  </div>
+
+  <div class="promo-task-summary">
+    <article class="promo-task-card" data-task="creative">
+      <div class="promo-task-title">이미지</div>
+      <div class="promo-task-state is-processing">
+        <span class="promo-task-spinner"></span>
+        <span class="promo-task-label">작업 준비 중</span>
+      </div>
+    </article>
+    <article class="promo-task-card" data-task="landing">
+      <div class="promo-task-title">랜딩페이지</div>
+      <div class="promo-task-state is-processing">
+        <span class="promo-task-spinner"></span>
+        <span class="promo-task-label">작업 준비 중</span>
+      </div>
+    </article>
+    <article class="promo-task-card" data-task="instagram">
+      <div class="promo-task-title">인스타게시글</div>
+      <div class="promo-task-state is-processing">
+        <span class="promo-task-spinner"></span>
+        <span class="promo-task-label">작업 준비 중</span>
+      </div>
+    </article>
+    <article class="promo-task-card" data-task="blog">
+      <div class="promo-task-title">블로그</div>
+      <div class="promo-task-state is-processing">
+        <span class="promo-task-spinner"></span>
+        <span class="promo-task-label">작업 준비 중</span>
+      </div>
+    </article>
+  </div>
+
+  <div class="promo-workspace-sections">
+    <section class="promo-embed-panel">
+      <div class="promo-embed-head">
+        <h3>시안만들기</h3>
+      </div>
+      <iframe id="promo-frame-creative" class="promo-embed-frame promo-embed-frame-creative" title="시안만들기" loading="eager"></iframe>
+    </section>
+
+    <section class="promo-embed-panel">
+      <div class="promo-embed-head">
+        <h3>랜딩페이지</h3>
+      </div>
+      <iframe id="promo-frame-landing" class="promo-embed-frame promo-embed-frame-copy" title="랜딩페이지" loading="eager"></iframe>
+    </section>
+
+    <section class="promo-embed-panel">
+      <div class="promo-embed-head">
+        <h3>인스타게시글</h3>
+      </div>
+      <iframe id="promo-frame-instagram" class="promo-embed-frame promo-embed-frame-copy" title="인스타게시글" loading="eager"></iframe>
+    </section>
+
+    <section class="promo-embed-panel">
+      <div class="promo-embed-head">
+        <h3>블로그</h3>
+      </div>
+      <iframe id="promo-frame-blog" class="promo-embed-frame promo-embed-frame-copy" title="블로그" loading="eager"></iframe>
+    </section>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/promo-hub-r20260401.js', v='20260401-6') }}"></script>{% endblock %}

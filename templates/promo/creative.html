@@ -1,0 +1,21 @@
+{% extends "promo/_layout.html" %}
+{% block title %}온라인 시안 만들기{% endblock %}
+{% block content %}
+<section class="promo-hero">
+  <div>
+    <h1>온라인 시안 만들기</h1>
+  </div>
+</section>
+
+<section class="promo-panel">
+  <div class="promo-inline-head">
+    <h2>시안 미리보기</h2>
+    <button class="promo-btn" id="download-creative-btn">이미지 다운로드</button>
+  </div>
+  <div id="creative-empty" class="promo-empty">시안을 생성하고 있습니다.</div>
+  <div id="creative-preview" class="promo-preview-grid" style="display:none;"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/promo-creative-r20260401.js', v='20260401-6') }}"></script>
+{% endblock %}

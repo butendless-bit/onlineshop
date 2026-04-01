@@ -1,0 +1,9 @@
+{% extends "promo/_layout.html" %}
+{% block title %}캠페인 랜딩{% endblock %}
+{% block content %}
+<section class="promo-hero"><div><h1>캠페인 랜딩페이지</h1><p>공유용 모바일 랜딩입니다.</p></div></section>
+<section class="promo-panel">
+  <div id="campaign-landing-root" data-campaign-id="{{ campaign_id }}"></div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/promo-campaign.js', v='20260401-3') }}"></script>{% endblock %}

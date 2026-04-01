@@ -1,0 +1,13 @@
+{% extends "promo/_layout.html" %}
+{% block title %}저장한 홍보물{% endblock %}
+{% block content %}
+<section class="promo-hero"><div><h1>저장한 홍보물</h1><p>저장한 캠페인, 결과물, 문의 현황을 한눈에 확인하세요.</p></div></section>
+<section class="promo-panel">
+  <div id="saved-empty" class="promo-empty">아직 저장한 홍보물이 없습니다.</div>
+  <table id="saved-table" class="promo-list-table" style="display:none;">
+    <thead><tr><th>캠페인</th><th>행사명</th><th>생성일</th><th>문의 현황</th><th>동작</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/promo-saved.js', v='20260401-3') }}"></script>{% endblock %}
