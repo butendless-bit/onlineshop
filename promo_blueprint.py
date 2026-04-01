@@ -27,8 +27,8 @@ from promo_repository import (
     update_campaign,
 )
 from services.background_removal import remove_background
-from services.openai_service import (
-    OpenAIServiceError,
+from services.claude_service import (
+    ClaudeServiceError as OpenAIServiceError,
     generate_blog_copy,
     generate_blog_copy_v2,
     generate_creative_title,
