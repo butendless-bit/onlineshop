@@ -28,12 +28,16 @@ def get_enhanced_badges(
     benefit: int,
     prev_benefit: int | None,
     review_count: int = 0,
+    alltime_low: int | None = None,
+    naver_price: int | None = None,
 ) -> list[str]:
-    """종합 배지 계산 — ranker.py 의 _assign_badges 대체"""
+    """종합 배지 계산 — ranker.py 의 _assign_badges 대체.
+    alltime_low, naver_price 를 미리 조회해서 전달하면 추가 DB 쿼리를 생략합니다.
+    """
     badges = []
 
     # ① 역대 최저가 / 최저가
-    low = get_alltime_low(model_no)
+    low = alltime_low if alltime_low is not None else get_alltime_low(model_no)
     if low and benefit and benefit <= low:
         badges.append("🔥 역대 최저가")
     elif score >= 60:
@@ -53,7 +57,7 @@ def get_enhanced_badges(
             badges.append(f"🏷 {int(rate)}% 할인")
 
     # ④ 네이버 최저가 비교
-    naver = get_competitor_price(model_no)
+    naver = naver_price if naver_price is not None else get_competitor_price(model_no)
     if naver and benefit and naver > 0:
         diff_pct = (naver - benefit) / naver * 100
         if diff_pct >= NAVER_COMPARE_MIN_DIFF:
@@ -61,7 +65,7 @@ def get_enhanced_badges(
 
     # ⑤ 리뷰 인기
     if review_count and review_count >= REVIEW_THRESHOLD_HIGH:
-        badges.append(f"⭐ 리뷰 {review_count:,}개+")
+        badges.append(f"⭐⭐ 리뷰 {review_count:,}개+")
     elif review_count and review_count >= REVIEW_THRESHOLD_LOW:
         badges.append(f"⭐ 리뷰 {review_count:,}개+")
 

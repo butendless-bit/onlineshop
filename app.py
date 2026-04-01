@@ -13,6 +13,9 @@ from database import (
     get_subscription_recommendations,
 )
 from ranker import get_all_recommendations, rank_category
+from promo_blueprint import promo_bp
+from promo_repository import init_promo_db
+from services.vercel_seed import ensure_seed_db
 import threading
 
 _crawl_lock = threading.Lock()
@@ -20,6 +23,7 @@ _crawl_last_run: float = 0.0
 _CRAWL_COOLDOWN = 300  # 5분 쿨다운
 
 app = Flask(__name__)
+app.register_blueprint(promo_bp)
 
 
 def _dispatch_github_actions_crawl():
@@ -46,7 +50,9 @@ def _dispatch_github_actions_crawl():
 
 # Vercel 서버리스: 모듈 임포트 시점에 DB 초기화 (main 블록이 실행되지 않으므로)
 if os.environ.get("VERCEL"):
+    ensure_seed_db()
     init_db()
+    init_promo_db()
 
 
 # ── 기본 라우트 ────────────────────────────────────────────────────────────────
@@ -139,7 +145,6 @@ def api_crawl():
         "mode": "local",
         "message": "즉시 새로 수집을 시작했습니다. 잠시 후 새로고침하세요.",
     })
-    return jsonify({"message": "크롤링 시작됨. 잠시 후 새로고침하세요."})
 
 
 # ── API: 구독상품 CRUD ────────────────────────────────────────────────────────
@@ -271,7 +276,9 @@ def proxy_image():
 
 # ── 앱 시작 ────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    ensure_seed_db()
     init_db()
+    init_promo_db()
 
     # Vercel 서버리스 환경에서는 스케줄러 미실행
     if not os.environ.get("VERCEL"):

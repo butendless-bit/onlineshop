@@ -69,10 +69,12 @@ def init_db():
                 updated_at           DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE INDEX IF NOT EXISTS idx_price_model   ON price_history(model_no);
-            CREATE INDEX IF NOT EXISTS idx_price_crawled ON price_history(crawled_at);
-            CREATE INDEX IF NOT EXISTS idx_comp_model    ON competitor_prices(model_no);
-            CREATE INDEX IF NOT EXISTS idx_sub_active    ON subscription_products(is_active);
+            CREATE INDEX IF NOT EXISTS idx_price_model    ON price_history(model_no);
+            CREATE INDEX IF NOT EXISTS idx_price_crawled  ON price_history(crawled_at);
+            CREATE INDEX IF NOT EXISTS idx_comp_model     ON competitor_prices(model_no);
+            CREATE INDEX IF NOT EXISTS idx_sub_active     ON subscription_products(is_active);
+            CREATE INDEX IF NOT EXISTS idx_prod_category  ON products(category);
+            CREATE INDEX IF NOT EXISTS idx_prod_url       ON products(product_url);
         """)
         # review_count 컬럼 — 기존 DB에 없을 수 있으므로 안전하게 추가
         try:
@@ -171,6 +173,37 @@ def get_alltime_low(model_no):
     return row["min_price"] if row else None
 
 
+def get_alltime_lows(model_nos: list) -> dict:
+    """여러 모델의 역대 최저가를 한 번의 쿼리로 조회 (N+1 방지)"""
+    if not model_nos:
+        return {}
+    placeholders = ",".join("?" * len(model_nos))
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"SELECT model_no, MIN(benefit_price) AS min_price FROM price_history"
+            f" WHERE model_no IN ({placeholders}) GROUP BY model_no",
+            model_nos,
+        ).fetchall()
+    return {row["model_no"]: row["min_price"] for row in rows}
+
+
+def get_competitor_prices(model_nos: list) -> dict:
+    """여러 모델의 최신 네이버 최저가를 한 번의 쿼리로 조회 (N+1 방지)"""
+    if not model_nos:
+        return {}
+    placeholders = ",".join("?" * len(model_nos))
+    with get_conn() as conn:
+        rows = conn.execute(
+            f"""SELECT model_no, naver_price FROM competitor_prices
+                WHERE (model_no, crawled_at) IN (
+                    SELECT model_no, MAX(crawled_at) FROM competitor_prices
+                    WHERE model_no IN ({placeholders}) GROUP BY model_no
+                )""",
+            model_nos,
+        ).fetchall()
+    return {row["model_no"]: row["naver_price"] for row in rows}
+
+
 def get_status():
     with get_conn() as conn:
         last = conn.execute(
@@ -233,7 +266,9 @@ def add_subscription_product(product_name, model_no, category, monthly_fee,
 
 def update_subscription_product(sub_id: int, **fields) -> bool:
     allowed = {"product_name", "model_no", "category", "monthly_fee",
-               "contract_months", "install_fee", "image_url", "product_url", "notes", "is_active"}
+               "contract_months", "install_fee", "image_url", "product_url", "notes", "is_active",
+               "care_plan", "card_benefit_monthly", "lotte_card_price", "hybrid_price",
+               "cashback_amount", "benefit_desc", "care_benefit", "period_start", "period_end"}
     sets = {k: v for k, v in fields.items() if k in allowed}
     if not sets:
         return False

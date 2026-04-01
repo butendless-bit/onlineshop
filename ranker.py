@@ -6,7 +6,7 @@ from config import (
     CATEGORIES, TOP_N,
     SCORE_DISCOUNT_MAX, SCORE_PRICE_DROP_MAX, SCORE_ALLTIME_LOW,
 )
-from database import get_latest_prices, get_alltime_low
+from database import get_latest_prices, get_alltime_low, get_alltime_lows, get_competitor_prices
 from badge_calculator import get_enhanced_badges
 
 
@@ -36,11 +36,11 @@ def _price_drop_score(benefit: int, prev_benefit: int | None) -> int:
     return 0
 
 
-def _alltime_low_score(model_no: str, benefit: int) -> int:
-    """역대 최저가 보너스 (20점)"""
+def _alltime_low_score(model_no: str, benefit: int, alltime_low: int | None = None) -> int:
+    """역대 최저가 보너스 (20점). alltime_low 를 미리 조회해서 전달하면 DB 쿼리 생략."""
     if not benefit:
         return 0
-    low = get_alltime_low(model_no)
+    low = alltime_low if alltime_low is not None else get_alltime_low(model_no)
     return SCORE_ALLTIME_LOW if (low and benefit <= low) else 0
 
 
@@ -82,6 +82,11 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
                 filtered.append(r)
         rows = filtered
 
+    # 배치 조회로 N+1 쿼리 방지
+    model_nos = [r["model_no"] for r in rows]
+    alltime_lows = get_alltime_lows(model_nos)
+    naver_prices = get_competitor_prices(model_nos)
+
     scored = []
 
     for r in rows:
@@ -92,14 +97,18 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
         if benefit == 0 or benefit <= 200_000:
             continue
 
+        alltime_low = alltime_lows.get(r["model_no"])
+        naver_price = naver_prices.get(r["model_no"])
+
         s_discount = _discount_score(original, benefit)
         s_drop = _price_drop_score(benefit, prev)
-        s_low = _alltime_low_score(r["model_no"], benefit)
+        s_low = _alltime_low_score(r["model_no"], benefit, alltime_low=alltime_low)
         total_score = s_discount + s_drop + s_low
 
         review_count = r.get("review_count") or 0
         badges = get_enhanced_badges(
-            r["model_no"], total_score, original, benefit, prev, review_count
+            r["model_no"], total_score, original, benefit, prev, review_count,
+            alltime_low=alltime_low, naver_price=naver_price,
         )
 
         scored.append({

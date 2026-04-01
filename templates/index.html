@@ -204,15 +204,16 @@
     font-size: 17px; font-weight: 800; color: #111;
     word-break: keep-all; line-height: 1.35; margin-bottom: 10px;
   }
-  .sub-attr-list { display: flex; flex-direction: column; gap: 7px; }
+  .sub-attr-list { display: flex; flex-direction: column; gap: 6px; }
   .sub-attr-item {
-    display: flex; align-items: flex-start; gap: 6px;
-    font-size: 13px; color: #222; line-height: 1.4;
+    display: flex; align-items: baseline; gap: 4px;
+    font-size: 13px; color: #222; line-height: 1.45;
   }
-  .sub-attr-check { color: #3a7d3a; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-  .sub-attr-grp { font-weight: 700; flex-shrink: 0; }
+  .sub-attr-check { color: #3a7d3a; font-weight: 700; flex-shrink: 0; }
+  .sub-attr-grp { font-weight: 700; flex-shrink: 0; white-space: nowrap; }
+  .sub-attr-val { flex: 1; word-break: keep-all; }
   /* ⑤ 구독 서비스 혜택 */
-  .sub-bene-wrap { flex: 1; min-height: 0; }
+  .sub-bene-wrap { flex-shrink: 0; }
   .sub-bene-heading {
     font-size: 15px; font-weight: 800; color: #3a7d3a; margin-bottom: 8px;
   }
@@ -230,10 +231,11 @@
   /* ⑥ 롯데카드 가격 박스 (노란색) */
   .sub-price-zone {
     flex-shrink: 0;
+    margin-top: auto;
     background: #fffde7;
     border: 1.5px solid #f0b800;
     border-radius: 8px;
-    margin: 0 0 8px;
+    margin-bottom: 8px;
     padding: 12px 16px 12px;
   }
   .sub-price-top {
@@ -1911,7 +1913,7 @@ async function generateSubscriptionPOP(product) {
       if (!a.grp && !a.val) return;
       const row = document.createElement('div');
       row.className = 'sub-attr-item';
-      row.innerHTML = `<span class="sub-attr-check">✓</span><span><span class="sub-attr-grp">${a.grp}</span>&nbsp;${a.val}</span>`;
+      row.innerHTML = `<span class="sub-attr-check">✓</span><span class="sub-attr-grp">${a.grp}</span><span class="sub-attr-val">${a.val}</span>`;
       attrListEl.appendChild(row);
     });
   } catch(e) {}
@@ -1998,11 +2000,12 @@ async function generateSubscriptionPOP(product) {
         .sub-model-no { font-size:11px !important; color:#888 !important; margin-top:6px !important; text-align:center !important; word-break:break-all !important; }
         .sub-info-col { flex:1 !important; min-width:0 !important; }
         .sub-product-name { font-size:17px !important; font-weight:800 !important; color:#111 !important; word-break:keep-all !important; line-height:1.35 !important; margin-bottom:10px !important; }
-        .sub-attr-list { display:flex !important; flex-direction:column !important; gap:7px !important; }
-        .sub-attr-item { display:flex !important; align-items:flex-start !important; gap:6px !important; font-size:13px !important; color:#222 !important; line-height:1.4 !important; }
-        .sub-attr-check { color:#3a7d3a !important; font-weight:700 !important; flex-shrink:0 !important; margin-top:1px !important; }
-        .sub-attr-grp { font-weight:700 !important; flex-shrink:0 !important; }
-        .sub-bene-wrap { flex:1 !important; min-height:0 !important; }
+        .sub-attr-list { display:flex !important; flex-direction:column !important; gap:6px !important; }
+        .sub-attr-item { display:flex !important; align-items:baseline !important; gap:4px !important; font-size:13px !important; color:#222 !important; line-height:1.45 !important; }
+        .sub-attr-check { color:#3a7d3a !important; font-weight:700 !important; flex-shrink:0 !important; }
+        .sub-attr-grp { font-weight:700 !important; flex-shrink:0 !important; white-space:nowrap !important; }
+        .sub-attr-val { flex:1 !important; word-break:keep-all !important; }
+        .sub-bene-wrap { flex-shrink:0 !important; }
         .sub-bene-heading { font-size:15px !important; font-weight:800 !important; color:#3a7d3a !important; margin-bottom:8px !important; }
         .sub-bene-list { display:flex !important; flex-direction:column !important; gap:8px !important; }
         .sub-bene-item { display:flex !important; flex-direction:column !important; gap:3px !important; }
@@ -2010,7 +2013,7 @@ async function generateSubscriptionPOP(product) {
         .sub-bene-pill { flex-shrink:0 !important; background:#ffd600 !important; border-radius:3px !important; font-size:11px !important; font-weight:800 !important; color:#333 !important; padding:2px 7px !important; }
         .sub-bene-text { font-size:13px !important; color:#222 !important; font-weight:500 !important; line-height:1.4 !important; }
         .sub-bene-sub { font-size:11px !important; color:#555 !important; margin-left:52px !important; line-height:1.4 !important; }
-        .sub-price-zone { flex-shrink:0 !important; background:#fffde7 !important; border:1.5px solid #f0b800 !important; border-radius:8px !important; margin:0 0 8px !important; padding:12px 16px 12px !important; }
+        .sub-price-zone { flex-shrink:0 !important; margin-top:auto !important; background:#fffde7 !important; border:1.5px solid #f0b800 !important; border-radius:8px !important; margin-bottom:8px !important; padding:12px 16px 12px !important; }
         .sub-price-top { display:flex !important; align-items:center !important; justify-content:space-between !important; margin-bottom:6px !important; }
         .sub-price-cond { font-size:12px !important; color:#555 !important; font-weight:600 !important; }
         .sub-price-orig { font-size:12px !important; color:#888 !important; }

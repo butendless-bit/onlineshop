@@ -59,6 +59,39 @@ CATEGORY_KEYWORDS = {
     "tablet":       "태블릿",
 }
 
+CATEGORY_INCLUDE_PATTERNS = {
+    "tv": [
+        r"\bTV\b", r"OLED", r"QLED", r"QNED", r"UHD", r"Mini LED", r"구글 TV", r"스마트 TV",
+        r"\d{2,3}\s*(?:cm|인치|\")",
+    ],
+    "refrigerator": [r"냉장고", r"\d{2,4}\s*L", r"양문형", r"일반냉장고"],
+    "washer": [r"세탁기", r"드럼", r"통돌이", r"\d{1,2}(?:\.\d)?\s*kg"],
+    "dryer": [r"건조기", r"히트펌프", r"\d{1,2}(?:\.\d)?\s*kg"],
+    "kimchi": [r"김치냉장고", r"딤채", r"김치톡톡"],
+    "aircon": [r"에어컨", r"시스템에어컨", r"스탠드형", r"벽걸이형", r"\d{1,3}(?:\.\d)?\s*㎡"],
+    "airpurifier": [r"공기청정기", r"헤파", r"청정"],
+    "vacuum": [r"청소기", r"무선", r"유선", r"로봇청소기", r"싸이킹", r"흡입"],
+    "dishwasher": [r"식기세척기", r"식세기"],
+    "range": [r"인덕션", r"하이브리드", r"전기레인지", r"가스레인지"],
+    "laptop": [r"노트북", r"그램", r"맥북", r"갤럭시북"],
+    "tablet": [r"태블릿", r"아이패드", r"갤럭시탭", r"패드"],
+}
+
+CATEGORY_EXCLUDE_PATTERNS = {
+    "tv": [r"아이패드", r"태블릿", r"갤럭시탭", r"노트북", r"맥북", r"모니터", r"사운드바"],
+    "refrigerator": [r"정수기", r"냉동고", r"와인셀러"],
+    "washer": [r"건조기", r"식기세척기", r"청소기"],
+    "dryer": [r"세탁기", r"식품건조기", r"음식물처리기"],
+    "kimchi": [r"정수기"],
+    "aircon": [r"공기청정기", r"선풍기", r"제습기"],
+    "airpurifier": [r"에어컨", r"제습기"],
+    "vacuum": [r"공기청정기"],
+    "dishwasher": [r"세제", r"린스", r"클리너"],
+    "range": [r"전자레인지", r"오븐"],
+    "laptop": [r"태블릿", r"아이패드"],
+    "tablet": [r"\bTV\b", r"노트북", r"모니터"],
+}
+
 
 def _make_session() -> requests.Session:
     session = requests.Session()
@@ -97,6 +130,21 @@ def fetch_products(session: requests.Session, keyword: str, page_no: int) -> lis
         return []
 
 
+def _is_relevant_product(product_name: str, model_no: str, category_key: str) -> bool:
+    text = f"{product_name} {model_no}".strip()
+    if not text:
+        return False
+
+    exclude_patterns = CATEGORY_EXCLUDE_PATTERNS.get(category_key, [])
+    if any(re.search(pattern, text, re.I) for pattern in exclude_patterns):
+        return False
+
+    include_patterns = CATEGORY_INCLUDE_PATTERNS.get(category_key, [])
+    if not include_patterns:
+        return True
+    return any(re.search(pattern, text, re.I) for pattern in include_patterns)
+
+
 def _parse_product(p: dict, category_key: str) -> bool:
     """상품 1개 파싱 → DB 저장. 성공 시 True 반환."""
     try:
@@ -108,6 +156,9 @@ def _parse_product(p: dict, category_key: str) -> bool:
 
         model_no     = (p.get("mdlNm") or p.get("goodsNo") or "UNKNOWN").strip()
         product_name = (p.get("goodsNm") or "").strip()
+        if not _is_relevant_product(product_name, model_no, category_key):
+            log.info(f"[FILTER/{category_key}] skipped irrelevant product: {product_name} ({model_no})")
+            return False
         goods_no     = p.get("goodsNo") or ""
         product_url  = (f"{BASE_URL}/app/goods/goodsDetail?goodsNo={goods_no}"
                         if goods_no else "")

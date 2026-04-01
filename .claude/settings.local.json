@@ -12,7 +12,10 @@
       "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension eamodio.gitlens --force)",
       "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension usernamehw.errorlens --force)",
       "Bash(\"/c/Users/user/AppData/Local/Programs/Microsoft VS Code/code\" --install-extension formulahendry.auto-rename-tag --force)",
-      "Bash(cmd.exe /c \"code --install-extension esbenp.prettier-vscode\")"
+      "Bash(cmd.exe /c \"code --install-extension esbenp.prettier-vscode\")",
+      "Bash(python:*)",
+      "Bash(curl -s http://localhost:5000/ -o /dev/null -w \"%{http_code}\")",
+      "Bash(pkill -f \"python app.py\")"
     ]
   }
 }
