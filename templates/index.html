@@ -142,234 +142,134 @@
     width: 560px; height: 792px; max-height: 792px; overflow: hidden;
     font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
     display: flex; flex-direction: column;
-    background: linear-gradient(175deg,#b3d9ee 0%,#c8e5f3 20%,#daeef8 45%,#eaf5fb 70%,#f4f9fd 100%);
+    background: #fff;
   }
-  .sub-cloud-1 {
-    position: absolute; top: 20px; right: 30px;
-    width: 260px; height: 160px; background: rgba(255,255,255,0.5);
-    border-radius: 50%; filter: blur(28px); pointer-events: none; z-index: 0;
+  /* ① 최상단 헤더 바 (녹색) */
+  .sub-hdr {
+    flex-shrink: 0; height: 40px;
+    background: #3a7d3a;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
   }
-  .sub-cloud-2 {
-    position: absolute; top: 180px; left: -20px;
-    width: 200px; height: 130px; background: rgba(255,255,255,0.4);
-    border-radius: 50%; filter: blur(22px); pointer-events: none; z-index: 0;
+  .sub-hdr-tagline { font-size: 12px; color: #fff; font-weight: 500; }
+  .sub-hdr-logo { display: flex; align-items: center; gap: 6px; }
+  .sub-hdr-logo-circle {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #e60012;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 900; color: #fff; line-height: 1;
   }
-  /* ① 최상단 바 */
-  .sub-topbar {
-    height: 38px; flex-shrink: 0;
-    background: rgba(255,255,255,0.55);
-    border-bottom: 1px solid rgba(220,235,245,0.8);
-    display: flex; align-items: center; justify-content: flex-start;
-    padding: 0 16px; position: relative; z-index: 1;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  .sub-hdr-logo-text { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  /* ② 타이틀 영역 (녹색) */
+  .sub-title-zone {
+    flex-shrink: 0;
+    background: #3a7d3a;
+    padding: 10px 20px 16px;
+    display: flex; flex-direction: column; align-items: center;
   }
-  .sub-topbar-left { font-size: 12px; color: #333; font-weight: 500; }
-  /* ② 타이틀 + QR */
-  .sub-title-area {
-    flex-shrink: 0; position: relative;
-    padding: 14px 110px 0 18px; z-index: 1;
-  }
-  .sub-copy-line {
-    font-size: 14px; color: #333; font-weight: 500;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-copy-line strong { font-weight: 900; }
   .sub-main-title {
-    font-size: 52px; font-weight: 900; color: #e60012;
-    letter-spacing: -2px; line-height: 1.0;
-    white-space: nowrap; margin-top: 6px;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    font-size: 46px; font-weight: 900; color: #fff;
+    letter-spacing: -1.5px; line-height: 1.1; text-align: center;
+    white-space: nowrap;
   }
-  .sub-title-divider { display: none; }
-  .sub-qr-wrap {
-    position: absolute; right: 14px; top: 10px; z-index: 2;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  .sub-period-dates {
+    font-size: 16px; color: rgba(255,255,255,0.9); font-weight: 500;
+    margin-top: 8px; text-align: center;
   }
-  .sub-qr-label {
-    font-size: 10px; color: #444; font-weight: 600;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  /* ③ 흰색 컨텐츠 영역 */
+  .sub-white-zone {
+    flex: 1; min-height: 0;
+    background: #fff;
+    display: flex; flex-direction: column;
+    padding: 16px 18px 12px;
   }
-  /* ③ 제품 정보 */
-  .sub-product-area {
-    flex-shrink: 0; padding: 24px 16px 10px; position: relative; z-index: 1;
+  /* ④ 상품 정보 행 */
+  .sub-prod-row {
+    display: flex; gap: 14px; align-items: flex-start;
+    margin-bottom: 14px; flex-shrink: 0;
   }
-  .sub-period {
-    font-size: 12px; color: #555; text-align: right; margin-bottom: 4px;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  .sub-img-col {
+    flex: 0 0 175px;
+    display: flex; flex-direction: column; align-items: center;
   }
-  .sub-product-name {
-    font-size: 28px; font-weight: 900; color: #111;
-    word-break: keep-all; line-height: 1.25;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  .sub-product-img {
+    width: 170px; height: 170px; object-fit: contain; display: block;
   }
   .sub-model-no {
-    font-size: 12px; color: #888; margin-top: 4px;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    font-size: 11px; color: #888; margin-top: 6px; text-align: center;
+    word-break: break-all;
   }
-  .sub-summary-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: var(--sub-summary-row-h);
-    margin-top: 8px;
+  .sub-info-col { flex: 1; min-width: 0; }
+  .sub-product-name {
+    font-size: 17px; font-weight: 800; color: #111;
+    word-break: keep-all; line-height: 1.35; margin-bottom: 10px;
   }
-  .sub-summary-label {
-    flex: 0 0 auto;
-    font-size: 16px;
-    font-weight: 700;
-    color: #55626d;
-    line-height: 1;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  .sub-attr-list { display: flex; flex-direction: column; gap: 7px; }
+  .sub-attr-item {
+    display: flex; align-items: flex-start; gap: 6px;
+    font-size: 13px; color: #222; line-height: 1.4;
   }
-  .sub-summary-sep {
-    flex: 0 0 auto;
-    font-size: 16px;
-    font-weight: 700;
-    color: #6d7d88;
-    line-height: 1;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  .sub-attr-check { color: #3a7d3a; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .sub-attr-grp { font-weight: 700; flex-shrink: 0; }
+  /* ⑤ 구독 서비스 혜택 */
+  .sub-bene-wrap { flex: 1; min-height: 0; }
+  .sub-bene-heading {
+    font-size: 15px; font-weight: 800; color: #3a7d3a; margin-bottom: 8px;
   }
-  .sub-summary-value {
-    min-width: 0;
-    font-size: 30px;
-    font-weight: 900;
-    color: #111;
-    line-height: 1;
+  .sub-bene-list { display: flex; flex-direction: column; gap: 8px; }
+  .sub-bene-item { display: flex; flex-direction: column; gap: 3px; }
+  .sub-bene-row { display: flex; align-items: baseline; gap: 8px; }
+  .sub-bene-pill {
+    flex-shrink: 0;
+    background: #ffd600; border-radius: 3px;
+    font-size: 11px; font-weight: 800; color: #333;
+    padding: 2px 7px;
+  }
+  .sub-bene-text { font-size: 13px; color: #222; font-weight: 500; line-height: 1.4; }
+  .sub-bene-sub { font-size: 11px; color: #555; margin-left: 52px; line-height: 1.4; }
+  /* ⑥ 롯데카드 가격 박스 (노란색) */
+  .sub-price-zone {
+    flex-shrink: 0;
+    background: #fffde7;
+    border: 1.5px solid #f0b800;
+    border-radius: 8px;
+    margin: 0 0 8px;
+    padding: 12px 16px 12px;
+  }
+  .sub-price-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .sub-price-cond { font-size: 12px; color: #555; font-weight: 600; }
+  .sub-price-orig { font-size: 12px; color: #888; }
+  .sub-price-mid {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 6px;
+  }
+  .sub-card-img {
+    flex-shrink: 0;
+    width: 54px; height: 35px;
+    background: #1a1a2e; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sub-card-chip { width: 12px; height: 9px; background: #d4af37; border-radius: 2px; }
+  .sub-disc-badge {
+    background: #e60012; border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 14px; font-weight: 800; color: #fff;
+    white-space: nowrap;
+  }
+  .sub-price-main { display: flex; align-items: baseline; gap: 5px; }
+  .sub-price-prefix { font-size: 14px; color: #333; font-weight: 600; }
+  .sub-price-big {
+    font-size: 46px; font-weight: 900; color: #111;
+    letter-spacing: -2px; line-height: 1;
     font-variant-numeric: tabular-nums;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
   }
-  /* ④ 빨간 혜택 박스 (height 고정 없음) */
-  .sub-price-box {
-    background: #e60012; border-radius: 16px;
-    margin: 24px 14px 16px; padding: 20px 20px 18px;
-    position: relative; z-index: 1;
-  }
-  .sub-price-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    column-gap: 10px;
-  }
-  .sub-price-box > .sub-price-row { position: relative; z-index: 1; }
-  .sub-price-box > .sub-price-row:first-of-type { padding-bottom: 12px; }
-  .sub-price-box > .sub-price-row:last-of-type  { padding-top: 22px; }
-  .sub-price-label-wrap {
-    display: flex; flex-direction: column; justify-content: flex-start; flex-shrink: 0; gap: 2px;
-    transform: translateY(-4px);
-  }
-  .sub-price-right {
-    display: flex; flex-direction: column; align-items: flex-end; justify-self: end;
-    transform: translateY(-6px);
-  }
-  .sub-price-label-main {
-    font-size: 28px; font-weight: 800; color: #fff; line-height: 1.2;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-price-label-sub {
-    font-size: 22px; color: rgba(255,255,255,0.85); line-height: 1.2;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-price-amount { display: flex; align-items: baseline; gap: 4px; }
-  .sub-price-unit {
-    font-size: 20px; font-weight: 700; color: #fff; line-height: 1; transform: translateY(-2px);
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-price-num {
-    font-size: 52px; font-weight: 900; color: #fff; letter-spacing: -2px; line-height: 1;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-price-won {
-    font-size: 22px; font-weight: 700; color: #fff; line-height: 1; transform: translateY(-1px);
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-cashback {
-    font-size: 11px; color: rgba(255,255,255,0.8); text-align: right; margin-top: 2px;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-price-divider {
-    position: absolute;
-    left: 20px;
-    right: 20px;
-    top: 50%;
-    height: 1px;
-    background: rgba(255,255,255,0.3);
-    transform: translateY(-0.5px);
-    margin: 0;
-    pointer-events: none;
-  }
-  .sub-benefit-desc {
-    font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 8px; line-height: 1.4;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  /* ⑤ 안심케어 */
-  .sub-care-section {
-    flex-shrink: 0; padding: 18px 14px 6px; position: relative; z-index: 1;
-  }
-  .sub-care-title {
-    font-size: 16px; font-weight: 900; color: #e60012; margin-bottom: 6px;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-care-box {
-    border: 1.5px solid #ddd; border-radius: 10px; padding: 4px 12px; background: #fff;
-    display: flex;
-    align-items: center;
-    min-height: 60px;
-  }
-  .sub-care-content {
-    width: 100%;
-    display: flex;
-    align-items: center;
-  }
-  .sub-care-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    width: 100%;
-    justify-content: center;
-  }
-  .sub-care-item {
-    display: grid;
-    grid-template-columns: 8px minmax(0, 1fr);
-    align-items: center;
-    column-gap: 3px;
-  }
-  .sub-care-bullet {
-    font-size: 13px;
-    line-height: 1.15;
-    color: #333;
-    text-align: center;
-  }
-  .sub-care-text {
-    font-size: 12px; color: #333; line-height: 1.15; word-break: keep-all;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  /* ⑥ 주석 */
-  .sub-notes-section { flex-shrink: 0; padding: 16px 14px 4px; position: relative; z-index: 1; }
-  .sub-notes-section p {
-    font-size: 9px; color: #999; line-height: 1.6;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  /* ⑦ 푸터 */
-  .sub-footer-section {
-    flex-shrink: 0; background: rgba(255,255,255,0.45);
-    border-top: 1px solid rgba(200,220,230,0.6);
-    margin-top: auto;
-    padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;
-    position: relative; z-index: 1;
-  }
-  .sub-footer-left { display: flex; flex-direction: column; gap: 2px; }
-  .sub-footer-store {
-    font-size: 11px; font-weight: 700; color: #555;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-footer-date2 {
-    font-size: 10px; color: #bbb;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
-  .sub-footer-right {
-    font-size: 10px; color: #bbb;
-    font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
-  }
+  .sub-price-suffix { font-size: 17px; font-weight: 700; color: #333; }
+  /* ⑦ 주의사항 */
+  .sub-disclaimer { flex-shrink: 0; padding: 4px 2px 0; }
+  .sub-disclaimer p { font-size: 9px; color: #999; line-height: 1.6; }
 </style>
 </head>
 
@@ -400,6 +300,10 @@
       </div>
     </div>
     <div class="flex items-center gap-2 shrink-0">
+      <nav class="flex items-center gap-2 mr-2">
+        <a href="/main" class="px-3 py-1.5 rounded-full text-xs font-semibold text-white" style="background:rgba(230,0,18,.18);border:1px solid rgba(230,0,18,.3);">추천 상품</a>
+        <a href="/promo" class="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95" style="background:linear-gradient(135deg,#2757d7,#4f8cff);border:1px solid rgba(79,140,255,.32);box-shadow:0 10px 24px rgba(79,140,255,.18);">온라인 홍보하기</a>
+      </nav>
       <div class="hidden sm:block text-xs text-gray-500" id="today-date"></div>
       <button onclick="triggerCrawl()" id="crawl-btn"
         class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
@@ -513,6 +417,12 @@
         class="px-4 py-2 rounded-xl text-sm font-medium text-gray-400 border border-[#2a2a3a] hover:border-gray-600 transition-colors">
         선택 해제
       </button>
+      <button onclick="openPromoHub()"
+        class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95"
+        style="background:linear-gradient(135deg,#2757d7,#4f8cff);">
+        <iconify-icon icon="solar:share-circle-bold" style="font-size:16px;"></iconify-icon>
+        온라인 홍보하기
+      </button>
       <button id="compare-btn" onclick="openCompareModal()"
         class="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all hover:brightness-110 active:scale-95"
         style="display:none;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;">
@@ -550,8 +460,8 @@
     <div id="pop-subtitle" style="font-size:18px;font-weight:500;color:#fff;line-height:1.28;letter-spacing:-0.6px;margin-top:20px;min-height:46px;padding:0 12px;">온오프 통합매장인 우리매장 단독 특가</div>
   </div>
 
-  <div style="height:260px;background:#fff;position:relative;display:flex;align-items:center;justify-content:center;padding:12px 22px 6px;flex-shrink:0;box-sizing:border-box;">
-    <img id="pop-img" src="" alt="" style="max-width:280px;max-height:220px;object-fit:contain;display:block;" crossorigin="anonymous">
+  <div style="height:272px;background:#fff;position:relative;display:flex;align-items:center;justify-content:center;padding:12px 22px 6px;flex-shrink:0;box-sizing:border-box;">
+    <img id="pop-img" src="" alt="" style="max-width:340px;max-height:240px;object-fit:contain;display:block;" crossorigin="anonymous">
     <div style="position:absolute;right:12px;top:18px;width:110px;padding:8px 6px 10px;background:#fff;border:2px solid #222;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;">
       <div id="pop-qr" style="background:#fff;"></div>
       <div style="font-size:13px;font-weight:800;color:#111;text-align:center;line-height:1;margin-top:8px;">구매QR링크</div>
@@ -596,97 +506,65 @@
 <!-- ■ 구독 상품 POP (A5 고정 560x792) -->
 <div id="pop-card-subscription">
 
-  <!-- 구름 효과 -->
-  <div class="sub-cloud-1"></div>
-  <div class="sub-cloud-2"></div>
-
-  <!-- ① 최상단 바 -->
-  <div class="sub-topbar">
-    <span class="sub-topbar-left">구독이 쉬워지는 곳</span>
-  </div>
-
-  <!-- ② 타이틀 + QR -->
-  <div class="sub-title-area">
-    <div class="sub-copy-line">하구 싶은대로 다 되는 <strong>구독</strong></div>
-    <div class="sub-main-title">하이마트 온라인 구독</div>
-    <div class="sub-title-divider"></div>
-    <div class="sub-qr-wrap">
-      <div id="sub-qr"></div>
-      <div class="sub-qr-label">구매QR링크</div>
+  <!-- ① 헤더 바 -->
+  <div class="sub-hdr">
+    <span class="sub-hdr-tagline">가전이 쉬워지는 곳</span>
+    <div class="sub-hdr-logo">
+      <div class="sub-hdr-logo-circle">L</div>
+      <span class="sub-hdr-logo-text">LOTTE HIMART</span>
     </div>
   </div>
 
-  <!-- ③ 제품 정보 -->
-  <div class="sub-product-area">
-    <div id="sub-period" class="sub-period"></div>
-    <div id="sub-product-name" class="sub-product-name"></div>
-    <div id="sub-model-no" class="sub-model-no"></div>
-    <div class="sub-summary-row">
-      <span class="sub-summary-label">구독 개월 수</span>
-      <span class="sub-summary-sep">:</span>
-      <span id="sub-months" class="sub-summary-value"></span>
-    </div>
-    <div class="sub-summary-row">
-      <span class="sub-summary-label">월 구독료</span>
-      <span class="sub-summary-sep">:</span>
-      <span id="sub-monthly-fee" class="sub-summary-value"></span>
-    </div>
+  <!-- ② 타이틀 (녹색) -->
+  <div class="sub-title-zone">
+    <div class="sub-main-title">온라인 구독 BEST 상품</div>
+    <div id="sub-period-dates" class="sub-period-dates"></div>
   </div>
 
-  <!-- ④ 빨간 혜택 박스 -->
-  <div class="sub-price-box">
-    <div class="sub-price-row">
-      <div class="sub-price-label-wrap">
-        <span class="sub-price-label-main">롯데카드</span>
-        <span class="sub-price-label-sub">월 30만원 사용 시</span>
+  <!-- ③ 흰색 영역 -->
+  <div class="sub-white-zone">
+
+    <!-- 상품 정보 행 -->
+    <div class="sub-prod-row">
+      <div class="sub-img-col">
+        <img id="sub-product-img" class="sub-product-img" src="" alt="" crossorigin="anonymous">
+        <div id="sub-model-no" class="sub-model-no"></div>
       </div>
-      <div class="sub-price-right">
-        <div class="sub-price-amount">
-          <span class="sub-price-unit">월</span>
-          <span id="sub-lotte-price" class="sub-price-num"></span>
-          <span class="sub-price-won">원</span>
-        </div>
-        <div id="sub-cashback" class="sub-cashback"></div>
+      <div class="sub-info-col">
+        <div id="sub-product-name" class="sub-product-name"></div>
+        <div id="sub-attr-list" class="sub-attr-list"></div>
       </div>
     </div>
-    <div class="sub-price-divider"></div>
-    <div class="sub-price-row">
-      <div class="sub-price-label-wrap">
-        <span class="sub-price-label-main">롯데카드</span>
-        <span class="sub-price-label-sub">월 70만원 사용 시</span>
+
+    <!-- 구독 서비스 혜택 -->
+    <div class="sub-bene-wrap">
+      <div class="sub-bene-heading">구독 서비스 혜택</div>
+      <div id="sub-bene-list" class="sub-bene-list"></div>
+    </div>
+
+    <!-- 롯데카드 가격 박스 -->
+    <div class="sub-price-zone">
+      <div class="sub-price-top">
+        <span class="sub-price-cond">롯데제휴카드 월 30만원사용시</span>
+        <span id="sub-price-orig" class="sub-price-orig"></span>
       </div>
-      <div class="sub-price-right">
-        <div class="sub-price-amount">
-          <span class="sub-price-unit">월</span>
-          <span id="sub-hybrid-price" class="sub-price-num"></span>
-          <span class="sub-price-won">원</span>
-        </div>
+      <div class="sub-price-mid">
+        <div class="sub-card-img"><div class="sub-card-chip"></div></div>
+        <div id="sub-disc-badge" class="sub-disc-badge"></div>
+      </div>
+      <div class="sub-price-main">
+        <span class="sub-price-prefix">월 구독료</span>
+        <span id="sub-price-big" class="sub-price-big"></span>
+        <span class="sub-price-suffix">원~</span>
       </div>
     </div>
-  </div>
 
-  <!-- ⑤ 안심케어 -->
-  <div class="sub-care-section">
-    <div class="sub-care-title">구독 안심케어 혜택</div>
-    <div class="sub-care-box">
-      <div id="sub-care-benefit" class="sub-care-content"></div>
+    <!-- 주의사항 -->
+    <div class="sub-disclaimer">
+      <p>※ 금액은 변동될 수 있으며, 카드사 사정에따라 혜택이 변경될 수 있습니다. ※ 자세한 내용은 직원에게 문의 바랍니다.</p>
     </div>
-  </div>
 
-  <!-- ⑥ 주석 -->
-  <div class="sub-notes-section">
-    <p>※ 금액은 변동될 수 있으며, 자세한 내용은 직원에게 문의 바랍니다.</p>
-    <p>※ 표시된 가격은 실제 가격보다 반영이 늦을 수 있으니, 실제 판매 가격은 표시된 전자 가격표를 확인 바랍니다.</p>
-  </div>
-
-  <!-- ⑦ 푸터 -->
-  <div class="sub-footer-section">
-    <div class="sub-footer-left">
-      <span id="sub-store-name" class="sub-footer-store"></span>
-      <span id="sub-criteria-date" class="sub-footer-date2"></span>
-    </div>
-    <span id="sub-print-date" class="sub-footer-right"></span>
-  </div>
+  </div><!-- /sub-white-zone -->
 
 </div><!-- /pop-card-subscription -->
 
@@ -1809,17 +1687,8 @@ function tuneGeneralPopLayout() {
 }
 
 function tuneSubscriptionPopLayout() {
-  bindAutoFitText(document.getElementById('sub-copy-line'),         { maxFont: 24, minFont: 15, maxLines: 1, baseLineHeight: 1.05, baseLetterSpacing: -0.7, minLetterSpacing: -1.4, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-main-title'),        { maxFont: 72, minFont: 34, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -2.6, minLetterSpacing: -4, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-period'),            { maxFont: 16, minFont: 10, maxLines: 1, baseLineHeight: 1, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-brand'),             { maxFont: 44, minFont: 22, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -2.6, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-product-name'),      { maxFont: 44, minFont: 18, maxLines: 2, baseLineHeight: 1.06, minLineHeight: 0.92, baseLetterSpacing: -1.7, minLetterSpacing: -2.6, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-model-no'),          { maxFont: 14, minFont: 9, maxLines: 1, baseLineHeight: 1, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-months'),            { maxFont: 30, minFont: 15, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -0.9, minLetterSpacing: -1.6, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-monthly-fee'),       { maxFont: 30, minFont: 15, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -0.9, minLetterSpacing: -1.6, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-lotte-price-group'), { maxFont: 78, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -3, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-hybrid-price-group'),{ maxFont: 78, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -1.8, minLetterSpacing: -3, ellipsis: true });
-  bindAutoFitText(document.getElementById('sub-cashback'),          { maxFont: 15, minFont: 8, maxLines: 1, baseLineHeight: 1, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-product-name'), { maxFont: 18, minFont: 12, maxLines: 2, baseLineHeight: 1.35, ellipsis: true });
+  bindAutoFitText(document.getElementById('sub-price-big'),    { maxFont: 46, minFont: 26, maxLines: 1, baseLineHeight: 1, baseLetterSpacing: -2, minLetterSpacing: -3, ellipsis: false });
 }
 
 function extractCareMonths(text, fallback = 24) {
@@ -1913,7 +1782,7 @@ async function captureAndDownload(product, dateStr) {
     windowWidth: 560,
     windowHeight: 792,
     scrollX: 0,
-    scrollY: -window.scrollY,
+    scrollY: 0,
     onclone: (clonedDoc) => {
       const clonedCard = clonedDoc.getElementById('pop-card');
       clonedCard.style.height    = '792px';
@@ -1954,84 +1823,138 @@ function getSelectedItems() {
 }
 
 /** 구독 POP 채우기 + 캡처 */
+function persistPromoSelection() {
+  const items = getSelectedItems().map(item => ({
+    model_no: item.model_no,
+    _isSubscription: !!item._isSubscription,
+    product_name: item.product_name || '',
+    model_name: item.model_no || '',
+    image_url: item.image_url || '',
+    category: item.category || '',
+    product_url: item.product_url || '',
+    original_price: item.original_price || item.price || 0,
+    sale_price: item.sale_price || item.price || item.monthly_fee || 0,
+    price: item.sale_price || item.monthly_fee || 0,
+    benefit_price: item.benefit_price || item.sale_price || item.monthly_fee || 0,
+    subscription_price: item.monthly_fee || 0,
+    cardBenefitText: item.card_benefit_text || item.cardBenefitText || '',
+    recommendationReason: item.reason || item.recommendationReason || '',
+    featureBullets: item.feature_bullets || item.featureBullets || [],
+    productDescription: item.product_description || item.productDescription || '',
+    tags: item.tags || [],
+    spec: item.spec || {},
+  }));
+  sessionStorage.setItem('himartPromoSelection', JSON.stringify(items));
+  try { localStorage.setItem('himartPromoSelection', JSON.stringify(items)); } catch {}
+  return items;
+}
+
+function openPromoHub() {
+  const items = persistPromoSelection();
+  if (!items.length) {
+    showToast('온라인 홍보용으로 선택한 상품이 없습니다.');
+    return;
+  }
+  if (items.some(item => item._isSubscription)) {
+    showToast('구독상품을 제외시켜 주세요');
+    return;
+  }
+  const models = items
+    .map(item => encodeURIComponent(item.model_no || ''))
+    .filter(Boolean)
+    .join(',');
+  window.location.href = models ? `/promo?models=${models}` : '/promo';
+}
+
 async function generateSubscriptionPOP(product) {
   const d    = new Date();
   const yyyy = d.getFullYear();
   const mm   = String(d.getMonth()+1).padStart(2,'0');
   const dd   = String(d.getDate()).padStart(2,'0');
-  const hh   = String(d.getHours()).padStart(2,'0');
   const dateStr = `${yyyy}${mm}${dd}`;
 
   const monthly     = parseInt(product.monthly_fee || 0);
-  const cardMonthly = Math.max(0, monthly - 14000);
-  const hybridPrice = Math.max(0, monthly - 18000);
+  const cardMonthly = parseInt(product.lotte_card_price || 0) || Math.max(0, monthly - 14000);
+  const discount    = Math.max(0, monthly - cardMonthly);
   const months      = product.contract_months || 36;
   const category    = product.category || '';
   const carePlan    = product.care_plan || '';
 
+  // 상품명 · 모델번호
   document.getElementById('sub-product-name').textContent = (product.product_name || '').trim();
   document.getElementById('sub-model-no').textContent     = product.model_no || '';
-  document.getElementById('sub-months').textContent       = `${months}개월 구독`;
-  document.getElementById('sub-monthly-fee').textContent  = `${monthly.toLocaleString('ko-KR')}원`;
 
-  const period = (product.period_start && product.period_end)
-    ? `${product.period_start} ~ ${product.period_end}` : '';
-  document.getElementById('sub-period').textContent = period;
+  // 행사 기간 표시
+  const periodEl = document.getElementById('sub-period-dates');
+  if (product.period_start && product.period_end) {
+    periodEl.textContent = `${product.period_start} - ${product.period_end}`;
+  } else {
+    const lastDay = new Date(parseInt(yyyy), parseInt(mm), 0).getDate();
+    periodEl.textContent = `${parseInt(mm)}.1 - ${parseInt(mm)}.${lastDay}`;
+  }
 
-  document.getElementById('sub-lotte-price').textContent  = cardMonthly.toLocaleString('ko-KR');
-  document.getElementById('sub-hybrid-price').textContent = hybridPrice.toLocaleString('ko-KR');
+  // 상품 이미지
+  const imgEl = document.getElementById('sub-product-img');
+  if (product.image_url) {
+    imgEl.src = product.image_url;
+    imgEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+  }
 
-  const cb = parseInt(product.cashback_amount || 0);
-  document.getElementById('sub-cashback').textContent =
-    cb > 0 ? `캐시백 : ${cb.toLocaleString('ko-KR')}원` : '';
+  // 상품 속성 체크 리스트 (goods_attrs)
+  const attrListEl = document.getElementById('sub-attr-list');
+  attrListEl.innerHTML = '';
+  try {
+    const attrs = JSON.parse(product.goods_attrs || '[]');
+    attrs.slice(0, 4).forEach(a => {
+      if (!a.grp && !a.val) return;
+      const row = document.createElement('div');
+      row.className = 'sub-attr-item';
+      row.innerHTML = `<span class="sub-attr-check">✓</span><span><span class="sub-attr-grp">${a.grp}</span>&nbsp;${a.val}</span>`;
+      attrListEl.appendChild(row);
+    });
+  } catch(e) {}
 
-
+  // 구독 서비스 혜택
   const careDescMap = CARE_PLAN_DESC[category] || {};
   const careDesc = product.care_benefit ||
     (carePlan && careDescMap[carePlan] ? careDescMap[carePlan] : '');
-  // 연장보증 기간 = 구독 계약 기간 (contract_months)
-  const warrantyMonths = months;
   const cleaningDetail = cleanCareDetail(careDesc) || '제품 외관 및 내부 클리닝 서비스';
-  // TV·노트북·태블릿은 두번째 항목 고정
-  const secondCare = (category === 'tv') ? '파손보장 보험 서비스'
+  const subBullet = (category === 'tv') ? '파손보장 보험 서비스'
     : (category === 'laptop' || category === 'tablet') ? '파손보장보험 가입, 가전교체서비스 혜택'
     : cleaningDetail;
-  document.getElementById('sub-care-benefit').innerHTML = `
-    <div class="sub-care-list">
-      <div class="sub-care-item">
-        <span class="sub-care-bullet">-</span>
-        <span class="sub-care-text">${warrantyMonths}개월 무상보증기간 연장</span>
+
+  document.getElementById('sub-bene-list').innerHTML = `
+    <div class="sub-bene-item">
+      <div class="sub-bene-row">
+        <span class="sub-bene-pill">혜택 1.</span>
+        <span class="sub-bene-text">안심케어 서비스, 1회, ${months}개월 주기</span>
       </div>
-      <div class="sub-care-item">
-        <span class="sub-care-bullet">-</span>
-        <span class="sub-care-text">${secondCare}</span>
+      <div class="sub-bene-sub">- ${subBullet}</div>
+    </div>
+    <div class="sub-bene-item">
+      <div class="sub-bene-row">
+        <span class="sub-bene-pill">혜택 2.</span>
+        <span class="sub-bene-text">구독기간내 무상 보증기간 연장 서비스</span>
       </div>
     </div>`;
 
-  const storeFull = document.getElementById('store-name')?.textContent?.trim() || '롯데하이마트';
-  document.getElementById('sub-store-name').textContent    = storeFull;
-  document.getElementById('sub-print-date').textContent    = `출력일: ${yyyy}.${mm}.${dd}`;
-  document.getElementById('sub-criteria-date').textContent = `${yyyy}년 ${parseInt(mm)}월 ${parseInt(dd)}일 ${hh}시 기준`;
-
-  const qrWrap = document.getElementById('sub-qr');
-  if (qrWrap) {
-    qrWrap.innerHTML = '';
-    new QRCode(qrWrap, {
-      text: product.product_url || 'https://www.e-himart.co.kr',
-      width: 80, height: 80,
-      colorDark: '#000000', colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-  }
+  // 가격 정보
+  document.getElementById('sub-price-orig').textContent =
+    `월 구독료 ${monthly.toLocaleString('ko-KR')}원`;
+  document.getElementById('sub-disc-badge').textContent =
+    discount > 0 ? `월 ${discount.toLocaleString('ko-KR')}원 할인 혜택!` : '롯데제휴카드 특가';
+  document.getElementById('sub-price-big').textContent = cardMonthly.toLocaleString('ko-KR');
 
   await document.fonts.ready;
+  tuneSubscriptionPopLayout();
   await new Promise(r => setTimeout(r, 1500));
 
   const card = document.getElementById('pop-card-subscription');
   const W = 560;
   const H = 792;
 
-  // 캡처 전 카드를 화면에 보이는 위치로 임시 이동
   card.style.position = 'fixed';
   card.style.left = '0';
   card.style.top = '0';
@@ -2042,8 +1965,8 @@ async function generateSubscriptionPOP(product) {
   card.style.overflow = 'hidden';
 
   const canvas = await html2canvas(card, {
-    scale: 2.0,
-    backgroundColor: '#b3d9ee',
+    scale: 2.4,
+    backgroundColor: '#ffffff',
     useCORS: true, allowTaint: false, logging: false,
     width: W, height: H, windowWidth: W, windowHeight: H,
     scrollX: 0, scrollY: 0,
@@ -2053,67 +1976,60 @@ async function generateSubscriptionPOP(product) {
         position: absolute !important; left: 0 !important; top: 0 !important;
         width: 560px !important; height: 792px !important; max-height: 792px !important; overflow: hidden !important;
         display: flex !important; flex-direction: column !important;
-        background: linear-gradient(175deg,#b3d9ee 0%,#c8e5f3 20%,#daeef8 45%,#eaf5fb 70%,#f4f9fd 100%) !important;
+        background: #fff !important;
         font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif !important;
       `;
       const style = clonedDoc.createElement('style');
       style.textContent = `
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css');
         * { font-family: 'Pretendard','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif !important; -webkit-font-smoothing: antialiased; box-sizing: border-box !important; }
-        .sub-topbar { height:38px !important; flex-shrink:0 !important; background:rgba(255,255,255,0.55) !important; border-bottom:1px solid rgba(220,235,245,0.8) !important; display:flex !important; align-items:center !important; justify-content:flex-start !important; padding:0 16px !important; position:relative !important; z-index:1 !important; }
-        .sub-topbar-left { font-size:12px !important; color:#333 !important; font-weight:500 !important; }
-        .sub-title-area { flex-shrink:0 !important; position:relative !important; padding:14px 110px 0 18px !important; z-index:1 !important; }
-        .sub-copy-line { font-size:14px !important; color:#333 !important; font-weight:500 !important; }
-        .sub-copy-line strong { font-weight:900 !important; }
-        .sub-main-title { font-size:52px !important; font-weight:900 !important; color:#e60012 !important; letter-spacing:-2px !important; line-height:1.0 !important; white-space:nowrap !important; margin-top:6px !important; }
-        .sub-title-divider { display:none !important; }
-        .sub-qr-wrap { position:absolute !important; right:14px !important; top:10px !important; z-index:2 !important; display:flex !important; flex-direction:column !important; align-items:center !important; gap:4px !important; }
-        .sub-qr-label { font-size:10px !important; color:#444 !important; font-weight:600 !important; }
-        .sub-product-area { flex-shrink:0 !important; padding:24px 16px 10px !important; position:relative !important; z-index:1 !important; }
-        .sub-period { font-size:12px !important; color:#555 !important; text-align:right !important; margin-bottom:4px !important; }
-        .sub-product-name { font-size:28px !important; font-weight:900 !important; color:#111 !important; word-break:keep-all !important; line-height:1.25 !important; }
-        .sub-model-no { font-size:12px !important; color:#888 !important; margin-top:4px !important; }
-        .sub-summary-row { display:flex !important; align-items:center !important; gap:10px !important; min-height:32px !important; margin-top:8px !important; }
-        .sub-summary-label { flex:0 0 auto !important; font-size:16px !important; font-weight:700 !important; color:#55626d !important; line-height:1 !important; }
-        .sub-summary-sep { flex:0 0 auto !important; font-size:16px !important; font-weight:700 !important; color:#6d7d88 !important; line-height:1 !important; }
-        .sub-summary-value { min-width:0 !important; font-size:30px !important; font-weight:900 !important; color:#111 !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
-        .sub-price-box { background:#e60012 !important; border-radius:16px !important; margin:24px 14px 16px !important; padding:20px 20px 18px !important; position:relative !important; z-index:1 !important; }
-        .sub-price-row { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; align-items:start !important; column-gap:10px !important; }
-        .sub-price-box > .sub-price-row { position:relative !important; z-index:1 !important; }
-        .sub-price-box > .sub-price-row:first-of-type { padding-bottom:12px !important; }
-        .sub-price-box > .sub-price-row:last-of-type  { padding-top:22px !important; }
-        .sub-price-label-wrap { display:flex !important; flex-direction:column !important; justify-content:flex-start !important; flex-shrink:0 !important; gap:2px !important; transform:translateY(-4px) !important; }
-        .sub-price-right { display:flex !important; flex-direction:column !important; align-items:flex-end !important; justify-self:end !important; transform:translateY(-6px) !important; }
-        .sub-price-label-main { font-size:28px !important; font-weight:800 !important; color:#fff !important; line-height:1.2 !important; }
-        .sub-price-label-sub { font-size:22px !important; color:rgba(255,255,255,0.85) !important; line-height:1.2 !important; }
-        .sub-price-amount { display:flex !important; align-items:baseline !important; gap:4px !important; }
-        .sub-price-unit { font-size:20px !important; font-weight:700 !important; color:#fff !important; line-height:1 !important; transform:translateY(-2px) !important; }
-        .sub-price-num { font-size:52px !important; font-weight:900 !important; color:#fff !important; letter-spacing:-2px !important; line-height:1 !important; }
-        .sub-price-won { font-size:22px !important; font-weight:700 !important; color:#fff !important; line-height:1 !important; transform:translateY(-1px) !important; }
-        .sub-cashback { font-size:11px !important; color:rgba(255,255,255,0.8) !important; text-align:right !important; margin-top:2px !important; }
-        .sub-price-divider { position:absolute !important; left:20px !important; right:20px !important; top:50% !important; height:1px !important; background:rgba(255,255,255,0.3) !important; transform:translateY(-0.5px) !important; margin:0 !important; display:block !important; pointer-events:none !important; }
-        .sub-benefit-desc { font-size:10px !important; color:rgba(255,255,255,0.75) !important; margin-top:8px !important; line-height:1.4 !important; }
-        .sub-care-section { flex-shrink:0 !important; padding:18px 14px 6px !important; position:relative !important; z-index:1 !important; }
-        .sub-care-title { font-size:16px !important; font-weight:900 !important; color:#e60012 !important; margin-bottom:6px !important; }
-        .sub-care-box { border:1.5px solid #ddd !important; border-radius:10px !important; padding:10px 16px !important; background:#fff !important; display:flex !important; align-items:center !important; min-height:80px !important; }
-        .sub-care-content { width:100% !important; display:flex !important; align-items:center !important; }
-        .sub-care-list { display:flex !important; flex-direction:column !important; gap:4px !important; width:100% !important; justify-content:center !important; }
-        .sub-care-item { display:grid !important; grid-template-columns:10px minmax(0,1fr) !important; align-items:center !important; column-gap:4px !important; }
-        .sub-care-bullet { font-size:16px !important; line-height:1.3 !important; color:#333 !important; text-align:center !important; }
-        .sub-care-text { font-size:15px !important; color:#333 !important; line-height:1.3 !important; word-break:keep-all !important; }
-        .sub-notes-section { flex-shrink:0 !important; padding:16px 14px 4px !important; position:relative !important; z-index:1 !important; }
-        .sub-notes-section p { font-size:9px !important; color:#999 !important; line-height:1.6 !important; }
-        .sub-footer-section { flex-shrink:0 !important; background:rgba(255,255,255,0.45) !important; border-top:1px solid rgba(200,220,230,0.6) !important; margin-top:auto !important; padding:8px 14px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; position:relative !important; z-index:1 !important; }
-        .sub-footer-left { display:flex !important; flex-direction:column !important; gap:2px !important; }
-        .sub-footer-store { font-size:11px !important; font-weight:700 !important; color:#555 !important; }
-        .sub-footer-date2 { font-size:10px !important; color:#bbb !important; }
-        .sub-footer-right { font-size:10px !important; color:#bbb !important; }
+        .sub-hdr { flex-shrink:0 !important; height:40px !important; background:#3a7d3a !important; display:flex !important; align-items:center !important; justify-content:space-between !important; padding:0 16px !important; }
+        .sub-hdr-tagline { font-size:12px !important; color:#fff !important; font-weight:500 !important; }
+        .sub-hdr-logo { display:flex !important; align-items:center !important; gap:6px !important; }
+        .sub-hdr-logo-circle { width:18px !important; height:18px !important; border-radius:50% !important; background:#e60012 !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:8px !important; font-weight:900 !important; color:#fff !important; line-height:1 !important; }
+        .sub-hdr-logo-text { font-size:12px !important; font-weight:700 !important; color:#fff !important; letter-spacing:0.5px !important; }
+        .sub-title-zone { flex-shrink:0 !important; background:#3a7d3a !important; padding:10px 20px 16px !important; display:flex !important; flex-direction:column !important; align-items:center !important; }
+        .sub-main-title { font-size:46px !important; font-weight:900 !important; color:#fff !important; letter-spacing:-1.5px !important; line-height:1.1 !important; text-align:center !important; white-space:nowrap !important; }
+        .sub-period-dates { font-size:16px !important; color:rgba(255,255,255,0.9) !important; font-weight:500 !important; margin-top:8px !important; text-align:center !important; }
+        .sub-white-zone { flex:1 !important; min-height:0 !important; background:#fff !important; display:flex !important; flex-direction:column !important; padding:16px 18px 12px !important; }
+        .sub-prod-row { display:flex !important; gap:14px !important; align-items:flex-start !important; margin-bottom:14px !important; flex-shrink:0 !important; }
+        .sub-img-col { flex:0 0 175px !important; display:flex !important; flex-direction:column !important; align-items:center !important; }
+        .sub-product-img { width:170px !important; height:170px !important; object-fit:contain !important; display:block !important; }
+        .sub-model-no { font-size:11px !important; color:#888 !important; margin-top:6px !important; text-align:center !important; word-break:break-all !important; }
+        .sub-info-col { flex:1 !important; min-width:0 !important; }
+        .sub-product-name { font-size:17px !important; font-weight:800 !important; color:#111 !important; word-break:keep-all !important; line-height:1.35 !important; margin-bottom:10px !important; }
+        .sub-attr-list { display:flex !important; flex-direction:column !important; gap:7px !important; }
+        .sub-attr-item { display:flex !important; align-items:flex-start !important; gap:6px !important; font-size:13px !important; color:#222 !important; line-height:1.4 !important; }
+        .sub-attr-check { color:#3a7d3a !important; font-weight:700 !important; flex-shrink:0 !important; margin-top:1px !important; }
+        .sub-attr-grp { font-weight:700 !important; flex-shrink:0 !important; }
+        .sub-bene-wrap { flex:1 !important; min-height:0 !important; }
+        .sub-bene-heading { font-size:15px !important; font-weight:800 !important; color:#3a7d3a !important; margin-bottom:8px !important; }
+        .sub-bene-list { display:flex !important; flex-direction:column !important; gap:8px !important; }
+        .sub-bene-item { display:flex !important; flex-direction:column !important; gap:3px !important; }
+        .sub-bene-row { display:flex !important; align-items:baseline !important; gap:8px !important; }
+        .sub-bene-pill { flex-shrink:0 !important; background:#ffd600 !important; border-radius:3px !important; font-size:11px !important; font-weight:800 !important; color:#333 !important; padding:2px 7px !important; }
+        .sub-bene-text { font-size:13px !important; color:#222 !important; font-weight:500 !important; line-height:1.4 !important; }
+        .sub-bene-sub { font-size:11px !important; color:#555 !important; margin-left:52px !important; line-height:1.4 !important; }
+        .sub-price-zone { flex-shrink:0 !important; background:#fffde7 !important; border:1.5px solid #f0b800 !important; border-radius:8px !important; margin:0 0 8px !important; padding:12px 16px 12px !important; }
+        .sub-price-top { display:flex !important; align-items:center !important; justify-content:space-between !important; margin-bottom:6px !important; }
+        .sub-price-cond { font-size:12px !important; color:#555 !important; font-weight:600 !important; }
+        .sub-price-orig { font-size:12px !important; color:#888 !important; }
+        .sub-price-mid { display:flex !important; align-items:center !important; gap:10px !important; margin-bottom:6px !important; }
+        .sub-card-img { flex-shrink:0 !important; width:54px !important; height:35px !important; background:#1a1a2e !important; border-radius:5px !important; display:flex !important; align-items:center !important; justify-content:center !important; }
+        .sub-card-chip { width:12px !important; height:9px !important; background:#d4af37 !important; border-radius:2px !important; }
+        .sub-disc-badge { background:#e60012 !important; border-radius:4px !important; padding:4px 10px !important; font-size:14px !important; font-weight:800 !important; color:#fff !important; white-space:nowrap !important; }
+        .sub-price-main { display:flex !important; align-items:baseline !important; gap:5px !important; }
+        .sub-price-prefix { font-size:14px !important; color:#333 !important; font-weight:600 !important; }
+        .sub-price-big { font-size:46px !important; font-weight:900 !important; color:#111 !important; letter-spacing:-2px !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
+        .sub-price-suffix { font-size:17px !important; font-weight:700 !important; color:#333 !important; }
+        .sub-disclaimer { flex-shrink:0 !important; padding:4px 2px 0 !important; }
+        .sub-disclaimer p { font-size:9px !important; color:#999 !important; line-height:1.6 !important; }
       `;
       clonedDoc.head.appendChild(style);
     }
   });
 
-  // 캡처 후 원위치 복구
+  // 캡처 후 원위치
   card.style.position = 'fixed';
   card.style.left = '-9999px';
   card.style.top = '0';
