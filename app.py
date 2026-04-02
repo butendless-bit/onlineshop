@@ -106,9 +106,12 @@ def api_categories():
 # ── API: 크롤러 상태 ───────────────────────────────────────────────────────────
 @app.route("/api/status")
 def api_status():
-    from scheduler import get_next_run_time
     status = get_status()
-    status["next_run"] = get_next_run_time()
+    if os.environ.get("VERCEL"):
+        status["next_run"] = None
+    else:
+        from scheduler import get_next_run_time
+        status["next_run"] = get_next_run_time()
     return jsonify(status)
 
 
@@ -201,11 +204,20 @@ def api_subscription_delete(sub_id):
 
 @app.route("/api/subscription/crawl", methods=["POST"])
 def api_subscription_crawl():
+    if os.environ.get("VERCEL"):
+        try:
+            _dispatch_github_actions_crawl()
+            return jsonify({
+                "mode": "github_actions",
+                "message": "구독상품 크롤링을 시작했습니다. 완료 후 자동 재배포됩니다.",
+            })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 503
     from crawler import run_subscription_crawler
     def _run():
         run_subscription_crawler()
     threading.Thread(target=_run, daemon=True).start()
-    return jsonify({"message": "구독상품 크롤링 시작됨"})
+    return jsonify({"mode": "local", "message": "구독상품 크롤링 시작됨"})
 
 
 # ── API: 구독 추천 (카테고리별 TOP 5, 월 요금 기준) ───────────────────────────

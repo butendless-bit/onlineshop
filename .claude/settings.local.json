@@ -15,7 +15,8 @@
       "Bash(cmd.exe /c \"code --install-extension esbenp.prettier-vscode\")",
       "Bash(python:*)",
       "Bash(curl -s http://localhost:5000/ -o /dev/null -w \"%{http_code}\")",
-      "Bash(pkill -f \"python app.py\")"
+      "Bash(pkill -f \"python app.py\")",
+      "Bash(wc:*)"
     ]
   }
 }

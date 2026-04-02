@@ -18,6 +18,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 import re
+import json
 from config import (
     CATEGORIES, CRAWL_DELAY, CRAWL_RETRY, CRAWL_TIMEOUT, USER_AGENT, LOG_PATH,
     CATEGORY_SEARCH_TERMS, SUBSCRIPTION_SEARCH_TERMS,
@@ -248,10 +249,14 @@ def fetch_review_count(session: requests.Session, goods_no: str) -> int:
 def fetch_naver_price(session: requests.Session, keyword: str) -> int | None:
     """네이버 쇼핑 검색으로 최저가 조회 (공개 검색 파싱)"""
     try:
+        naver_client_id = os.environ.get("NAVER_CLIENT_ID", "")
+        naver_client_secret = os.environ.get("NAVER_CLIENT_SECRET", "")
+        if not naver_client_id or not naver_client_secret:
+            return None
         url = "https://openapi.naver.com/v1/search/shop.json"
         headers = {
-            "X-Naver-Client-Id":     "NAVER_CLIENT_ID",
-            "X-Naver-Client-Secret": "NAVER_CLIENT_SECRET",
+            "X-Naver-Client-Id":     naver_client_id,
+            "X-Naver-Client-Secret": naver_client_secret,
         }
         resp = session.get(url, params={"query": keyword, "display": 5, "sort": "asc"},
                            headers=headers, timeout=8)
@@ -325,8 +330,7 @@ def crawl_subscription_by_category(session: requests.Session, category_key: str)
             contract_months, care_plan = _parse_prc_txt(prc_txt)
 
             # goodsAttrs JSON
-            import json as _json
-            goods_attrs = _json.dumps(
+            goods_attrs = json.dumps(
                 [{"grp": a.get("attrGrp",""), "val": a.get("attrVal","")}
                  for a in (p.get("goodsAttrs") or [])],
                 ensure_ascii=False

@@ -4,6 +4,25 @@ import shutil
 from config import DB_PATH, DB_SEED
 
 
+def _db_has_products(path: str) -> bool:
+    """DB 파일이 존재하고 products 데이터가 있으면 True"""
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        return False
+    try:
+        conn = sqlite3.connect(path)
+        row = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='products'"
+        ).fetchone()
+        if not row:
+            conn.close()
+            return False
+        count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+        conn.close()
+        return int(count) > 0
+    except Exception:
+        return False
+
+
 def get_conn():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
@@ -13,10 +32,14 @@ def get_conn():
 
 
 def init_db():
-    # Vercel: 시드 DB를 /tmp로 복사 (쓰기 가능 경로)
-    if os.environ.get("VERCEL") and not os.path.exists(DB_PATH):
-        if os.path.exists(DB_SEED):
+    # Vercel: 시드 DB → /tmp 복사 (데이터가 없을 때만 복사)
+    if os.environ.get("VERCEL") and not _db_has_products(DB_PATH):
+        if _db_has_products(DB_SEED):
+            os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
             shutil.copy2(DB_SEED, DB_PATH)
+            print(f"[DB] 시드 복사 완료: {DB_SEED} → {DB_PATH}")
+        else:
+            print(f"[DB] 경고: 시드 DB에 데이터 없음 ({DB_SEED})")
 
     with get_conn() as conn:
         conn.executescript("""
