@@ -17,7 +17,6 @@ from promo_repository import (
     get_default_store_info,
     init_promo_db,
     list_campaigns,
-    normalize_promo_products,
     record_campaign_event,
     resolve_selected_products,
     save_generated_asset,
@@ -29,11 +28,9 @@ from promo_repository import (
 from services.background_removal import remove_background
 from services.claude_service import (
     ClaudeServiceError as OpenAIServiceError,
-    generate_blog_copy,
-    generate_blog_copy_v2,
+    generate_blog_prompt,
     generate_creative_title,
-    generate_instagram_copy,
-    generate_instagram_copy_v2,
+    generate_instagram_prompt,
     generate_short_product_name,
     recommend_campaign_info,
     recommend_landing_copy,
@@ -118,20 +115,25 @@ def api_promo_selection_resolve():
 @promo_bp.route("/api/promo/create-campaign", methods=["POST"])
 def api_promo_create_campaign():
     payload = request.get_json(force=True) or {}
-    selected = payload.get("selected_product_ids") or []
-    print(f"[promo] create_campaign requested selected={len(selected)}")
-    if not payload.get("selected_product_ids"):
-        print("[promo] create_campaign rejected: no selected_product_ids")
-        return jsonify({"error": "선택된 상품이 없어 캠페인을 만들 수 없습니다."}), 400
-    recommended = recommend_campaign_info(
-        resolve_selected_products(selected),
-        store_name=payload.get("store_name", STORE_NAME),
-    )
-    payload["event_title"] = payload.get("event_title") or recommended["event_title"]
-    payload["campaign_name"] = payload.get("campaign_name") or recommended["campaign_name"]
-    campaign = create_campaign(payload)
-    print(f"[promo] create_campaign success id={campaign.get('id')} products={len(campaign.get('products', []))}")
-    return jsonify(campaign), 201
+    try:
+        selected = payload.get("selected_product_ids") or []
+        print(f"[promo] create_campaign requested selected={len(selected)}")
+        if not selected:
+            print("[promo] create_campaign rejected: no selected_product_ids")
+            return jsonify({"error": "선택된 상품이 없어 캠페인을 만들 수 없습니다."}), 400
+        products = resolve_selected_products(selected)
+        recommended = recommend_campaign_info(
+            products,
+            store_name=payload.get("store_name", STORE_NAME),
+        )
+        payload["event_title"] = payload.get("event_title") or recommended["event_title"]
+        payload["campaign_name"] = payload.get("campaign_name") or recommended["campaign_name"]
+        campaign = create_campaign(payload)
+        print(f"[promo] create_campaign success id={campaign.get('id')} products={len(campaign.get('products', []))}")
+        return jsonify(campaign), 201
+    except Exception as exc:
+        print(f"[promo] create_campaign error: {exc}")
+        return jsonify({"error": str(exc)}), 500
 
 
 @promo_bp.route("/api/promo/recommend-campaign", methods=["POST"])
@@ -171,56 +173,64 @@ def api_promo_recommend_landing():
 @promo_bp.route("/api/promo/generate-creative", methods=["POST"])
 def api_promo_generate_creative():
     payload = request.get_json(force=True) or {}
-    campaign_id = payload.get("campaign_id")
-    campaign = get_campaign(campaign_id) if campaign_id else None
-    if not campaign:
-        print(f"[promo] generate_creative rejected missing campaign_id={campaign_id}")
-        return jsonify({"error": "캠페인을 먼저 생성해 주세요."}), 400
-    print(f"[promo] generate_creative campaign_id={campaign_id} products={len(campaign.get('products', []))}")
-    enriched_products = []
-    for product in campaign.get("products", []):
-        enriched_products.append(
-            {
-                **product,
-                "display_name": generate_short_product_name(
-                    product.get("product_name", ""),
-                    category=product.get("category", ""),
-                ),
-                "creative_title": generate_creative_title(
-                    product.get("product_name", ""),
-                    category=product.get("category", ""),
-                ),
-            }
-        )
-    creative_payload = {
-        "style": payload.get("style", "깔끔형"),
-        "tone": payload.get("tone", "가성비 강조"),
-        "price_display": payload.get("price_display", "혜택가"),
-        "layout": payload.get("layout", "상품별 1장씩"),
-        "products": enriched_products,
-        "event_title": campaign.get("event_title"),
-        "campaign_name": campaign.get("campaign_name"),
-        "store_name": campaign.get("store_name"),
-        "phone": campaign.get("phone"),
-        "kakao_channel_url": campaign.get("kakao_channel_url"),
-    }
-    saved = save_generated_asset(campaign_id, "square-creative", creative_payload)
-    return jsonify(saved)
+    try:
+        campaign_id = payload.get("campaign_id")
+        campaign = get_campaign(campaign_id) if campaign_id else None
+        c = campaign or {}
+        # campaign이 DB에 없으면 payload 데이터 fallback 사용
+        products = c.get("products") or payload.get("products") or []
+        if not products:
+            return jsonify({"error": "상품 정보가 없습니다. 캠페인을 다시 시작해 주세요."}), 400
+        print(f"[promo] generate_creative campaign_id={campaign_id} products={len(products)}")
+        enriched_products = []
+        for product in products:
+            enriched_products.append(
+                {
+                    **product,
+                    "display_name": generate_short_product_name(
+                        product.get("product_name", ""),
+                        category=product.get("category", ""),
+                    ),
+                    "creative_title": generate_creative_title(
+                        product.get("product_name", ""),
+                        category=product.get("category", ""),
+                    ),
+                }
+            )
+        creative_payload = {
+            "style": payload.get("style", "깔끔형"),
+            "tone": payload.get("tone", "가성비 강조"),
+            "price_display": payload.get("price_display", "혜택가"),
+            "layout": payload.get("layout", "상품별 1장씩"),
+            "products": enriched_products,
+            "event_title": c.get("event_title") or payload.get("event_title", ""),
+            "campaign_name": c.get("campaign_name") or payload.get("campaign_name", ""),
+            "store_name": c.get("store_name") or payload.get("store_name", STORE_NAME),
+            "phone": c.get("phone") or payload.get("phone", ""),
+            "kakao_channel_url": c.get("kakao_channel_url") or payload.get("kakao_channel_url", ""),
+        }
+        saved = save_generated_asset(campaign_id, "square-creative", creative_payload) if campaign_id else None
+        return jsonify(saved or {"type": "square-creative", "payload": creative_payload})
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
 
 
 @promo_bp.route("/api/promo/generate-landing", methods=["POST"])
 def api_promo_generate_landing():
     payload = request.get_json(force=True) or {}
-    campaign_id = payload.get("campaign_id")
-    campaign = get_campaign(campaign_id) if campaign_id else None
-    if not campaign:
-        print(f"[promo] generate_landing rejected missing campaign_id={campaign_id}")
-        return jsonify({"error": "캠페인을 먼저 생성해 주세요."}), 400
-    print(f"[promo] generate_landing campaign_id={campaign_id} products={len(campaign.get('products', []))}")
-    landing_payload = build_landing_payload(payload, campaign)
-    update_campaign(campaign_id, metadata={**campaign.get("metadata", {}), "landing": landing_payload})
-    saved = save_generated_asset(campaign_id, "landing", landing_payload)
-    return jsonify({"campaign_id": campaign_id, "landing": landing_payload, "asset": saved})
+    try:
+        campaign_id = payload.get("campaign_id")
+        campaign = get_campaign(campaign_id) if campaign_id else None
+        c = campaign or {}
+        print(f"[promo] generate_landing campaign_id={campaign_id} products={len(c.get('products', []))}")
+        landing_payload = build_landing_payload(payload, c)
+        if campaign_id and campaign:
+            update_campaign(campaign_id, metadata={**c.get("metadata", {}), "landing": landing_payload})
+        saved = save_generated_asset(campaign_id, "landing", landing_payload) if campaign_id else None
+        return jsonify({"campaign_id": campaign_id, "landing": landing_payload, "asset": saved})
+    except Exception as exc:
+        print(f"[promo] generate_landing error: {exc}")
+        return jsonify({"error": str(exc)}), 500
 
 
 @promo_bp.route("/api/promo/generate-instagram-copy", methods=["POST"])
@@ -229,22 +239,21 @@ def api_promo_generate_instagram_copy():
     try:
         campaign_id = payload.get("campaign_id")
         campaign = get_campaign(campaign_id) if campaign_id else None
-        if campaign and not payload.get("products"):
-            payload["products"] = campaign.get("products", [])
-            payload["event_title"] = payload.get("event_title") or campaign.get("event_title", "")
-            payload["store_name"] = payload.get("store_name") or campaign.get("store_name", STORE_NAME)
-            payload["phone"] = payload.get("phone") or campaign.get("phone", "")
-            payload["kakao_channel_url"] = payload.get("kakao_channel_url") or campaign.get("kakao_channel_url", "")
-        if campaign:
-            payload["landing"] = payload.get("landing") or campaign.get("metadata", {}).get("landing", {})
-        raw_products = payload.get("products") or []
-        payload["raw_products"] = raw_products
-        payload["products"] = normalize_promo_products(raw_products)
-        result = generate_instagram_copy_v2(payload)
+        c = campaign or {}
+        if not payload.get("products"):
+            payload["products"] = c.get("products", [])
+        payload["event_title"] = payload.get("event_title") or c.get("event_title", "")
+        payload["store_name"] = payload.get("store_name") or c.get("store_name", STORE_NAME)
+        payload["phone"] = payload.get("phone") or c.get("phone", "")
+        payload["kakao_channel_url"] = payload.get("kakao_channel_url") or c.get("kakao_channel_url", "")
+        prompt = generate_instagram_prompt(payload)
+        result = {"prompt": prompt}
         saved = save_generated_asset(campaign_id, "instagram-copy", result) if campaign_id else None
+        print(f"[promo] instagram prompt generated campaign_id={campaign_id} len={len(prompt)}")
         return jsonify({"result": result, "asset": saved})
-    except OpenAIServiceError as exc:
-        return jsonify({"error": str(exc)}), 400
+    except Exception as exc:
+        print(f"[promo] instagram copy error: {exc}")
+        return jsonify({"error": str(exc)}), 500
 
 
 @promo_bp.route("/api/promo/generate-blog-copy", methods=["POST"])
@@ -253,20 +262,21 @@ def api_promo_generate_blog_copy():
     try:
         campaign_id = payload.get("campaign_id")
         campaign = get_campaign(campaign_id) if campaign_id else None
-        if campaign and not payload.get("products"):
-            payload["products"] = campaign.get("products", [])
-            payload["event_title"] = payload.get("event_title") or campaign.get("event_title", "")
-            payload["store_name"] = payload.get("store_name") or campaign.get("store_name", STORE_NAME)
-            payload["phone"] = payload.get("phone") or campaign.get("phone", "")
-            payload["kakao_channel_url"] = payload.get("kakao_channel_url") or campaign.get("kakao_channel_url", "")
-        if campaign:
-            payload["landing"] = payload.get("landing") or campaign.get("metadata", {}).get("landing", {})
-        payload["products"] = normalize_promo_products(payload.get("products") or [])
-        result = generate_blog_copy_v2(payload)
+        c = campaign or {}
+        if not payload.get("products"):
+            payload["products"] = c.get("products", [])
+        payload["event_title"] = payload.get("event_title") or c.get("event_title", "")
+        payload["store_name"] = payload.get("store_name") or c.get("store_name", STORE_NAME)
+        payload["phone"] = payload.get("phone") or c.get("phone", "")
+        payload["kakao_channel_url"] = payload.get("kakao_channel_url") or c.get("kakao_channel_url", "")
+        prompt = generate_blog_prompt(payload)
+        result = {"prompt": prompt}
         saved = save_generated_asset(campaign_id, "blog-copy", result) if campaign_id else None
+        print(f"[promo] blog prompt generated campaign_id={campaign_id} len={len(prompt)}")
         return jsonify({"result": result, "asset": saved})
-    except OpenAIServiceError as exc:
-        return jsonify({"error": str(exc)}), 400
+    except Exception as exc:
+        print(f"[promo] blog copy error: {exc}")
+        return jsonify({"error": str(exc)}), 500
 
 
 @promo_bp.route("/api/promo/generate-track-link", methods=["POST"])

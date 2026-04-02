@@ -3,11 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resultEl = document.getElementById('instagram-result');
   const empty = document.getElementById('instagram-empty');
   const captionEl = document.getElementById('instagram-caption');
-  const hashtagEl = document.getElementById('instagram-hashtags');
-  const dmEl = document.getElementById('instagram-dm-reply');
-  const copyCaptionBtn = document.getElementById('copy-instagram-caption-btn');
-  const copyHashtagBtn = document.getElementById('copy-instagram-hashtag-btn');
-  const copyDmBtn = document.getElementById('copy-instagram-dm-btn');
+  const copyBtn = document.getElementById('copy-instagram-caption-btn');
   const generateBtn = document.getElementById('generate-instagram-btn');
   const TASK_NAME = 'instagram';
 
@@ -29,7 +25,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.self === window.top) window.location.href = '/promo';
       return null;
     }
-    return app.apiFetch(`/api/promo/campaign/${saved.id}`);
+    if (saved.products?.length) return saved;
+    try {
+      return await app.apiFetch(`/api/promo/campaign/${saved.id}`);
+    } catch {
+      return saved;
+    }
   }
 
   function copyText(text, btn) {
@@ -42,16 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).catch(() => app.showToast('복사에 실패했습니다.'));
   }
 
-  function renderResult(result) {
-    // result = {hooks, caption, hashtags, dm_reply} from claude_service
-    const caption = result?.caption || '';
-    const hashtags = result?.hashtags || [];
-    const dmReply = result?.dm_reply || '';
-
-    if (captionEl) captionEl.value = caption;
-    if (hashtagEl) hashtagEl.value = hashtags.join(' ');
-    if (dmEl) dmEl.value = dmReply;
-
+  function renderResult(data) {
+    const prompt = data?.result?.prompt || data?.prompt || '';
+    if (captionEl) captionEl.value = prompt;
     resultEl.style.display = 'block';
     empty.style.display = 'none';
     requestAnimationFrame(postFrameHeight);
@@ -61,8 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campaign = await ensureCampaign();
     if (!campaign) return;
 
-    postTaskStatus('processing', '인스타 게시글 생성 중');
-    empty.textContent = 'AI가 인스타그램 게시글을 작성하고 있습니다...';
+    postTaskStatus('processing', '인스타 프롬프트 생성 중');
+    empty.textContent = '프롬프트를 생성하고 있습니다...';
     empty.style.display = 'block';
     resultEl.style.display = 'none';
 
@@ -78,23 +72,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       }),
     });
 
-    renderResult(response.result || response || {});
-    postTaskStatus('done', '인스타 게시글 완료');
+    renderResult(response);
+    postTaskStatus('done', '프롬프트 완료');
   }
 
-  copyCaptionBtn?.addEventListener('click', () => copyText(captionEl?.value || '', copyCaptionBtn));
-  copyHashtagBtn?.addEventListener('click', () => copyText(hashtagEl?.value || '', copyHashtagBtn));
-  copyDmBtn?.addEventListener('click', () => copyText(dmEl?.value || '', copyDmBtn));
+  copyBtn?.addEventListener('click', () => copyText(captionEl?.value || '', copyBtn));
 
   generateBtn?.addEventListener('click', async () => {
     try {
       generateBtn.disabled = true;
       generateBtn.textContent = '생성 중...';
       await generateInstagramCopy();
-      app.showToast('인스타그램 게시글을 만들었습니다!');
+      app.showToast('프롬프트가 생성됐습니다! ChatGPT/Gemini에 붙여넣으세요.');
     } catch (error) {
       app.showToast(error.message);
-      empty.textContent = '게시글을 불러오지 못했습니다.';
+      empty.textContent = '프롬프트를 불러오지 못했습니다.';
       postTaskStatus('error', '확인 필요');
     } finally {
       generateBtn.disabled = false;
@@ -107,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     requestAnimationFrame(postFrameHeight);
   } catch (error) {
     app.showToast(error.message);
-    empty.textContent = '게시글을 불러오지 못했습니다.';
+    empty.textContent = '프롬프트를 불러오지 못했습니다.';
     postTaskStatus('error', '확인 필요');
   }
 

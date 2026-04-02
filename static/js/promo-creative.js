@@ -36,11 +36,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.self === window.top) window.location.href = '/promo';
       return null;
     }
-
-    const result = await app.apiFetch(`/api/promo/campaign/${campaign.id}`);
-    app.setCampaign(result);
-    campaignData = result;
-    return result;
+    if (campaign.products?.length) {
+      app.setCampaign(campaign);
+      campaignData = campaign;
+      return campaign;
+    }
+    try {
+      const result = await app.apiFetch(`/api/promo/campaign/${campaign.id}`);
+      app.setCampaign(result);
+      campaignData = result;
+      return result;
+    } catch {
+      campaignData = campaign;
+      return campaign;
+    }
   }
 
   function buildCardHtml(product) {
@@ -115,6 +124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         tone: '행사 강조',
         price_display: '혜택가',
         layout: '상품별 1장',
+        // 백엔드가 DB에서 캠페인 못 찾을 때 fallback용
+        products: campaign.products || [],
+        event_title: campaign.event_title || '',
+        campaign_name: campaign.campaign_name || '',
+        store_name: campaign.store_name || '',
+        phone: campaign.phone || '',
+        kakao_channel_url: campaign.kakao_channel_url || '',
       }),
     });
 

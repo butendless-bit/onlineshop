@@ -4,7 +4,7 @@
 <section class="promo-hero">
   <div>
     <h1>인스타그램 게시글</h1>
-    <p class="promo-hero-sub">선택한 상품을 기반으로 AI가 실제 게시글 문구를 작성합니다. 복사해서 바로 사용하세요!</p>
+    <p class="promo-hero-sub">상품 정보 기반 프롬프트를 자동 생성합니다. 복사 후 ChatGPT 또는 Gemini에 붙여넣으면 완성된 게시글을 받을 수 있습니다.</p>
   </div>
 </section>
 
@@ -12,58 +12,46 @@
   <button class="promo-btn primary" id="generate-instagram-btn">다시 생성하기</button>
 </div>
 
-<div id="instagram-empty" class="promo-empty" style="margin-top:18px;">AI가 인스타그램 게시글을 작성하고 있습니다...</div>
+<div id="instagram-empty" class="promo-empty" style="margin-top:18px;">프롬프트를 생성하고 있습니다...</div>
 
 <div id="instagram-result" style="display:none;">
   <div class="promo-panel ig-section">
     <div class="ig-section-head">
       <div>
-        <span class="ig-badge">게시글 본문</span>
-        <p class="ig-desc">캡션 전체를 복사해서 인스타그램에 바로 붙여넣으세요.</p>
+        <span class="ig-badge">인스타그램 프롬프트</span>
+        <p class="ig-desc">아래 프롬프트를 복사 → ChatGPT 또는 Gemini에 붙여넣기 하면 게시글이 완성됩니다.</p>
       </div>
-      <button class="single-copy-btn" id="copy-instagram-caption-btn">복사</button>
-    </div>
-    <textarea id="instagram-caption" class="single-prompt-textarea" rows="14" placeholder="AI가 생성한 인스타그램 게시글 본문이 표시됩니다."></textarea>
-  </div>
-
-  <div class="promo-panel ig-section" style="margin-top:14px;">
-    <div class="ig-section-head">
-      <div>
-        <span class="ig-badge ig-badge-hashtag">해시태그</span>
-        <p class="ig-desc">복사해서 게시글 마지막에 붙여넣으세요.</p>
+      <div style="display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:wrap;">
+        <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="ai-link-btn">ChatGPT ↗</a>
+        <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" class="ai-link-btn ai-link-gemini">Gemini ↗</a>
+        <button class="single-copy-btn" id="copy-instagram-caption-btn">복사</button>
       </div>
-      <button class="single-copy-btn" id="copy-instagram-hashtag-btn">복사</button>
     </div>
-    <textarea id="instagram-hashtags" class="single-prompt-textarea" rows="3" placeholder="해시태그가 표시됩니다."></textarea>
-  </div>
-
-  <div class="promo-panel ig-section" style="margin-top:14px;">
-    <div class="ig-section-head">
-      <div>
-        <span class="ig-badge ig-badge-dm">DM 답변 템플릿</span>
-        <p class="ig-desc">문의 DM 수신 시 사용할 답변 문구입니다.</p>
-      </div>
-      <button class="single-copy-btn" id="copy-instagram-dm-btn">복사</button>
-    </div>
-    <textarea id="instagram-dm-reply" class="single-prompt-textarea" rows="4" placeholder="DM 답변 템플릿이 표시됩니다."></textarea>
+    <textarea id="instagram-caption" class="single-prompt-textarea" rows="22" placeholder="프롬프트가 여기 표시됩니다."></textarea>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/promo-instagram.js', v='20260401-10') }}"></script>
+<script src="{{ url_for('static', filename='js/promo-instagram.js', v='20260402-1') }}"></script>
 <style>
 .promo-hero-sub { margin: 8px 0 0; color: var(--promo-muted); font-size: 14px; line-height: 1.65; max-width: 720px; }
 .single-prompt-bar { padding: 14px 18px; display: flex; justify-content: flex-end; }
 .ig-section { padding: 22px; }
-.ig-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.ig-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
 .ig-badge {
   display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800;
   background: rgba(230,0,18,.18); color: #ffb3b9; border: 1px solid rgba(230,0,18,.3);
 }
-.ig-badge-hashtag { background: rgba(79,140,255,.18); color: #b8d0ff; border-color: rgba(79,140,255,.3); }
-.ig-badge-dm { background: rgba(19,184,123,.18); color: #b9f5d8; border-color: rgba(19,184,123,.3); }
 .ig-desc { margin: 6px 0 0; font-size: 13px; color: var(--promo-muted); line-height: 1.6; }
+.ai-link-btn {
+  flex-shrink: 0; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800;
+  background: rgba(16,163,127,.15); border: 1px solid rgba(16,163,127,.35); color: #6ee7d4;
+  text-decoration: none; white-space: nowrap;
+}
+.ai-link-btn:hover { background: rgba(16,163,127,.28); }
+.ai-link-gemini { background: rgba(79,140,255,.15); border-color: rgba(79,140,255,.35); color: #b8d0ff; }
+.ai-link-gemini:hover { background: rgba(79,140,255,.28); }
 .single-copy-btn {
   flex-shrink: 0; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer;
   background: rgba(255,255,255,.06); border: 1px solid var(--promo-border); color: var(--promo-text);
@@ -73,7 +61,7 @@
 .single-prompt-textarea {
   width: 100%; border: 1px solid var(--promo-border); border-radius: 14px;
   padding: 18px; background: rgba(8,12,24,.54); color: var(--promo-text);
-  font: inherit; font-size: 14px; line-height: 1.85; resize: none;
+  font: inherit; font-size: 13px; line-height: 1.85; resize: vertical;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
 }
 .single-prompt-textarea:focus { outline: none; border-color: rgba(79,140,255,.5); }

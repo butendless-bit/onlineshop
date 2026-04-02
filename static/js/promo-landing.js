@@ -29,9 +29,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.self === window.top) window.location.href = '/promo';
       return null;
     }
-    campaign = await app.apiFetch(`/api/promo/campaign/${saved.id}`);
-    app.setCampaign(campaign);
-    return campaign;
+    if (saved.products?.length) {
+      app.setCampaign(saved);
+      campaign = saved;
+      return saved;
+    }
+    try {
+      campaign = await app.apiFetch(`/api/promo/campaign/${saved.id}`);
+      app.setCampaign(campaign);
+      return campaign;
+    } catch {
+      campaign = saved;
+      return saved;
+    }
   }
 
   async function applyRecommendedCopy(force = false) {

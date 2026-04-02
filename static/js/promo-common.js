@@ -40,7 +40,8 @@
 
   function getCampaign() {
     try {
-      const stored = JSON.parse(sessionStorage.getItem(CAMPAIGN_KEY) || 'null');
+      // localStorage는 iframe과 공유됨 (sessionStorage는 공유 안 됨)
+      const stored = JSON.parse(localStorage.getItem(CAMPAIGN_KEY) || 'null');
       if (stored?.id) return stored;
       const campaignId = new URLSearchParams(window.location.search).get('campaign_id');
       return campaignId ? { id: campaignId } : null;
@@ -51,11 +52,11 @@
   }
 
   function setCampaign(data) {
-    sessionStorage.setItem(CAMPAIGN_KEY, JSON.stringify(data));
+    localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(data));
   }
 
   function clearPromoSession() {
-    sessionStorage.removeItem(CAMPAIGN_KEY);
+    localStorage.removeItem(CAMPAIGN_KEY);
     sessionStorage.removeItem(CREATIVE_KEY);
     sessionStorage.removeItem(CUTOUT_KEY);
     sessionStorage.removeItem(LANDING_KEY);

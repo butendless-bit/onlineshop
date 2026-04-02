@@ -2,11 +2,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const app = window.promoApp;
   const resultEl = document.getElementById('blog-result');
   const empty = document.getElementById('blog-empty');
-  const titlesEl = document.getElementById('blog-titles');
   const bodyEl = document.getElementById('blog-body');
-  const ctaEl = document.getElementById('blog-cta');
   const copyBodyBtn = document.getElementById('copy-blog-body-btn');
-  const copyAllBtn = document.getElementById('copy-blog-all-btn');
   const generateBtn = document.getElementById('generate-blog-btn');
   const TASK_NAME = 'blog';
 
@@ -42,24 +39,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = '/promo';
       return null;
     }
-    return app.apiFetch(`/api/promo/campaign/${saved.id}`);
+    if (saved.products?.length) return saved;
+    try {
+      return await app.apiFetch(`/api/promo/campaign/${saved.id}`);
+    } catch {
+      return saved;
+    }
   }
 
-  function renderResult(payload) {
-    const result = payload?.result || payload || {};
-    // result = {titles: [...], body: "...", cta: "..."} from claude_service
-    const titles = result?.titles || [];
-    const body = result?.body || '';
-    const cta = result?.cta || '';
-
-    if (titlesEl) {
-      titlesEl.innerHTML = titles.map((t, i) =>
-        `<div class="blog-title-option"><span class="blog-title-num">${i + 1}</span><span class="blog-title-text">${t}</span></div>`
-      ).join('');
-    }
-    if (bodyEl) bodyEl.value = body;
-    if (ctaEl) ctaEl.value = cta;
-
+  function renderResult(data) {
+    const prompt = data?.result?.prompt || data?.prompt || '';
+    if (bodyEl) bodyEl.value = prompt;
     resultEl.style.display = 'block';
     empty.style.display = 'none';
     requestAnimationFrame(postFrameHeight);
@@ -69,12 +59,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campaign = await ensureCampaign();
     if (!campaign) return;
 
-    postTaskStatus('processing', '블로그 글 생성 중');
+    postTaskStatus('processing', '블로그 프롬프트 생성 중');
     empty.style.display = 'block';
-    empty.textContent = 'AI가 블로그 글을 작성하고 있습니다... (약 15~30초 소요)';
+    empty.textContent = '프롬프트를 생성하고 있습니다...';
     resultEl.style.display = 'none';
 
-    const payload = await app.apiFetch('/api/promo/generate-blog-copy', {
+    const response = await app.apiFetch('/api/promo/generate-blog-copy', {
       method: 'POST',
       body: JSON.stringify({
         campaign_id: campaign.id,
@@ -83,34 +73,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         store_name: campaign.store_name,
         phone: campaign.phone,
         kakao_channel_url: campaign.kakao_channel_url,
-        target_length: 2000,
       }),
     });
 
-    renderResult(payload);
-    postTaskStatus('done', '블로그 글 완료');
+    renderResult(response);
+    postTaskStatus('done', '프롬프트 완료');
   }
 
   copyBodyBtn?.addEventListener('click', () => copyText(bodyEl?.value || '', copyBodyBtn));
-  copyAllBtn?.addEventListener('click', () => {
-    const titles = Array.from(document.querySelectorAll('.blog-title-text')).map(el => el.textContent).join('\n');
-    const body = bodyEl?.value || '';
-    const cta = ctaEl?.value || '';
-    const titleSection = titles ? `📌 제목 후보:\n${titles}\n\n` : '';
-    const ctaSection = cta ? `\n\n[상담 유도]\n${cta}` : '';
-    copyText(titleSection + body + ctaSection, copyAllBtn);
-  });
 
   generateBtn?.addEventListener('click', async () => {
     try {
       generateBtn.disabled = true;
       generateBtn.textContent = '생성 중...';
       await generateBlogCopy();
-      app.showToast('블로그 글을 만들었습니다!');
+      app.showToast('프롬프트가 생성됐습니다! ChatGPT/Gemini에 붙여넣으세요.');
     } catch (error) {
       app.showToast(error.message);
       empty.style.display = 'block';
-      empty.textContent = '블로그 글을 불러오지 못했습니다.';
+      empty.textContent = '프롬프트를 불러오지 못했습니다.';
       postTaskStatus('error', '확인 필요');
     } finally {
       generateBtn.disabled = false;
@@ -124,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     app.showToast(error.message);
     empty.style.display = 'block';
-    empty.textContent = '블로그 글을 불러오지 못했습니다.';
+    empty.textContent = '프롬프트를 불러오지 못했습니다.';
     postTaskStatus('error', '확인 필요');
   }
 

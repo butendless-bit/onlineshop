@@ -651,6 +651,137 @@ def recommend_landing_copy(
         return fallback
 
 
+def generate_instagram_prompt(payload: dict[str, Any]) -> str:
+    """인스타그램 게시글 작성용 프롬프트 생성 — AI 호출 없음. 사용자가 ChatGPT/Gemini에 복사해서 사용."""
+    store    = payload.get("store_name") or "하이마트"
+    event    = payload.get("event_title") or "이번 주 특가 행사"
+    phone    = payload.get("phone") or ""
+    kakao    = payload.get("kakao_channel_url") or ""
+    products = payload.get("products") or []
+
+    lines = [
+        "아래 정보를 참고해서 하이마트 매장의 인스타그램 홍보 게시글을 작성해줘.",
+        "",
+        "【매장 정보】",
+        f"- 매장명: {store}",
+        f"- 행사명: {event}",
+    ]
+    if phone:
+        lines.append(f"- 전화 문의: {phone}")
+    if kakao:
+        lines.append(f"- 카카오채널: {kakao}")
+
+    lines += ["", "【추천 상품】"]
+    for i, p in enumerate(products[:5], 1):
+        name  = _heuristic_short_name(p.get("product_name", "") or p.get("productName", ""), category=p.get("category", ""), limit=20)
+        price = _best_price_value(p)
+        price_text = f"{int(round(price / 10000))}만원대" if price > 0 else "가격 문의"
+        cat   = _category_label(p.get("category", ""))
+        reason = (p.get("recommendationReason") or p.get("reason") or "").strip()
+        bullets = [str(b).strip() for b in (p.get("featureBullets") or [])
+                   if str(b).strip() and "?" not in str(b)][:2]
+        lines.append(f"{i}. {name} ({cat}) — {price_text}")
+        if reason:
+            lines.append(f"   추천 이유: {reason}")
+        for b in bullets:
+            lines.append(f"   · {b}")
+
+    lines += [
+        "",
+        "【작성 조건】",
+        "- 게시글 본문(캡션): 400~600자, 이모지 자연스럽게 포함",
+        "- 톤: 친근하고 감성적, 부담 없이 관심 유도",
+        "- 상품 가격·재고는 변동 가능하다는 안내 자연스럽게 포함",
+        "- 해시태그: 15개 내외, 한국어 위주 (#하이마트 #특가 등)",
+        "- DM 자동 답변 템플릿: 문의 DM 수신 시 보낼 짧은 답변 문구 1개",
+        "",
+        "【출력 형식】 (아래 구분선 형식 그대로 사용해줘)",
+        "=== 게시글 본문 ===",
+        "(내용)",
+        "",
+        "=== 해시태그 ===",
+        "(내용)",
+        "",
+        "=== DM 답변 템플릿 ===",
+        "(내용)",
+    ]
+    return "\n".join(lines)
+
+
+def generate_blog_prompt(payload: dict[str, Any]) -> str:
+    """블로그 글 작성용 프롬프트 생성 — AI 호출 없음. 사용자가 ChatGPT/Gemini에 복사해서 사용."""
+    store    = payload.get("store_name") or "하이마트"
+    event    = payload.get("event_title") or "이번 주 특가 행사"
+    phone    = payload.get("phone") or ""
+    kakao    = payload.get("kakao_channel_url") or ""
+    products = payload.get("products") or []
+
+    lines = [
+        "아래 정보를 참고해서 하이마트 매장의 네이버 블로그 홍보 글을 작성해줘.",
+        "",
+        "【매장 정보】",
+        f"- 매장명: {store}",
+        f"- 행사명: {event}",
+    ]
+    if phone:
+        lines.append(f"- 전화 문의: {phone}")
+    if kakao:
+        lines.append(f"- 카카오채널: {kakao}")
+
+    lines += ["", "【추천 상품】"]
+    for i, p in enumerate(products[:5], 1):
+        name       = _heuristic_short_name(p.get("product_name", "") or p.get("productName", ""), category=p.get("category", ""), limit=20)
+        full_name  = (p.get("product_name") or p.get("productName") or "").strip()
+        price      = _best_price_value(p)
+        price_text = f"{int(round(price / 10000))}만원대" if price > 0 else "가격 문의"
+        original   = 0
+        for k in ("original_price", "originalPrice", "price"):
+            v = p.get(k)
+            try:
+                if v and int(float(v)) > 0:
+                    original = int(float(v)); break
+            except Exception:
+                pass
+        cat    = _category_label(p.get("category", ""))
+        reason = (p.get("recommendationReason") or p.get("reason") or "").strip()
+        bullets = _blog_feature_lines(p)
+
+        lines.append(f"{i}. {name} ({cat})")
+        if full_name and full_name != name:
+            lines.append(f"   전체명: {full_name[:60]}")
+        lines.append(f"   혜택가: {price_text}")
+        if original > price > 0:
+            lines.append(f"   기존가: {int(round(original / 10000))}만원대 → 약 {int(round((original - price) / 10000))}만원 절약")
+        if reason:
+            lines.append(f"   추천 이유: {reason}")
+        for b in bullets:
+            lines.append(f"   · {b}")
+
+    lines += [
+        "",
+        "【작성 조건】",
+        "- 네이버 블로그용 글, 약 1500~2000자",
+        "- SEO를 고려한 제목 후보 3가지 제시",
+        "- 소제목(##) 활용해서 상품별 섹션 구성",
+        "- 독자가 매장 방문이나 상담을 자연스럽게 고려하게 유도",
+        "- 과장 없이 실용적인 정보 위주로 작성",
+        "- 마지막에 상담 유도 문구 포함",
+        "",
+        "【출력 형식】 (아래 구분선 형식 그대로 사용해줘)",
+        "=== 제목 후보 ===",
+        "1. (제목)",
+        "2. (제목)",
+        "3. (제목)",
+        "",
+        "=== 본문 ===",
+        "(내용)",
+        "",
+        "=== 상담 유도 문구 ===",
+        "(내용)",
+    ]
+    return "\n".join(lines)
+
+
 def generate_short_product_name(product_name: str, *, category: str = "", limit: int = 13) -> str:
     """순수 휴리스틱 기반 상품명 축약 (AI 호출 없음)."""
     result = _heuristic_short_name(product_name, category=category, limit=limit)
