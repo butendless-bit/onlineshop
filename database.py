@@ -5,11 +5,15 @@ from config import DB_PATH, DB_SEED
 
 
 def _db_has_products(path: str) -> bool:
-    """DB 파일이 존재하고 products 데이터가 있으면 True"""
+    """DB 파일이 존재하고 products 데이터가 있으면 True.
+    immutable=1 로 열어 read-only 파일시스템(Vercel /var/task/)에서도 안전하게 읽음.
+    """
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         return False
     try:
-        conn = sqlite3.connect(path)
+        # immutable=1: SQLite가 -shm/-wal 파일 생성 시도를 하지 않음 (읽기 전용 FS 대응)
+        uri = f"file:{path}?immutable=1"
+        conn = sqlite3.connect(uri, uri=True)
         row = conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='products'"
         ).fetchone()
@@ -27,7 +31,6 @@ def get_conn():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
     return conn
 
 
