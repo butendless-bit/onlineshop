@@ -18,15 +18,17 @@ def main() -> None:
     print(f"Product crawl saved: {product_count}")
     print(f"Subscription crawl saved: {subscription_count}")
 
-    # WAL 체크포인트: 모든 WAL 데이터를 메인 DB 파일에 플러시
-    # (GitHub Actions이 data/himart.db만 커밋하므로 반드시 필요)
+    # WAL → DELETE 모드 전환 + 체크포인트
+    # Vercel의 /var/task/ 는 읽기 전용 → WAL 모드면 .db-shm 생성 실패로 DB 열기 불가
+    # GitHub Actions 커밋 전 반드시 DELETE 모드로 전환해야 Vercel에서 시드 DB 사용 가능
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        conn.execute("PRAGMA journal_mode=DELETE")
         conn.close()
-        print(f"[DB] WAL checkpoint 완료 → {DB_PATH}")
+        print(f"[DB] WAL→DELETE 모드 전환 + checkpoint 완료 → {DB_PATH}")
     except Exception as e:
-        print(f"[DB] WAL checkpoint 실패: {e}")
+        print(f"[DB] checkpoint/mode 전환 실패: {e}")
 
 
 if __name__ == "__main__":
