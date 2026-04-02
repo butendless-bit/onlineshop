@@ -16,7 +16,9 @@
       "Bash(python:*)",
       "Bash(curl -s http://localhost:5000/ -o /dev/null -w \"%{http_code}\")",
       "Bash(pkill -f \"python app.py\")",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Skill(yj-code-review)",
+      "Bash(cat C:/Users/user/Documents/claude/onlineshop/.github/workflows/*.yml)"
     ]
   }
 }

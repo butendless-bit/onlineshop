@@ -247,7 +247,7 @@ def api_promo_generate_instagram_copy():
         payload["phone"] = payload.get("phone") or c.get("phone", "")
         payload["kakao_channel_url"] = payload.get("kakao_channel_url") or c.get("kakao_channel_url", "")
         prompt = generate_instagram_prompt(payload)
-        result = {"prompt": prompt}
+        result = {"prompt": prompt, "prompt_package": {"single_prompt": prompt}}
         saved = save_generated_asset(campaign_id, "instagram-copy", result) if campaign_id else None
         print(f"[promo] instagram prompt generated campaign_id={campaign_id} len={len(prompt)}")
         return jsonify({"result": result, "asset": saved})
@@ -270,7 +270,7 @@ def api_promo_generate_blog_copy():
         payload["phone"] = payload.get("phone") or c.get("phone", "")
         payload["kakao_channel_url"] = payload.get("kakao_channel_url") or c.get("kakao_channel_url", "")
         prompt = generate_blog_prompt(payload)
-        result = {"prompt": prompt}
+        result = {"prompt": prompt, "prompt_package": {"single_prompt": prompt}}
         saved = save_generated_asset(campaign_id, "blog-copy", result) if campaign_id else None
         print(f"[promo] blog prompt generated campaign_id={campaign_id} len={len(prompt)}")
         return jsonify({"result": result, "asset": saved})

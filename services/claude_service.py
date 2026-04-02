@@ -652,15 +652,34 @@ def recommend_landing_copy(
 
 
 def generate_instagram_prompt(payload: dict[str, Any]) -> str:
-    """인스타그램 게시글 작성용 프롬프트 생성 — AI 호출 없음. 사용자가 ChatGPT/Gemini에 복사해서 사용."""
-    store    = payload.get("store_name") or "하이마트"
-    event    = payload.get("event_title") or "이번 주 특가 행사"
-    phone    = payload.get("phone") or ""
-    kakao    = payload.get("kakao_channel_url") or ""
-    products = payload.get("products") or []
+    """인스타그램 게시글 작성용 프롬프트 생성 — AI 호출 없음. 사용자가 ChatGPT/Gemini에 복사해서 사용.
+    e-himart 상품 페이지 실제 데이터를 스크래핑해서 프롬프트에 반영."""
+    # 상품 페이지 실제 데이터 보강
+    raw_products = payload.get("products") or []
+    try:
+        products = enrich_products_from_pages(raw_products) if raw_products else []
+    except Exception:
+        products = raw_products
+
+    store = payload.get("store_name") or "하이마트"
+    event = payload.get("event_title") or "이번 주 특가 행사"
+    phone = payload.get("phone") or ""
+    kakao = payload.get("kakao_channel_url") or ""
 
     lines = [
-        "아래 정보를 참고해서 하이마트 매장의 인스타그램 홍보 게시글을 작성해줘.",
+        "아래 정보를 참고해서 하이마트 매장 인스타그램 홍보 게시물을 작성해줘.",
+        "",
+        "【핵심 작성 원칙】",
+        "- 도입부: '광고 같지 않은' 느낌으로 공감 또는 현장 묘사로 시작. 절대 제품명/브랜드로 시작하지 말 것",
+        "  예) '이번에 바꿨는데 진짜 잘 바꿨다 싶었어요' / '집에서 보내는 시간이 달라지면 기분도 달라지더라고요'",
+        "- 본문: 스펙 나열 금지. 고객이 실제 생활에서 느낄 변화와 경험으로 풀어쓸 것",
+        "  나쁜 예) '1600rpm 고속탈수, 에너지 A등급'",
+        "  좋은 예) '세탁 끝나고 꺼냈을 때 옷에서 나던 퀴퀴한 냄새가 없어요. 진짜로요.'",
+        "- 상품이 여러 개면 번호 매기지 말고 한 흐름으로 자연스럽게 묶을 것",
+        "- 광고성 과장 표현 금지: '최고!', '무조건', '지금 안 사면 손해' 등",
+        "- 마무리: 방문·문의 유도 CTA를 판매 냄새 없이 자연스럽게",
+        "  예) '광복롯데몰 하이마트에 오시면 직접 만져보실 수 있어요 :)'",
+        "- 전체 본문: 15줄 이내, 이모지는 핵심 포인트에만 5개 이하",
         "",
         "【매장 정보】",
         f"- 매장명: {store}",
@@ -671,53 +690,99 @@ def generate_instagram_prompt(payload: dict[str, Any]) -> str:
     if kakao:
         lines.append(f"- 카카오채널: {kakao}")
 
-    lines += ["", "【추천 상품】"]
+    lines += ["", "【상품별 실제 정보 (e-himart 페이지 데이터 포함)】"]
+    bad_tags = ["dryer cap", "washer cap", "fridge size", "fridge type",
+                "size group", "tv type", "aircon type", "kimchi_size", "kimchi_type"]
     for i, p in enumerate(products[:5], 1):
-        name  = _heuristic_short_name(p.get("product_name", "") or p.get("productName", ""), category=p.get("category", ""), limit=20)
+        name  = _heuristic_short_name(
+            p.get("product_name", "") or p.get("productName", ""),
+            category=p.get("category", ""), limit=22,
+        )
         price = _best_price_value(p)
         price_text = f"{int(round(price / 10000))}만원대" if price > 0 else "가격 문의"
         cat   = _category_label(p.get("category", ""))
+        brand = (p.get("brand") or "").strip()
         reason = (p.get("recommendationReason") or p.get("reason") or "").strip()
+
+        # featureBullets: DB 데이터 + 페이지 feature_sentences 합산
         bullets = [str(b).strip() for b in (p.get("featureBullets") or [])
-                   if str(b).strip() and "?" not in str(b)][:2]
-        lines.append(f"{i}. {name} ({cat}) — {price_text}")
+                   if str(b).strip() and "?" not in str(b)
+                   and not any(t in str(b).lower() for t in bad_tags)][:3]
+
+        # 페이지 설명 (productDescription)
+        page_desc = (p.get("productDescription") or "").strip()[:120]
+
+        # 리뷰 정보
+        review_count = int(p.get("review_count") or 0)
+        page_rating  = float(p.get("pageRating") or 0)
+
+        header = f"{i}. {name}"
+        if brand:
+            header += f" ({brand})"
+        header += f" — {cat} | 혜택가 {price_text}"
+        lines.append(header)
+
         if reason:
-            lines.append(f"   추천 이유: {reason}")
+            lines.append(f"   ✅ 추천 이유: {reason}")
+        if page_desc:
+            lines.append(f"   📝 상품 설명 (페이지 원문): {page_desc}")
         for b in bullets:
             lines.append(f"   · {b}")
+        if review_count > 0 and page_rating > 0:
+            lines.append(f"   ⭐ 리뷰 {review_count}건, 평점 {page_rating:.1f}/5")
+        elif review_count > 0:
+            lines.append(f"   ⭐ 고객 리뷰 {review_count}건")
 
     lines += [
         "",
-        "【작성 조건】",
-        "- 게시글 본문(캡션): 400~600자, 이모지 자연스럽게 포함",
-        "- 톤: 친근하고 감성적, 부담 없이 관심 유도",
-        "- 상품 가격·재고는 변동 가능하다는 안내 자연스럽게 포함",
-        "- 해시태그: 15개 내외, 한국어 위주 (#하이마트 #특가 등)",
-        "- DM 자동 답변 템플릿: 문의 DM 수신 시 보낼 짧은 답변 문구 1개",
-        "",
-        "【출력 형식】 (아래 구분선 형식 그대로 사용해줘)",
+        "【출력 형식】 (아래 구분선 그대로 사용)",
         "=== 게시글 본문 ===",
-        "(내용)",
+        "(공감 도입 → 상품 경험 서술 → 자연스러운 CTA, 15줄 이내)",
         "",
         "=== 해시태그 ===",
-        "(내용)",
+        "(15개 내외: 브랜드·품목·지역·감성 태그 혼합. 필수 포함: #하이마트광복점 #부산가전 #광복롯데몰)",
         "",
         "=== DM 답변 템플릿 ===",
-        "(내용)",
+        "(문의 DM에 바로 사용할 짧고 친근한 답변 문구 1개)",
     ]
     return "\n".join(lines)
 
 
 def generate_blog_prompt(payload: dict[str, Any]) -> str:
-    """블로그 글 작성용 프롬프트 생성 — AI 호출 없음. 사용자가 ChatGPT/Gemini에 복사해서 사용."""
+    """블로그 글 작성용 프롬프트 생성 — AI 호출 없음. 사용자가 ChatGPT/Gemini에 복사해서 사용.
+    e-himart 상품 페이지 실제 데이터를 스크래핑해서 프롬프트에 반영."""
+    # 상품 페이지 실제 데이터 보강
+    raw_products = payload.get("products") or []
+    try:
+        products = enrich_products_from_pages(raw_products) if raw_products else []
+    except Exception:
+        products = raw_products
+
     store    = payload.get("store_name") or "하이마트"
     event    = payload.get("event_title") or "이번 주 특가 행사"
     phone    = payload.get("phone") or ""
     kakao    = payload.get("kakao_channel_url") or ""
-    products = payload.get("products") or []
 
     lines = [
-        "아래 정보를 참고해서 하이마트 매장의 네이버 블로그 홍보 글을 작성해줘.",
+        "아래 정보를 참고해서 네이버 블로그용 홍보 글을 작성해줘.",
+        "",
+        "【핵심 작성 원칙】",
+        "- 톤: '전문성 있고 신뢰감 있는 사람이 직접 경험하고 쓴 글' 느낌. 친한 친구 ❌ → 믿을 수 있는 전문가 추천 ✅",
+        "- 도입부: 공감 또는 현장 묘사로 시작. 절대 제품명/브랜드로 시작하지 말 것",
+        "  예) '프리미엄 세탁기를 고민하다 보면 결국 이 브랜드 얘기가 나옵니다.'",
+        "- AI 번역체 금지: '~할 수 있습니다', '다양한 기능을 제공합니다', '효율적인' 등 광고 형용사 사용 금지",
+        "- 단점 포함 필수: 아쉬운 점 1개 이상 솔직하게 포함해서 신뢰도 높일 것",
+        "  예) '이 부분은 아쉬웠는데요' / '가격이 좀 있는 건 사실이에요'",
+        "- 스펙은 경험으로 번역: '1600rpm' → '세탁 후 옷이 훨씬 덜 눅눅하게 나왔어요'",
+        "- 소제목: ## 사용, 키워드 자연 포함, 클릭 유도형으로",
+        "  나쁜 예) '## 제품 특징'  좋은 예) '## 직접 써보니까 달랐던 점'",
+        "- 전체 분량: 공백 포함 1800~2200자",
+        "- 마무리: '이런 분께 추천한다' 형식으로 자연스럽게 마무리, 억지 CTA 없이",
+        "",
+        "【SEO 핵심 키워드 (자연스럽게 포함)】",
+        "지역: 부산 가전제품, 광복 롯데몰, 부산 하이마트, 부산 신혼가전, 부산 인테리어 가전",
+        "상황: 신혼 가전 추천, 이사 가전 세팅, 빌트인 설치, 가전 교체",
+        "기능: 프리미엄 가전, 독일 가전, 유럽 가전, 고급 가전",
         "",
         "【매장 정보】",
         f"- 매장명: {store}",
@@ -728,10 +793,10 @@ def generate_blog_prompt(payload: dict[str, Any]) -> str:
     if kakao:
         lines.append(f"- 카카오채널: {kakao}")
 
-    lines += ["", "【추천 상품】"]
+    lines += ["", "【상품별 실제 정보 (e-himart 페이지 데이터 포함)】"]
     for i, p in enumerate(products[:5], 1):
-        name       = _heuristic_short_name(p.get("product_name", "") or p.get("productName", ""), category=p.get("category", ""), limit=20)
         full_name  = (p.get("product_name") or p.get("productName") or "").strip()
+        name       = _heuristic_short_name(full_name, category=p.get("category", ""), limit=22)
         price      = _best_price_value(p)
         price_text = f"{int(round(price / 10000))}만원대" if price > 0 else "가격 문의"
         original   = 0
@@ -743,41 +808,63 @@ def generate_blog_prompt(payload: dict[str, Any]) -> str:
             except Exception:
                 pass
         cat    = _category_label(p.get("category", ""))
+        brand  = (p.get("brand") or "").strip()
         reason = (p.get("recommendationReason") or p.get("reason") or "").strip()
         bullets = _blog_feature_lines(p)
 
-        lines.append(f"{i}. {name} ({cat})")
+        # 페이지에서 가져온 추가 데이터
+        page_desc    = (p.get("productDescription") or "").strip()[:200]
+        review_count = int(p.get("review_count") or 0)
+        page_rating  = float(p.get("pageRating") or 0)
+        page_specs   = (p.get("pageSpecs") or [])[:3]
+        page_keywords = (p.get("pageKeywords") or [])[:5]
+        category_full = (p.get("categoryFull") or "").strip()
+
+        header = f"{i}. {name}"
+        if brand:
+            header += f" ({brand})"
+        header += f" — {cat}"
+        if category_full:
+            header += f" [{category_full}]"
+        lines.append(header)
         if full_name and full_name != name:
-            lines.append(f"   전체명: {full_name[:60]}")
+            lines.append(f"   전체 상품명: {full_name[:70]}")
         lines.append(f"   혜택가: {price_text}")
         if original > price > 0:
-            lines.append(f"   기존가: {int(round(original / 10000))}만원대 → 약 {int(round((original - price) / 10000))}만원 절약")
+            lines.append(f"   절약 혜택: 기존 {int(round(original / 10000))}만원대 → 약 {int(round((original - price) / 10000))}만원 절약")
         if reason:
-            lines.append(f"   추천 이유: {reason}")
+            lines.append(f"   ✅ 추천 이유: {reason}")
+        if page_desc:
+            lines.append(f"   📝 상품 공식 설명 (페이지 원문): {page_desc}")
         for b in bullets:
             lines.append(f"   · {b}")
+        if page_specs:
+            lines.append(f"   📊 주요 스펙: {' / '.join(f'{s.get(\"name\",\"\")}:{s.get(\"value\",\"\")}' for s in page_specs)}")
+        if review_count > 0 and page_rating > 0:
+            lines.append(f"   ⭐ 고객 리뷰 {review_count}건, 평점 {page_rating:.1f}/5 — 인기 이유 글에서 자연스럽게 언급")
+        elif review_count > 0:
+            lines.append(f"   ⭐ 고객 리뷰 {review_count}건 — 인기도 언급 가능")
+        if page_keywords:
+            lines.append(f"   🔑 페이지 키워드: {', '.join(page_keywords)}")
 
     lines += [
         "",
-        "【작성 조건】",
-        "- 네이버 블로그용 글, 약 1500~2000자",
-        "- SEO를 고려한 제목 후보 3가지 제시",
-        "- 소제목(##) 활용해서 상품별 섹션 구성",
-        "- 독자가 매장 방문이나 상담을 자연스럽게 고려하게 유도",
-        "- 과장 없이 실용적인 정보 위주로 작성",
-        "- 마지막에 상담 유도 문구 포함",
-        "",
-        "【출력 형식】 (아래 구분선 형식 그대로 사용해줘)",
+        "【출력 형식】 (아래 구분선 그대로 사용)",
         "=== 제목 후보 ===",
-        "1. (제목)",
-        "2. (제목)",
-        "3. (제목)",
+        "1. (SEO 키워드 포함, 클릭하고 싶은 제목)",
+        "2. (다른 각도의 제목)",
+        "3. (감성 또는 정보형 제목)",
         "",
         "=== 본문 ===",
-        "(내용)",
+        "(도입부 → ## 소제목1 → ## 소제목2 → ## 소제목3 → 마무리, 1800~2200자)",
         "",
         "=== 상담 유도 문구 ===",
-        "(내용)",
+        "(글 마지막 또는 댓글용, 자연스럽게 방문/문의 유도 1~2문장)",
+        "",
+        "=== SEO 메모 ===",
+        "- 핵심 키워드: (사용된 주요 키워드 나열)",
+        "- 자연 삽입 횟수: (키워드별 등장 횟수)",
+        "- 예상 독자 체류 시간: (읽기 시간 추정)",
     ]
     return "\n".join(lines)
 
