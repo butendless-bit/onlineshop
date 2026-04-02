@@ -103,6 +103,32 @@ def api_categories():
     ])
 
 
+# ── API: DB 디버그 (임시) ──────────────────────────────────────────────────────
+@app.route("/api/debug-db")
+def api_debug_db():
+    from config import DB_PATH, DB_SEED
+    from database import _db_has_products
+    import sqlite3
+    result = {
+        "DB_PATH": DB_PATH,
+        "DB_SEED": DB_SEED,
+        "seed_exists": os.path.exists(DB_SEED),
+        "seed_size": os.path.getsize(DB_SEED) if os.path.exists(DB_SEED) else 0,
+        "seed_has_products": _db_has_products(DB_SEED),
+        "target_exists": os.path.exists(DB_PATH),
+        "target_size": os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0,
+        "target_has_products": _db_has_products(DB_PATH),
+    }
+    if result["target_exists"]:
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            result["target_products"] = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+            conn.close()
+        except Exception as e:
+            result["target_error"] = str(e)
+    return jsonify(result)
+
+
 # ── API: 크롤러 상태 ───────────────────────────────────────────────────────────
 @app.route("/api/status")
 def api_status():
