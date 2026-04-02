@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const downloadBtn = document.getElementById('download-creative-btn');
   const TASK_NAME = 'creative';
 
+  let campaignData = null;
   let renderedCards = [];
-  const BRAND_PATTERN = /^(LG|삼성|Samsung|SAMSUNG|위니아|캐리어|Carrier|대우|코웨이|쿠쿠|Apple|애플|SK|하이얼|Haier|다이슨|Dyson)/i;
 
   function postTaskStatus(status, message = '') {
     if (window.self !== window.top) {
@@ -29,6 +29,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replaceAll("'", '&#39;');
   }
 
+  /** "40만원대~" 형식 — 예전 시안 스타일 */
+  function formatPriceCreative(product) {
+    const value = Number(
+      product.benefit_price || product.benefitPrice ||
+      product.sale_price   || product.salePrice    ||
+      product.price        || 0
+    );
+    if (!value) return '가격 문의';
+    const manwon = Math.floor(value / 10000);
+    return `${manwon}만원대~`;
+  }
+
   async function ensureCampaign() {
     const campaign = app.getCampaign();
     if (!campaign?.id) {
@@ -36,48 +48,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.self === window.top) window.location.href = '/promo';
       return null;
     }
-
-    const result = await app.apiFetch(`/api/promo/campaign/${campaign.id}`);
-    app.setCampaign(result);
-    return result;
+    // 로컬에 상품 데이터 있으면 API 호출 생략 (Vercel 인스턴스 분리 문제 회피)
+    if (campaign.products?.length) {
+      app.setCampaign(campaign);
+      campaignData = campaign;
+      return campaign;
+    }
+    try {
+      const result = await app.apiFetch(`/api/promo/campaign/${campaign.id}`);
+      app.setCampaign(result);
+      campaignData = result;
+      return result;
+    } catch {
+      campaignData = campaign;
+      return campaign;
+    }
   }
 
-  function getBrandLabel(product) {
-    const name = String(product.product_name || '');
-    const match = name.match(BRAND_PATTERN);
-    if (match?.[1]) return match[1].replace(/^Samsung$/i, 'SAMSUNG');
-    return String(product.brand || 'HiMart').trim() || 'HiMart';
-  }
-
-  function getPriceDisplay(product) {
-    const value = Number(
-      product.benefit_price
-      || product.benefitPrice
-      || product.sale_price
-      || product.price
-      || 0
-    );
-    if (!value) return { major: '가격문의', suffix: '' };
-    return { major: value.toLocaleString('ko-KR'), suffix: '원' };
-  }
-
-  function buildCardHtml(product, imageSrc) {
-    const title = escapeHtml(app.getShortProductName(product));
-    const brand = escapeHtml(getBrandLabel(product));
-    const price = getPriceDisplay(product);
+  /** 예전 디자인: 흰 이미지 스테이지 + 검정 상품명 + 빨간 가격 바 */
+  function buildCardHtml(product) {
+    const imageSrc = app.getPreferredImage(product);
+    const title    = escapeHtml(app.getShortProductName(product));
+    const price    = escapeHtml(formatPriceCreative(product));
 
     return `
-      <article class="creative-square price">
-        <div class="creative-brand-top">${brand}</div>
-        <div class="creative-oval-stage">
-          ${imageSrc ? `<img src="${imageSrc}" alt="${title}" loading="eager" crossorigin="anonymous">` : `<div class="creative-image-fallback">H</div>`}
+      <article class="creative-square creative-square-remade">
+        <div class="creative-remade-image-stage">
+          ${imageSrc
+            ? `<img src="${imageSrc}" alt="${title}" loading="eager" crossorigin="anonymous">`
+            : `<div class="creative-image-fallback">H</div>`}
         </div>
-        <p class="creative-short-name">${title}</p>
-        <div class="creative-price-pill">
-          <div class="creative-price-band">
-            <span class="creative-price-major">${escapeHtml(price.major)}</span>
-            ${price.suffix ? `<span class="creative-price-suffix">${escapeHtml(price.suffix)}</span>` : ''}
-          </div>
+        <div class="creative-remade-title">${title}</div>
+        <div class="creative-remade-price-stage">
+          <span class="creative-remade-price-text">${price}</span>
         </div>
       </article>
     `;
@@ -88,17 +91,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderedCards = [];
 
     for (const product of products || []) {
-      const imageSrc = await app.getRenderableImageSrc(app.getPreferredImage(product));
       const wrapper = document.createElement('div');
-      wrapper.innerHTML = buildCardHtml(product, imageSrc);
+      wrapper.innerHTML = buildCardHtml(product);
       const card = wrapper.firstElementChild;
       preview.appendChild(card);
       renderedCards.push(card);
     }
 
     await Promise.all(renderedCards.map((card) => app.waitForImages(card)));
-    empty.style.display = renderedCards.length ? 'none' : 'block';
-    preview.style.display = renderedCards.length ? 'grid' : 'none';
+    empty.style.display   = renderedCards.length ? 'none'  : 'block';
+    preview.style.display = renderedCards.length ? 'grid'  : 'none';
     requestAnimationFrame(postFrameHeight);
   }
 
@@ -110,13 +112,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           method: 'POST',
           body: JSON.stringify({
             product_id: product.product_id || product.model_no,
-            image_url: product.image_url,
-            force: false,
+            image_url:  product.image_url,
+            force:      false,
           }),
         });
         app.saveCutout(product.product_id || product.model_no, result);
       } catch {
-        // 누끼 실패 시 원본 이미지를 그대로 사용
+        // 누끼 실패 시 원본 이미지 사용
       }
     }
   }
@@ -131,11 +133,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const response = await app.apiFetch('/api/promo/generate-creative', {
       method: 'POST',
       body: JSON.stringify({
-        campaign_id: campaign.id,
-        style: '행사형',
-        tone: '행사 강조',
-        price_display: '혜택가',
-        layout: '상품별 1장씩',
+        campaign_id:        campaign.id,
+        style:              '행사형',
+        tone:               '행사 강조',
+        price_display:      '혜택가',
+        layout:             '상품별 1장씩',
+        // Vercel DB miss 시 fallback
+        products:           campaign.products || [],
+        event_title:        campaign.event_title || '',
+        campaign_name:      campaign.campaign_name || '',
+        store_name:         campaign.store_name || '',
+        phone:              campaign.phone || '',
+        kakao_channel_url:  campaign.kakao_channel_url || '',
       }),
     });
 
@@ -156,14 +165,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = renderedCards[i];
       await app.waitForImages(card);
       const canvas = await html2canvas(card, {
-        scale: 2,
+        scale:           2,
         backgroundColor: null,
-        useCORS: true,
-        allowTaint: false,
+        useCORS:         true,
+        allowTaint:      false,
       });
       const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
-      link.download = `promo_creative_${i + 1}.png`;
+      link.href      = canvas.toDataURL('image/png');
+      link.download  = `promo_creative_${i + 1}.png`;
       link.click();
       if (i < renderedCards.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, 300));
@@ -179,7 +188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campaign = await ensureCampaign();
     if (!campaign) return;
 
-    const saved = app.getCreativeResult();
+    const saved         = app.getCreativeResult();
     const savedProducts = saved?.payload?.products || [];
     if (savedProducts.length) {
       await ensureCutouts(savedProducts);

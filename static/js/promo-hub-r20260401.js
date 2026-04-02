@@ -210,11 +210,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       const creativeResult = await app.apiFetch('/api/promo/generate-creative', {
         method: 'POST',
         body: JSON.stringify({
-          campaign_id: campaign.id,
-          style: '행사형',
-          tone: '행사 강조',
-          price_display: '혜택가',
-          layout: '상품별 1장',
+          campaign_id:       campaign.id,
+          style:             '행사형',
+          tone:              '행사 강조',
+          price_display:     '혜택가',
+          layout:            '상품별 1장',
+          // Vercel 인스턴스 분리 대응: DB miss 시 payload fallback
+          products:          campaign.products || [],
+          event_title:       campaign.event_title || '',
+          campaign_name:     campaign.campaign_name || '',
+          store_name:        campaign.store_name || '',
+          phone:             campaign.phone || '',
+          kakao_channel_url: campaign.kakao_channel_url || '',
         }),
       });
       app.setCreativeResult(creativeResult);
