@@ -839,7 +839,8 @@ def generate_blog_prompt(payload: dict[str, Any]) -> str:
         for b in bullets:
             lines.append(f"   · {b}")
         if page_specs:
-            lines.append(f"   📊 주요 스펙: {' / '.join(f'{s.get(\"name\",\"\")}:{s.get(\"value\",\"\")}' for s in page_specs)}")
+            spec_text = " / ".join(str(s.get("name", "")) + ":" + str(s.get("value", "")) for s in page_specs)
+            lines.append(f"   📊 주요 스펙: {spec_text}")
         if review_count > 0 and page_rating > 0:
             lines.append(f"   ⭐ 고객 리뷰 {review_count}건, 평점 {page_rating:.1f}/5 — 인기 이유 글에서 자연스럽게 언급")
         elif review_count > 0:
