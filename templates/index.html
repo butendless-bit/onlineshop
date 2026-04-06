@@ -232,11 +232,11 @@
     white-space: nowrap; position: relative; top: -1px;
   }
   .sub-bene-text {
-    font-size: 15px; flex: 1; line-height: 1.5; color: #111;
+    font-size: 21px; font-weight: 700; flex: 1; line-height: 1.5; color: #111;
     word-break: keep-all; overflow-wrap: break-word;
   }
   .sub-bene-sub {
-    padding-left: 20px; font-size: 13px; color: #555;
+    padding-left: 20px; font-size: 18px; font-weight: 700; color: #444;
     margin-top: 4px; line-height: 1.5;
     word-break: keep-all; overflow-wrap: break-word;
   }
@@ -264,6 +264,7 @@
   .sub-price-orig { font-size: 12px; color: #888; text-align: right; }
   .sub-price-main {
     padding: 0px 16px 14px;
+    margin-top: -2px;
     display: flex; align-items: baseline; gap: 4px; justify-content: flex-end;
   }
   .sub-price-prefix { font-size: 18px; font-weight: 700; color: #111; }
@@ -2016,15 +2017,15 @@ async function generateSubscriptionPOP(product) {
         .sub-bene-item:last-child { margin-bottom:0 !important; }
         .sub-bene-row { display:flex !important; align-items:flex-start !important; gap:8px !important; }
         .sub-bene-pill { background:#FFD600 !important; color:#111 !important; font-size:14px !important; font-weight:700 !important; padding:3px 8px !important; border-radius:4px !important; flex-shrink:0 !important; white-space:nowrap !important; position:relative !important; top:-1px !important; }
-        .sub-bene-text { font-size:15px !important; flex:1 !important; line-height:1.5 !important; color:#111 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
-        .sub-bene-sub { padding-left:20px !important; font-size:13px !important; color:#555 !important; margin-top:4px !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
+        .sub-bene-text { font-size:21px !important; font-weight:700 !important; flex:1 !important; line-height:1.5 !important; color:#111 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
+        .sub-bene-sub { padding-left:20px !important; font-size:18px !important; font-weight:700 !important; color:#444 !important; margin-top:4px !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
         .sub-price-zone { flex-shrink:0 !important; border:2px solid #FFD600 !important; border-radius:10px !important; margin:16px !important; background:#fff !important; }
         .sub-price-header { background:#2E7D32 !important; padding:9px 16px 10px !important; }
         .sub-price-cond { color:#fff !important; font-size:18px !important; font-weight:700 !important; }
         .sub-price-mid { padding:9px 16px 6px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
         .sub-disc-badge { background:#E8003D !important; color:#fff !important; font-size:16px !important; font-weight:700 !important; padding:10px 20px !important; border-radius:6px !important; word-break:keep-all !important; }
         .sub-price-orig { font-size:12px !important; color:#888 !important; text-align:right !important; }
-        .sub-price-main { padding:0px 16px 14px !important; display:flex !important; align-items:baseline !important; gap:4px !important; justify-content:flex-end !important; }
+        .sub-price-main { padding:0px 16px 14px !important; margin-top:-2px !important; display:flex !important; align-items:baseline !important; gap:4px !important; justify-content:flex-end !important; }
         .sub-price-prefix { font-size:18px !important; font-weight:700 !important; color:#111 !important; }
         .sub-price-big { font-size:58px !important; font-weight:900 !important; color:#111 !important; letter-spacing:-1px !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
         .sub-price-suffix { font-size:26px !important; font-weight:700 !important; color:#111 !important; }
