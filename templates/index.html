@@ -136,12 +136,12 @@
   html, body { margin: 0; padding: 0; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
 
-  /* ── 구독 POP 카드 (A5 고정 560x792) ── */
-  /* ━━━ 구독 POP 카드 — 완전 재설계 (height:auto, overflow 없음) ━━━ */
+  /* ── 구독 POP 카드 — A5 고정 (595×842px) ── */
   #pop-card-subscription {
     position: fixed; left: -9999px; top: 0;
     width: 595px;
-    height: auto;
+    height: 842px;
+    overflow: hidden;
     font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
     display: flex; flex-direction: column;
     background: #fff;
@@ -1958,21 +1958,20 @@ async function generateSubscriptionPOP(product) {
 
   const card = document.getElementById('pop-card-subscription');
   const W = 595;
+  const H = 842; // A5 고정 높이
 
-  // height:auto — 실제 렌더 높이를 측정
+  // A5 고정 크기로 배치
   card.style.position = 'fixed';
   card.style.left = '0';
   card.style.top = '0';
   card.style.zIndex = '-1';
   card.style.width = `${W}px`;
-  card.style.height = 'auto';
-  card.style.maxHeight = '';
-  card.style.overflow = 'visible';
+  card.style.height = `${H}px`;
+  card.style.overflow = 'hidden';
 
   // 폰트 완전 로딩 대기 → 글자간격 일관성 보장
   await document.fonts.ready;
   await new Promise(r => setTimeout(r, 100));
-  const H = card.scrollHeight;
 
   const canvas = await html2canvas(card, {
     scale: 2,
@@ -1984,7 +1983,7 @@ async function generateSubscriptionPOP(product) {
       const cc = clonedDoc.getElementById('pop-card-subscription');
       cc.style.cssText = `
         position: absolute !important; left: 0 !important; top: 0 !important;
-        width: 595px !important; height: auto !important;
+        width: 595px !important; height: 842px !important; overflow: hidden !important;
         display: flex !important; flex-direction: column !important;
         background: #fff !important;
         font-family: 'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif !important;
