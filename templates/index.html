@@ -226,9 +226,9 @@
   .sub-bene-item:last-child { margin-bottom: 0; }
   .sub-bene-row { display: flex; align-items: flex-start; gap: 8px; }
   .sub-bene-pill {
-    color: #E8003D;
-    font-size: 19px; font-weight: 800;
-    flex-shrink: 0;
+    background: #FFD600; color: #111;
+    font-size: 14px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px; flex-shrink: 0;
     white-space: nowrap;
   }
   .sub-bene-text {
@@ -256,8 +256,9 @@
     display: flex; justify-content: space-between; align-items: center;
   }
   .sub-disc-badge {
-    color: #E8003D;
-    font-size: 22px; font-weight: 900;
+    background: #E8003D; color: #fff;
+    font-size: 16px; font-weight: 700;
+    padding: 10px 20px; border-radius: 6px;
     word-break: keep-all;
   }
   .sub-price-orig { font-size: 12px; color: #888; text-align: right; }
@@ -516,6 +517,10 @@
   <div class="sub-hdr">
     <div class="sub-hdr-top">
       <span class="sub-hdr-tagline">가전이 쉬워지는 곳</span>
+      <div class="sub-hdr-logo">
+        <div class="sub-hdr-logo-circle">L</div>
+        <span class="sub-hdr-logo-text">LOTTE HIMART</span>
+      </div>
     </div>
     <div class="sub-main-title">온라인 구독 BEST 상품</div>
     <div id="sub-period-dates" class="sub-period-dates"></div>
@@ -1994,7 +1999,9 @@ async function generateSubscriptionPOP(product) {
         .sub-hdr { flex-shrink:0 !important; background:#2E7D32 !important; width:100% !important; padding:12px 20px 18px !important; display:flex !important; flex-direction:column !important; }
         .sub-hdr-top { display:flex !important; align-items:center !important; justify-content:space-between !important; margin-bottom:10px !important; }
         .sub-hdr-tagline { font-size:11px !important; color:#fff !important; font-weight:400 !important; }
-        .sub-hdr-logo { display:none !important; }
+        .sub-hdr-logo { display:flex !important; align-items:center !important; gap:6px !important; }
+        .sub-hdr-logo-circle { width:18px !important; height:18px !important; border-radius:50% !important; background:#e60012 !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:9px !important; font-weight:900 !important; color:#fff !important; line-height:1 !important; }
+        .sub-hdr-logo-text { font-size:13px !important; font-weight:700 !important; color:#fff !important; letter-spacing:0.5px !important; }
         .sub-main-title { font-size:52px !important; font-weight:900 !important; color:#fff !important; letter-spacing:-1px !important; line-height:1.1 !important; text-align:center !important; white-space:nowrap !important; }
         .sub-period-dates { font-size:18px !important; color:#fff !important; font-weight:500 !important; margin-top:4px !important; text-align:center !important; }
         .sub-prod-row { display:flex !important; flex-direction:row !important; align-items:flex-start !important; gap:16px !important; padding:20px !important; flex-shrink:0 !important; }
@@ -2014,14 +2021,14 @@ async function generateSubscriptionPOP(product) {
         .sub-bene-item { display:flex !important; flex-direction:column !important; margin-bottom:8px !important; }
         .sub-bene-item:last-child { margin-bottom:0 !important; }
         .sub-bene-row { display:flex !important; align-items:flex-start !important; gap:8px !important; }
-        .sub-bene-pill { color:#E8003D !important; font-size:19px !important; font-weight:800 !important; flex-shrink:0 !important; white-space:nowrap !important; }
+        .sub-bene-pill { background:#FFD600 !important; color:#111 !important; font-size:14px !important; font-weight:700 !important; padding:3px 8px !important; border-radius:4px !important; flex-shrink:0 !important; white-space:nowrap !important; }
         .sub-bene-text { font-size:15px !important; flex:1 !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
         .sub-bene-sub { padding-left:20px !important; font-size:13px !important; color:#555 !important; margin-top:4px !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
         .sub-price-zone { flex-shrink:0 !important; border:2px solid #FFD600 !important; border-radius:10px !important; margin:16px !important; background:#fff !important; }
         .sub-price-header { background:#2E7D32 !important; padding:10px 16px !important; }
         .sub-price-cond { color:#fff !important; font-size:18px !important; font-weight:700 !important; }
         .sub-price-mid { padding:10px 16px 6px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
-        .sub-disc-badge { color:#E8003D !important; font-size:22px !important; font-weight:900 !important; word-break:keep-all !important; }
+        .sub-disc-badge { background:#E8003D !important; color:#fff !important; font-size:16px !important; font-weight:700 !important; padding:10px 20px !important; border-radius:6px !important; word-break:keep-all !important; }
         .sub-price-orig { font-size:12px !important; color:#888 !important; text-align:right !important; }
         .sub-price-main { padding:2px 16px 14px !important; display:flex !important; align-items:baseline !important; gap:4px !important; }
         .sub-price-prefix { font-size:16px !important; font-weight:700 !important; color:#111 !important; }
