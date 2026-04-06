@@ -243,11 +243,12 @@
 
   /* ④ 가격 박스 — 텍스트 영역 overflow:hidden 없음 */
   .sub-price-zone {
-    flex-shrink: 0;
+    flex: 1;
     border: 2px solid #FFD600;
     border-radius: 10px;
-    margin: 6px 16px 16px;
+    margin: 6px 16px 6px;
     background: #fff;
+    display: flex; flex-direction: column;
   }
   .sub-price-header { background: #2E7D32; padding: 0 16px; display: flex; align-items: center; min-height: 44px; }
   .sub-price-cond { color: #fff; font-size: 18px; font-weight: 700; }
@@ -264,7 +265,7 @@
   }
   .sub-price-orig { font-size: 12px; color: #888; text-align: right; }
   .sub-price-main {
-    padding: 0px 16px 90px;
+    padding: 0px 16px 14px;
     display: flex; align-items: baseline; gap: 4px; justify-content: flex-end;
   }
   .sub-price-prefix { font-size: 18px; font-weight: 700; color: #111; }
@@ -2019,13 +2020,13 @@ async function generateSubscriptionPOP(product) {
         .sub-bene-pill { background:#FFD600 !important; color:#111 !important; font-size:14px !important; font-weight:700 !important; padding:3px 8px !important; border-radius:4px !important; flex-shrink:0 !important; white-space:nowrap !important; }
         .sub-bene-text { font-size:21px !important; font-weight:700 !important; flex:1 !important; line-height:1.5 !important; color:#111 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
         .sub-bene-sub { padding-left:20px !important; font-size:18px !important; font-weight:700 !important; color:#444 !important; margin-top:4px !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
-        .sub-price-zone { flex-shrink:0 !important; border:2px solid #FFD600 !important; border-radius:10px !important; margin:6px 16px 16px !important; background:#fff !important; }
+        .sub-price-zone { flex:1 !important; border:2px solid #FFD600 !important; border-radius:10px !important; margin:6px 16px 6px !important; background:#fff !important; display:flex !important; flex-direction:column !important; }
         .sub-price-header { background:#2E7D32 !important; padding:0 16px !important; display:flex !important; align-items:center !important; min-height:44px !important; }
         .sub-price-cond { color:#fff !important; font-size:18px !important; font-weight:700 !important; }
         .sub-price-mid { padding:6px 16px 4px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
         .sub-disc-badge { background:#E8003D !important; color:#fff !important; font-size:16px !important; font-weight:700 !important; padding:0 !important; min-height:44px !important; min-width:160px !important; border-radius:6px !important; word-break:keep-all !important; display:flex !important; align-items:center !important; justify-content:center !important; }
         .sub-price-orig { font-size:12px !important; color:#888 !important; text-align:right !important; }
-        .sub-price-main { padding:0px 16px 90px !important; display:flex !important; align-items:baseline !important; gap:4px !important; justify-content:flex-end !important; }
+        .sub-price-main { padding:0px 16px 14px !important; display:flex !important; align-items:baseline !important; gap:4px !important; justify-content:flex-end !important; }
         .sub-price-prefix { font-size:18px !important; font-weight:700 !important; color:#111 !important; }
         .sub-price-big { font-size:58px !important; font-weight:900 !important; color:#111 !important; letter-spacing:-1px !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
         .sub-price-suffix { font-size:26px !important; font-weight:700 !important; color:#111 !important; }
