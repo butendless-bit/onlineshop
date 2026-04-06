@@ -177,7 +177,7 @@
   }
   .sub-period-dates {
     font-size: 18px; color: #fff; font-weight: 500;
-    margin-top: 4px; text-align: center;
+    margin-top: 5px; text-align: center;
   }
 
   /* ② 제품 정보 행 — height 고정 없음 */
@@ -229,10 +229,10 @@
     background: #FFD600; color: #111;
     font-size: 14px; font-weight: 700;
     padding: 3px 8px; border-radius: 4px; flex-shrink: 0;
-    white-space: nowrap;
+    white-space: nowrap; position: relative; top: -1px;
   }
   .sub-bene-text {
-    font-size: 15px; flex: 1; line-height: 1.5;
+    font-size: 15px; flex: 1; line-height: 1.5; color: #111;
     word-break: keep-all; overflow-wrap: break-word;
   }
   .sub-bene-sub {
@@ -249,10 +249,10 @@
     margin: 16px;
     background: #fff;
   }
-  .sub-price-header { background: #2E7D32; padding: 10px 16px; }
+  .sub-price-header { background: #2E7D32; padding: 9px 16px 10px; }
   .sub-price-cond { color: #fff; font-size: 18px; font-weight: 700; }
   .sub-price-mid {
-    padding: 10px 16px 6px;
+    padding: 9px 16px 6px;
     display: flex; justify-content: space-between; align-items: center;
   }
   .sub-disc-badge {
@@ -263,16 +263,16 @@
   }
   .sub-price-orig { font-size: 12px; color: #888; text-align: right; }
   .sub-price-main {
-    padding: 2px 16px 14px;
-    display: flex; align-items: baseline; gap: 4px;
+    padding: 0px 16px 14px;
+    display: flex; align-items: baseline; gap: 4px; justify-content: flex-end;
   }
-  .sub-price-prefix { font-size: 16px; font-weight: 700; color: #111; }
+  .sub-price-prefix { font-size: 18px; font-weight: 700; color: #111; }
   .sub-price-big {
-    font-size: 52px; font-weight: 900; color: #111;
+    font-size: 58px; font-weight: 900; color: #111;
     letter-spacing: -1px; line-height: 1;
     font-variant-numeric: tabular-nums;
   }
-  .sub-price-suffix { font-size: 24px; font-weight: 700; color: #111; }
+  .sub-price-suffix { font-size: 26px; font-weight: 700; color: #111; }
 
   /* ⑤ 주석 */
   .sub-disclaimer { flex-shrink: 0; padding: 8px 16px 12px; }
@@ -1969,7 +1969,9 @@ async function generateSubscriptionPOP(product) {
   card.style.maxHeight = '';
   card.style.overflow = 'visible';
 
-  await new Promise(r => setTimeout(r, 200));
+  // 폰트 완전 로딩 대기 → 글자간격 일관성 보장
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 100));
   const H = card.scrollHeight;
 
   const canvas = await html2canvas(card, {
@@ -1990,14 +1992,13 @@ async function generateSubscriptionPOP(product) {
       `;
       const style = clonedDoc.createElement('style');
       style.textContent = `
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap');
         #pop-card-subscription * { font-family:'Noto Sans KR','Apple SD Gothic Neo',system-ui,sans-serif !important; -webkit-font-smoothing:antialiased; box-sizing:border-box !important; }
         .sub-hdr { flex-shrink:0 !important; background:#2E7D32 !important; width:100% !important; padding:12px 20px 18px !important; display:flex !important; flex-direction:column !important; }
         .sub-hdr-top { display:flex !important; align-items:center !important; justify-content:space-between !important; margin-bottom:10px !important; }
         .sub-hdr-tagline { font-size:11px !important; color:#fff !important; font-weight:400 !important; }
         .sub-hdr-logo { display:none !important; }
         .sub-main-title { font-size:52px !important; font-weight:900 !important; color:#fff !important; letter-spacing:-1px !important; line-height:1.1 !important; text-align:center !important; white-space:nowrap !important; }
-        .sub-period-dates { font-size:18px !important; color:#fff !important; font-weight:500 !important; margin-top:4px !important; text-align:center !important; }
+        .sub-period-dates { font-size:18px !important; color:#fff !important; font-weight:500 !important; margin-top:5px !important; text-align:center !important; }
         .sub-prod-row { display:flex !important; flex-direction:row !important; align-items:flex-start !important; gap:16px !important; padding:20px !important; flex-shrink:0 !important; }
         .sub-img-col { width:200px !important; flex-shrink:0 !important; }
         .sub-product-img { width:100% !important; height:auto !important; object-fit:contain !important; display:block !important; }
@@ -2015,19 +2016,19 @@ async function generateSubscriptionPOP(product) {
         .sub-bene-item { display:flex !important; flex-direction:column !important; margin-bottom:8px !important; }
         .sub-bene-item:last-child { margin-bottom:0 !important; }
         .sub-bene-row { display:flex !important; align-items:flex-start !important; gap:8px !important; }
-        .sub-bene-pill { background:#FFD600 !important; color:#111 !important; font-size:14px !important; font-weight:700 !important; padding:3px 8px !important; border-radius:4px !important; flex-shrink:0 !important; white-space:nowrap !important; }
-        .sub-bene-text { font-size:15px !important; flex:1 !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
+        .sub-bene-pill { background:#FFD600 !important; color:#111 !important; font-size:14px !important; font-weight:700 !important; padding:3px 8px !important; border-radius:4px !important; flex-shrink:0 !important; white-space:nowrap !important; position:relative !important; top:-1px !important; }
+        .sub-bene-text { font-size:15px !important; flex:1 !important; line-height:1.5 !important; color:#111 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
         .sub-bene-sub { padding-left:20px !important; font-size:13px !important; color:#555 !important; margin-top:4px !important; line-height:1.5 !important; word-break:keep-all !important; overflow-wrap:break-word !important; }
         .sub-price-zone { flex-shrink:0 !important; border:2px solid #FFD600 !important; border-radius:10px !important; margin:16px !important; background:#fff !important; }
-        .sub-price-header { background:#2E7D32 !important; padding:10px 16px !important; }
+        .sub-price-header { background:#2E7D32 !important; padding:9px 16px 10px !important; }
         .sub-price-cond { color:#fff !important; font-size:18px !important; font-weight:700 !important; }
-        .sub-price-mid { padding:10px 16px 6px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
+        .sub-price-mid { padding:9px 16px 6px !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
         .sub-disc-badge { background:#E8003D !important; color:#fff !important; font-size:16px !important; font-weight:700 !important; padding:10px 20px !important; border-radius:6px !important; word-break:keep-all !important; }
         .sub-price-orig { font-size:12px !important; color:#888 !important; text-align:right !important; }
-        .sub-price-main { padding:2px 16px 14px !important; display:flex !important; align-items:baseline !important; gap:4px !important; }
-        .sub-price-prefix { font-size:16px !important; font-weight:700 !important; color:#111 !important; }
-        .sub-price-big { font-size:52px !important; font-weight:900 !important; color:#111 !important; letter-spacing:-1px !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
-        .sub-price-suffix { font-size:24px !important; font-weight:700 !important; color:#111 !important; }
+        .sub-price-main { padding:0px 16px 14px !important; display:flex !important; align-items:baseline !important; gap:4px !important; justify-content:flex-end !important; }
+        .sub-price-prefix { font-size:18px !important; font-weight:700 !important; color:#111 !important; }
+        .sub-price-big { font-size:58px !important; font-weight:900 !important; color:#111 !important; letter-spacing:-1px !important; line-height:1 !important; font-variant-numeric:tabular-nums !important; }
+        .sub-price-suffix { font-size:26px !important; font-weight:700 !important; color:#111 !important; }
         .sub-disclaimer { flex-shrink:0 !important; padding:8px 16px 12px !important; }
         .sub-disclaimer p { font-size:10px !important; color:#888 !important; line-height:1.6 !important; word-break:keep-all !important; }
       `;
