@@ -102,15 +102,20 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_prod_category  ON products(category);
             CREATE INDEX IF NOT EXISTS idx_prod_url       ON products(product_url);
         """)
-        # review_count 컬럼 — 기존 DB에 없을 수 있으므로 안전하게 추가
-        try:
-            conn.execute("ALTER TABLE products ADD COLUMN review_count INTEGER DEFAULT 0")
-        except Exception:
-            pass  # 이미 존재하면 무시
-        try:
-            conn.execute("ALTER TABLE products ADD COLUMN spec TEXT DEFAULT '{}'")
-        except Exception:
-            pass  # 이미 존재하면 무시
+        # 기존 DB에 없을 수 있는 컬럼 안전 추가
+        for col_sql in [
+            "ALTER TABLE products ADD COLUMN review_count INTEGER DEFAULT 0",
+            "ALTER TABLE products ADD COLUMN spec TEXT DEFAULT '{}'",
+            "ALTER TABLE products ADD COLUMN is_active INTEGER DEFAULT 1",
+            "ALTER TABLE products ADD COLUMN goods_no TEXT DEFAULT ''",
+            "ALTER TABLE products ADD COLUMN last_seen_at DATETIME DEFAULT CURRENT_TIMESTAMP",
+        ]:
+            try:
+                conn.execute(col_sql)
+            except Exception:
+                pass  # 이미 존재하면 무시
+        # is_active 인덱스
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_prod_active ON products(is_active)")
         for col_sql in [
             "ALTER TABLE subscription_products ADD COLUMN care_plan TEXT",
             "ALTER TABLE subscription_products ADD COLUMN card_benefit_monthly INTEGER",
@@ -135,18 +140,23 @@ def init_db():
     print(f"[DB] 초기화 완료 → {DB_PATH}")
 
 
-def upsert_product(model_no, product_name, category, product_url, image_url, spec="{}"):
+def upsert_product(model_no, product_name, category, product_url, image_url,
+                    spec="{}", goods_no="", is_active=1):
     with get_conn() as conn:
         conn.execute("""
-            INSERT INTO products (model_no, product_name, category, product_url, image_url, spec)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO products (model_no, product_name, category, product_url, image_url,
+                                  spec, goods_no, is_active, last_seen_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(model_no) DO UPDATE SET
                 product_name = excluded.product_name,
                 product_url  = excluded.product_url,
                 image_url    = excluded.image_url,
                 spec         = excluded.spec,
+                goods_no     = excluded.goods_no,
+                is_active    = excluded.is_active,
+                last_seen_at = CURRENT_TIMESTAMP,
                 updated_at   = CURRENT_TIMESTAMP
-        """, (model_no, product_name, category, product_url, image_url, spec))
+        """, (model_no, product_name, category, product_url, image_url, spec, goods_no, is_active))
 
 
 def insert_price(model_no, original_price, sale_price, benefit_price):
@@ -179,10 +189,11 @@ def get_latest_prices(category=None):
         FROM products p
         JOIN latest l ON l.model_no = p.model_no AND l.rn = 1
         LEFT JOIN prev  ON prev.model_no = p.model_no AND prev.rn = 1
+        WHERE p.is_active = 1
     """
     params = []
     if category:
-        sql += " WHERE p.category = ?"
+        sql += " AND p.category = ?"
         params.append(category)
 
     with get_conn() as conn:
@@ -245,6 +256,44 @@ def update_review_count(model_no: str, review_count: int):
             "UPDATE products SET review_count = ? WHERE model_no = ?",
             (review_count, model_no)
         )
+
+
+def mark_unseen_inactive(category: str, seen_model_nos: set):
+    """이번 크롤링에서 발견되지 않은 상품을 판매중지(is_active=0)로 마킹.
+    seen_model_nos: 이번 크롤에서 수집된 model_no 집합.
+    """
+    if not seen_model_nos:
+        return 0
+    with get_conn() as conn:
+        # 해당 카테고리에서 이번에 안 보인 상품만 비활성화
+        placeholders = ",".join("?" * len(seen_model_nos))
+        cur = conn.execute(
+            f"""UPDATE products SET is_active = 0, updated_at = CURRENT_TIMESTAMP
+                WHERE category = ? AND is_active = 1
+                AND model_no NOT IN ({placeholders})""",
+            [category] + list(seen_model_nos),
+        )
+        return cur.rowcount
+
+
+def mark_product_inactive(model_no: str):
+    """개별 상품 판매중지 처리"""
+    with get_conn() as conn:
+        conn.execute(
+            "UPDATE products SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE model_no = ?",
+            (model_no,)
+        )
+
+
+def get_inactive_count(category: str | None = None) -> int:
+    """판매중지 상품 수 조회"""
+    sql = "SELECT COUNT(*) AS c FROM products WHERE is_active = 0"
+    params = []
+    if category:
+        sql += " AND category = ?"
+        params.append(category)
+    with get_conn() as conn:
+        return conn.execute(sql, params).fetchone()["c"]
 
 
 def upsert_competitor_price(model_no: str, naver_price: int):

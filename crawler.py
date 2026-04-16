@@ -1,13 +1,25 @@
 """
-HiMart Crawler — e-himart.co.kr REST API 기반 가격 수집기
-확인된 API: /app/api/v1/search?query={keyword}&pageNo={n}&pageSize=20
+HiMart Crawler — e-himart.co.kr REST API 기반 전체 상품 수집기
+=============================================================
+v2: 끝까지 페이징 + 다중 정렬 + 판매중지 감지
+
+핵심 변경점:
+  1. 키워드별 page_count 제한 제거 → totalCnt 기반 끝까지 페이징
+  2. 다중 정렬(WEIGHT, DATE, PRICE_LOW, PRICE_HIGH) → 정렬별 누락 방지
+  3. goodsEmptyYn / goodsStatSctCd 기반 판매중지 감지
+  4. 크롤 후 안 보인 상품 → is_active=0 자동 마킹
 
 가격 구조:
   priceInfo.salePrc        → 판매가 (행사가)
   priceInfo.dscntSalePrc   → 할인판매가
   priceInfo.maxBenefitPrc  → 최대혜택가 (카드 등 포함 최저가)
   priceInfo.prcPrefix      → null이면 일반 판매 / '월 구독료'이면 렌탈 (제외)
+
+판매 상태:
+  goodsEmptyYn   → "Y"이면 품절/판매중지
+  goodsStatSctCd → "01"이면 정상 판매
 """
+import math
 import time
 import logging
 import os
@@ -22,10 +34,12 @@ import json
 from config import (
     CATEGORIES, CRAWL_DELAY, CRAWL_RETRY, CRAWL_TIMEOUT, USER_AGENT, LOG_PATH,
     CATEGORY_SEARCH_TERMS, SUBSCRIPTION_SEARCH_TERMS,
+    CRAWL_PAGE_SIZE, CRAWL_MAX_PAGES, CRAWL_SORT_ORDERS,
 )
 from database import (
     init_db, upsert_product, insert_price,
     update_review_count, upsert_competitor_price, upsert_subscription_from_crawl,
+    mark_unseen_inactive,
 )
 from spec_extractor import extract_spec
 
@@ -113,22 +127,28 @@ def _make_session() -> requests.Session:
     return session
 
 
-def fetch_products(session: requests.Session, keyword: str, page_no: int) -> list[dict]:
-    """검색 API로 상품 목록 1페이지 가져오기"""
+def fetch_products_page(session: requests.Session, keyword: str, page_no: int,
+                        sort: str = "WEIGHT", page_size: int = CRAWL_PAGE_SIZE
+                        ) -> tuple[list[dict], int]:
+    """검색 API로 상품 목록 1페이지 가져오기.
+    Returns: (상품 리스트, totalCnt)
+    """
     params = {
         "query":    keyword,
         "pageNo":   page_no,
-        "pageSize": 20,
-        "sort":     "POPULAR",
+        "pageSize": page_size,
+        "sort":     sort,
     }
     try:
         resp = session.get(SEARCH_API, params=params, timeout=CRAWL_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("product") or []
+        products = data.get("product") or []
+        total_cnt = int(data.get("totalCnt") or 0)
+        return products, total_cnt
     except Exception as e:
-        log.error(f"[API] 요청 실패 (keyword={keyword}, page={page_no}): {e}")
-        return []
+        log.error(f"[API] 요청 실패 (keyword={keyword}, page={page_no}, sort={sort}): {e}")
+        return [], 0
 
 
 def _is_relevant_product(product_name: str, model_no: str, category_key: str) -> bool:
@@ -146,20 +166,35 @@ def _is_relevant_product(product_name: str, model_no: str, category_key: str) ->
     return any(re.search(pattern, text, re.I) for pattern in include_patterns)
 
 
-def _parse_product(p: dict, category_key: str) -> bool:
-    """상품 1개 파싱 → DB 저장. 성공 시 True 반환."""
+def _is_product_active(p: dict) -> bool:
+    """API 응답에서 판매중지/품절 여부 판단.
+    - goodsEmptyYn == "Y" → 품절
+    - goodsStatSctCd != "01" → 비정상 상태 (판매중지 등)
+    """
+    if p.get("goodsEmptyYn") == "Y":
+        return False
+    stat_cd = p.get("goodsStatSctCd") or "01"
+    if stat_cd not in ("01",):  # 01=정상판매
+        return False
+    return True
+
+
+def _parse_product(p: dict, category_key: str) -> tuple[bool, str | None]:
+    """상품 1개 파싱 → DB 저장.
+    Returns: (저장 성공 여부, model_no or None)
+    """
     try:
         price_info = p.get("priceInfo") or {}
 
         # 렌탈/구독 상품 제외 (월 구독료 상품만 제외)
         if price_info.get("prcPrefix") == "월 구독료":
-            return False
+            return False, None
 
         model_no     = (p.get("mdlNm") or p.get("goodsNo") or "UNKNOWN").strip()
         product_name = (p.get("goodsNm") or "").strip()
         if not _is_relevant_product(product_name, model_no, category_key):
-            log.info(f"[FILTER/{category_key}] skipped irrelevant product: {product_name} ({model_no})")
-            return False
+            return False, None
+
         goods_no     = p.get("goodsNo") or ""
         product_url  = (f"{BASE_URL}/app/goods/goodsDetail?goodsNo={goods_no}"
                         if goods_no else "")
@@ -174,60 +209,124 @@ def _parse_product(p: dict, category_key: str) -> bool:
             benefit_price = original_price
 
         if not original_price:
-            return False
+            return False, None
+
+        # 판매 상태 확인
+        is_active = 1 if _is_product_active(p) else 0
 
         # 스펙 추출 (상품명 + 모델번호)
         spec = extract_spec(product_name, model_no, category_key)
 
-        upsert_product(model_no, product_name, category_key, product_url, image_url, spec)
-        insert_price(model_no, original_price, sale_price, benefit_price)
+        upsert_product(model_no, product_name, category_key, product_url, image_url,
+                        spec, goods_no, is_active)
+
+        # 판매중지 상품이라도 DB에 기록은 하되, 가격은 활성 상품만
+        if is_active:
+            insert_price(model_no, original_price, sale_price, benefit_price)
 
         review_cnt = (p.get("reviewCnt") or p.get("reviewCount")
                       or p.get("rvwCnt") or 0)
         if review_cnt:
             update_review_count(model_no, int(review_cnt))
 
-        return True
+        # 리뷰 점수도 기록
+        gdas = p.get("gdasInfo") or {}
+        if gdas.get("gdasCnt"):
+            update_review_count(model_no, int(gdas["gdasCnt"]))
+
+        return True, model_no
 
     except Exception as e:
         log.debug(f"상품 파싱 오류: {e}")
-        return False
+        return False, None
+
+
+def _crawl_keyword_exhaustive(session: requests.Session, keyword: str,
+                               category_key: str, seen: set,
+                               sort: str = "WEIGHT") -> int:
+    """키워드 1개를 해당 정렬로 끝까지 페이징하여 전체 상품 수집.
+    Returns: 신규 저장 수
+    """
+    cat_name = CATEGORIES[category_key]["name"]
+    count = 0
+
+    # 1페이지 먼저 → totalCnt 확인
+    products, total_cnt = fetch_products_page(session, keyword, 1, sort=sort)
+    if not products:
+        log.info(f"  [{cat_name}] '{keyword}' sort={sort}: 결과 없음")
+        return 0
+
+    max_pages = min(
+        math.ceil(total_cnt / CRAWL_PAGE_SIZE) if total_cnt > 0 else 1,
+        CRAWL_MAX_PAGES,
+    )
+    log.info(f"  [{cat_name}] '{keyword}' sort={sort}: totalCnt={total_cnt}, maxPages={max_pages}")
+
+    # 1페이지 처리
+    for p in products:
+        mn = (p.get("mdlNm") or p.get("goodsNo") or "").strip()
+        if mn in seen:
+            continue
+        seen.add(mn)
+        ok, _ = _parse_product(p, category_key)
+        if ok:
+            count += 1
+
+    # 2페이지부터 끝까지
+    for page_no in range(2, max_pages + 1):
+        time.sleep(CRAWL_DELAY)
+        products, _ = fetch_products_page(session, keyword, page_no, sort=sort)
+        if not products:
+            log.info(f"  [{cat_name}] '{keyword}' sort={sort} page {page_no}: 빈 페이지, 중단")
+            break
+
+        page_new = 0
+        for p in products:
+            mn = (p.get("mdlNm") or p.get("goodsNo") or "").strip()
+            if mn in seen:
+                continue
+            seen.add(mn)
+            ok, _ = _parse_product(p, category_key)
+            if ok:
+                page_new += 1
+                count += 1
+
+        log.info(f"  [{cat_name}] '{keyword}' sort={sort} page {page_no}/{max_pages}: +{page_new}개")
+
+        # 이 페이지에서 신규가 0이면 = 이미 다 수집됨 → 더 긁어도 중복뿐
+        if page_new == 0 and page_no > 3:
+            log.info(f"  [{cat_name}] '{keyword}' sort={sort}: 신규 0, 조기 중단")
+            break
+
+    return count
 
 
 def crawl_category(session: requests.Session, category_key: str) -> int:
-    """카테고리 1개 다중 키워드 크롤링 → DB 저장. 저장된 상품 수 반환."""
+    """카테고리 1개 전체 상품 수집 (다중 키워드 × 다중 정렬).
+    크롤 완료 후 이번에 안 보인 상품은 판매중지(is_active=0) 처리.
+    """
     cat_name  = CATEGORIES[category_key]["name"]
-    terms     = CATEGORY_SEARCH_TERMS.get(category_key, [(CATEGORY_KEYWORDS[category_key], 3)])
-    seen      = set()  # 중복 model_no 방지
+    terms     = CATEGORY_SEARCH_TERMS.get(category_key, [CATEGORY_KEYWORDS[category_key]])
+    seen      = set()   # 중복 model_no 방지 (키워드·정렬 간 글로벌)
     count     = 0
 
-    log.info(f"[{cat_name}] 크롤링 시작 — {len(terms)}개 키워드")
+    log.info(f"{'='*60}")
+    log.info(f"[{cat_name}] 전체 크롤링 시작 — {len(terms)}개 키워드 × {len(CRAWL_SORT_ORDERS)}개 정렬")
+    log.info(f"{'='*60}")
 
-    for keyword, page_count in terms:
-        log.info(f"[{cat_name}] keyword={keyword!r} ({page_count}페이지)")
-
-        for page_no in range(1, page_count + 1):
-            products = fetch_products(session, keyword, page_no)
-            if not products:
-                log.info(f"[{cat_name}] '{keyword}' 페이지 {page_no}: 상품 없음, 중단")
-                break
-
-            saved = 0
-            for p in products:
-                model_no = (p.get("mdlNm") or p.get("goodsNo") or "").strip()
-                if model_no in seen:
-                    continue
-                seen.add(model_no)
-                if _parse_product(p, category_key):
-                    saved += 1
-                    count += 1
-
-            log.info(f"[{cat_name}] '{keyword}' 페이지 {page_no}: {saved}개 신규 저장")
+    for keyword in terms:
+        for sort in CRAWL_SORT_ORDERS:
+            saved = _crawl_keyword_exhaustive(session, keyword, category_key, seen, sort=sort)
+            count += saved
             time.sleep(CRAWL_DELAY)
-
         time.sleep(CRAWL_DELAY)  # 키워드 간 간격
 
-    log.info(f"[{cat_name}] 완료 — 총 {count}개 저장 (중복 제외)")
+    # ── 판매중지 처리: 이번 크롤에서 안 보인 기존 상품 비활성화 ──
+    inactive_cnt = mark_unseen_inactive(category_key, seen)
+    if inactive_cnt:
+        log.info(f"[{cat_name}] ⚠️ 판매중지 처리: {inactive_cnt}개 (이번 크롤에서 미발견)")
+
+    log.info(f"[{cat_name}] ✅ 완료 — 총 {count}개 저장, {len(seen)}개 확인 (중복 포함)")
     return count
 
 
@@ -239,7 +338,6 @@ def fetch_review_count(session: requests.Session, goods_no: str) -> int:
         url = f"{BASE_URL}/app/api/v1/review/summary?goodsNo={goods_no}"
         resp = session.get(url, timeout=8)
         data = resp.json()
-        # 응답 구조: {"totalCount": 123, ...} 또는 {"reviewCount": 123}
         return (data.get("totalCount") or data.get("reviewCount") or
                 data.get("total") or 0)
     except Exception:
@@ -374,13 +472,19 @@ def run_crawler(categories: list | None = None):
     session = _make_session()
     total   = 0
 
-    log.info(f"크롤링 시작 — {len(targets)}개 카테고리")
+    log.info(f"{'#'*60}")
+    log.info(f"크롤링 시작 — {len(targets)}개 카테고리 (pageSize={CRAWL_PAGE_SIZE})")
+    log.info(f"정렬 옵션: {CRAWL_SORT_ORDERS}")
+    log.info(f"{'#'*60}")
+
     for key in targets:
         count = crawl_category(session, key)
         total += count
         time.sleep(CRAWL_DELAY * 2)
 
+    log.info(f"{'#'*60}")
     log.info(f"크롤링 완료 — 총 {total}개 저장 ({datetime.now().strftime('%Y-%m-%d %H:%M')})")
+    log.info(f"{'#'*60}")
     return total
 
 
