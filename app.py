@@ -28,7 +28,7 @@ app.register_blueprint(promo_bp)
 
 def _dispatch_github_actions_crawl():
     token = os.environ.get("GITHUB_ACTIONS_TRIGGER_TOKEN", "").strip()
-    repo = os.environ.get("GITHUB_ACTIONS_REPO", "youngjaelee33333/onlineshop").strip()
+    repo = os.environ.get("GITHUB_ACTIONS_REPO", "butendless-bit/onlineshop").strip()
     workflow = os.environ.get("GITHUB_ACTIONS_WORKFLOW", "daily-crawl.yml").strip()
     ref = os.environ.get("GITHUB_ACTIONS_REF", "main").strip()
 
