@@ -108,7 +108,8 @@ def init_db():
             "ALTER TABLE products ADD COLUMN spec TEXT DEFAULT '{}'",
             "ALTER TABLE products ADD COLUMN is_active INTEGER DEFAULT 1",
             "ALTER TABLE products ADD COLUMN goods_no TEXT DEFAULT ''",
-            "ALTER TABLE products ADD COLUMN last_seen_at DATETIME DEFAULT CURRENT_TIMESTAMP",
+            # SQLite ALTER TABLE은 non-constant DEFAULT(CURRENT_TIMESTAMP) 미지원 → default 없이 추가
+            "ALTER TABLE products ADD COLUMN last_seen_at DATETIME",
         ]:
             try:
                 conn.execute(col_sql)

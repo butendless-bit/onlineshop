@@ -6,6 +6,11 @@ on:
     - cron: "0 23 * * *"
   workflow_dispatch:
 
+# 동시 실행 방지: 진행 중이면 새 요청은 대기 없이 취소
+concurrency:
+  group: daily-crawl
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
