@@ -1,3 +1,30 @@
+/** 캠페인 데이터를 URL 안전 base64로 인코딩 (서버 없이 랜딩 렌더링용) */
+function _encodeCampaignData(campaign) {
+  const slim = {
+    id: campaign.id,
+    event_title: campaign.event_title || '',
+    store_name: campaign.store_name || '',
+    phone: campaign.phone || '',
+    kakao_channel_url: campaign.kakao_channel_url || '',
+    metadata: campaign.metadata || {},
+    products: (campaign.products || []).map((p) => ({
+      model_no: p.model_no || '',
+      product_name: p.product_name || '',
+      product_url: p.product_url || '',
+      image_url: p.image_url || '',
+      category: p.category || '',
+      original_price: p.original_price || 0,
+      benefit_price: p.benefit_price || p.sale_price || 0,
+      sale_price: p.sale_price || 0,
+      spec: p.spec || {},
+    })),
+  };
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(slim))))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch (_) { return ''; }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const app = window.promoApp;
   const DEFAULT_LANDING_TITLE = '온라인 가성비 특가상품 기획전';
@@ -93,23 +120,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       body: JSON.stringify(payload),
     });
 
-    const landingUrl = `${window.location.origin}/promo/${campaign.id}?source=direct`;
     titleInput.value = result.landing?.landing_title || payload.landing_title;
     introInput.value = result.landing?.intro_text || payload.intro_text;
     disclaimerInput.value = result.landing?.disclaimer || payload.disclaimer;
-    urlInput.value = landingUrl;
-    renderQr(landingUrl);
     app.setLandingResult(result);
 
-    // localStorage에 전체 캠페인 + 랜딩 데이터 저장
-    // → 새 탭으로 열어도 API 없이 바로 렌더링 가능 (Vercel 서버리스 인스턴스 불일치 방지)
+    // 캠페인 데이터를 URL에 인코딩 → 서버 DB 불필요, 어디서 열어도 렌더링 가능
+    const fullCampaign = {
+      ...campaign,
+      metadata: { ...(campaign.metadata || {}), landing: result.landing },
+    };
+    const encoded = _encodeCampaignData(fullCampaign);
+    const landingUrl = `${window.location.origin}/promo/${campaign.id}?d=${encoded}`;
+    urlInput.value = landingUrl;
+    renderQr(landingUrl);
+
+    // localStorage 캐시도 병행 저장 (같은 기기 빠른 재사용)
     try {
-      const cacheKey = `himartLandingCache_${campaign.id}`;
-      const cacheData = {
-        ...campaign,
-        metadata: { ...(campaign.metadata || {}), landing: result.landing },
-      };
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+      localStorage.setItem(`himartLandingCache_${campaign.id}`, JSON.stringify(fullCampaign));
     } catch (_) {}
 
     postTaskStatus('done', '완료');

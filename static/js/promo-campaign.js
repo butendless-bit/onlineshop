@@ -14,15 +14,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    // localStorage 캐시 우선 조회 → 없으면 API (Vercel 서버리스 인스턴스 불일치 대응)
+    // 우선순위: 1) URL ?d= 인코딩 데이터 → 2) localStorage → 3) API
     let campaign;
-    try {
-      const cacheKey = `himartLandingCache_${campaignId}`;
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) campaign = JSON.parse(cached);
-    } catch (_) {}
-    if (!campaign) {
-      campaign = await app.apiFetch(`/api/promo/campaign/${campaignId}`);
+
+    // 1) URL에 인코딩된 캠페인 데이터
+    const dParam = params.get('d');
+    if (dParam) {
+      try {
+        const padded = dParam.replace(/-/g, '+').replace(/_/g, '/');
+        const pad = padded.length % 4 ? '='.repeat(4 - padded.length % 4) : '';
+        campaign = JSON.parse(decodeURIComponent(escape(atob(padded + pad))));
+      } catch (_) {}
+    }
+
+    // 2) localStorage 캐시
+    if (!campaign?.products?.length) {
+      try {
+        const cached = localStorage.getItem(`himartLandingCache_${campaignId}`);
+        if (cached) campaign = JSON.parse(cached);
+      } catch (_) {}
+    }
+
+    // 3) API fallback
+    if (!campaign?.products?.length) {
+      try {
+        campaign = await app.apiFetch(`/api/promo/campaign/${campaignId}`);
+      } catch (_) {
+        if (!campaign) throw new Error('랜딩페이지 데이터를 불러올 수 없습니다.');
+      }
     }
 
     const landing = campaign.metadata?.landing || {
