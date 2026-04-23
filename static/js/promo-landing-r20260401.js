@@ -181,8 +181,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       titleInput.value = saved.landing.landing_title || '';
       introInput.value = saved.landing.intro_text || '';
       disclaimerInput.value = saved.landing.disclaimer || '';
-      urlInput.value = `${window.location.origin}/promo/${campaign.id}?source=direct`;
-      renderQr(urlInput.value);
+      // ?d= 인코딩 URL 복원 (서버 DB 불필요, 어디서 열어도 렌더링 가능)
+      const restoredCampaign = {
+        ...campaign,
+        metadata: { ...(campaign.metadata || {}), landing: saved.landing },
+      };
+      const restoredEncoded = _encodeCampaignData(restoredCampaign);
+      const restoredUrl = `${window.location.origin}/promo/${campaign.id}?d=${restoredEncoded}`;
+      urlInput.value = restoredUrl;
+      renderQr(restoredUrl);
       postTaskStatus('done', '완료');
       return;
     }
