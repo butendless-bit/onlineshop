@@ -222,6 +222,16 @@ def api_promo_generate_landing():
         campaign_id = payload.get("campaign_id")
         campaign = get_campaign(campaign_id) if campaign_id else None
         c = campaign or {}
+        # Vercel 인스턴스 불일치 대응: DB에 캠페인 없으면 클라이언트 payload 데이터 사용
+        if not c.get("products") and payload.get("products"):
+            c = {
+                **c,
+                "products": payload["products"],
+                "store_name": payload.get("store_name") or c.get("store_name", STORE_NAME),
+                "phone": payload.get("phone") or c.get("phone", ""),
+                "kakao_channel_url": payload.get("kakao_channel_url") or c.get("kakao_channel_url", ""),
+                "event_title": payload.get("event_title") or c.get("event_title", ""),
+            }
         print(f"[promo] generate_landing campaign_id={campaign_id} products={len(c.get('products', []))}")
         landing_payload = build_landing_payload(payload, c)
         if campaign_id and campaign:

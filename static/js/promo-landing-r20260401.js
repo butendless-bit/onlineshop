@@ -29,8 +29,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.self === window.top) window.location.href = '/promo';
       return null;
     }
-    campaign = await app.apiFetch(`/api/promo/campaign/${saved.id}`);
-    app.setCampaign(campaign);
+    // localStorage에 products가 있으면 API 호출 생략 (Vercel 인스턴스 불일치 대응)
+    if (saved.products?.length) {
+      campaign = saved;
+      return campaign;
+    }
+    // API 시도, 실패 시 localStorage fallback
+    try {
+      campaign = await app.apiFetch(`/api/promo/campaign/${saved.id}`);
+      app.setCampaign(campaign);
+    } catch (_) {
+      campaign = saved;
+    }
     return campaign;
   }
 
@@ -70,6 +80,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         kakao: document.getElementById('show-kakao-cta').checked,
       },
       disclaimer: disclaimerInput.value.trim(),
+      // Vercel 인스턴스 불일치 대응: 클라이언트가 갖고 있는 전체 데이터 전송
+      products: campaign.products || [],
+      store_name: campaign.store_name || '',
+      phone: campaign.phone || '',
+      kakao_channel_url: campaign.kakao_channel_url || '',
+      event_title: campaign.event_title || '',
     };
 
     const result = await app.apiFetch('/api/promo/generate-landing', {
