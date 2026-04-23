@@ -93,6 +93,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     requestAnimationFrame(postFrameHeight);
   }
 
+  /** ?d= 원본 URL → TinyURL 단축 (실패 시 원본 반환) */
+  async function shortenUrl(longUrl) {
+    try {
+      const res = await app.apiFetch('/api/promo/shorten', {
+        method: 'POST',
+        body: JSON.stringify({ url: longUrl }),
+      });
+      return res?.short_url || longUrl;
+    } catch (_) {
+      return longUrl;
+    }
+  }
+
+  /** URL 입력창 + QR 동시 업데이트 (단축 URL 표시, QR은 원본 ?d= 유지) */
+  async function applyLandingUrl(longUrl) {
+    urlInput.dataset.fullUrl = longUrl;
+    renderQr(longUrl);                        // QR은 항상 원본
+    urlInput.value = '단축 URL 생성 중…';
+    const short = await shortenUrl(longUrl);
+    urlInput.value = short;
+  }
+
   async function generateLanding() {
     if (!campaign?.id) return;
 
@@ -138,22 +160,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem(`himartLandingCache_${campaign.id}`, JSON.stringify(fullCampaign));
     } catch (_) {}
 
-    // TinyURL 단축 URL 요청 (실패해도 원본 URL 사용)
     postTaskStatus('processing', '단축 URL 생성 중');
-    let displayUrl = landingUrl;
-    try {
-      const shortened = await app.apiFetch('/api/promo/shorten', {
-        method: 'POST',
-        body: JSON.stringify({ url: landingUrl }),
-      });
-      if (shortened?.short_url) displayUrl = shortened.short_url;
-    } catch (_) {}
-
-    urlInput.value = displayUrl;
-    // 원본 URL(데이터 포함)을 data 속성에 보관 → QR / 실제 이동용
-    urlInput.dataset.fullUrl = landingUrl;
-    renderQr(landingUrl);   // QR은 항상 원본 ?d= URL 사용
-
+    await applyLandingUrl(landingUrl);
     postTaskStatus('done', '완료');
   }
 
@@ -202,8 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
       const restoredEncoded = _encodeCampaignData(restoredCampaign);
       const restoredUrl = `${window.location.origin}/promo/${campaign.id}?d=${restoredEncoded}`;
-      urlInput.value = restoredUrl;
-      renderQr(restoredUrl);
+      await applyLandingUrl(restoredUrl);
       postTaskStatus('done', '완료');
       return;
     }
