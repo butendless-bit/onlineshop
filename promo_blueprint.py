@@ -151,23 +151,31 @@ def api_promo_recommend_campaign():
 @promo_bp.route("/api/promo/recommend-landing", methods=["POST"])
 def api_promo_recommend_landing():
     payload = request.get_json(force=True) or {}
-    campaign_id = payload.get("campaign_id")
-    campaign = get_campaign(campaign_id) if campaign_id else None
-    if campaign:
-        products = campaign.get("products", [])
-        store_name = campaign.get("store_name", STORE_NAME)
-        event_title = campaign.get("event_title", "")
-    else:
-        selections = payload.get("selections") or []
-        products = resolve_selected_products(selections)
-        store_name = payload.get("store_name") or get_default_store_info().get("store_name") or STORE_NAME
-        event_title = payload.get("event_title") or ""
-    recommendation = recommend_landing_copy(
-        products,
-        store_name=store_name,
-        event_title=event_title,
-    )
-    return jsonify({"recommendation": recommendation})
+    try:
+        campaign_id = payload.get("campaign_id")
+        campaign = get_campaign(campaign_id) if campaign_id else None
+        if campaign:
+            products = campaign.get("products", [])
+            store_name = campaign.get("store_name", STORE_NAME)
+            event_title = campaign.get("event_title", "")
+        else:
+            selections = payload.get("selections") or []
+            products = resolve_selected_products(selections)
+            store_name = payload.get("store_name") or get_default_store_info().get("store_name") or STORE_NAME
+            event_title = payload.get("event_title") or ""
+        recommendation = recommend_landing_copy(
+            products,
+            store_name=store_name,
+            event_title=event_title,
+        )
+        return jsonify({"recommendation": recommendation})
+    except Exception as exc:
+        print(f"[promo] recommend_landing error: {exc}")
+        return jsonify({"recommendation": {
+            "landing_title": "온라인 가성비 특가상품 기획전",
+            "intro_text": "추천 상품을 확인하고 매장으로 문의해 보세요.",
+            "disclaimer": "행사 및 가격 정보는 생성 시점 기준이며 변동될 수 있습니다.",
+        }})
 
 
 @promo_bp.route("/api/promo/generate-creative", methods=["POST"])

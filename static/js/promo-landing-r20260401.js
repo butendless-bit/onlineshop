@@ -73,13 +73,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function applyRecommendedCopy(force = false) {
     if (!campaign?.id) return;
-    const result = await app.apiFetch('/api/promo/recommend-landing', {
-      method: 'POST',
-      body: JSON.stringify({ campaign_id: campaign.id }),
-    });
-    const recommendation = result.recommendation || {};
-    if (force || !titleInput.value.trim()) titleInput.value = recommendation.landing_title || DEFAULT_LANDING_TITLE;
-    if (force || !introInput.value.trim()) introInput.value = recommendation.intro_text || '';
+    try {
+      const result = await app.apiFetch('/api/promo/recommend-landing', {
+        method: 'POST',
+        body: JSON.stringify({ campaign_id: campaign.id }),
+      });
+      const recommendation = result.recommendation || {};
+      if (force || !titleInput.value.trim()) titleInput.value = recommendation.landing_title || DEFAULT_LANDING_TITLE;
+      if (force || !introInput.value.trim()) introInput.value = recommendation.intro_text || '';
+    } catch (_) {
+      // AI 추천 실패 시 기본값으로 진행 (랜딩 생성은 계속)
+      if (force || !titleInput.value.trim()) titleInput.value = DEFAULT_LANDING_TITLE;
+    }
   }
 
   function renderQr(url) {
