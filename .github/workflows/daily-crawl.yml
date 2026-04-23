@@ -2,8 +2,8 @@ name: Daily Crawl
 
 on:
   schedule:
-    # 08:00 Asia/Seoul = 23:00 UTC (previous day)
-    - cron: "0 23 * * *"
+    # 08:30 Asia/Seoul = 23:30 UTC (previous day)
+    - cron: "30 23 * * *"
   workflow_dispatch:
 
 # 동시 실행 방지: 진행 중이면 새 요청은 대기 없이 취소

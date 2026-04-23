@@ -84,6 +84,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     urlInput.value = landingUrl;
     renderQr(landingUrl);
     app.setLandingResult(result);
+
+    // localStorage에 전체 캠페인 + 랜딩 데이터 저장
+    // → 새 탭으로 열어도 API 없이 바로 렌더링 가능 (Vercel 서버리스 인스턴스 불일치 방지)
+    try {
+      const cacheKey = `himartLandingCache_${campaign.id}`;
+      const cacheData = {
+        ...campaign,
+        metadata: { ...(campaign.metadata || {}), landing: result.landing },
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (_) {}
+
     postTaskStatus('done', '완료');
   }
 

@@ -110,6 +110,8 @@ def init_db():
             "ALTER TABLE products ADD COLUMN goods_no TEXT DEFAULT ''",
             # SQLite ALTER TABLE은 non-constant DEFAULT(CURRENT_TIMESTAMP) 미지원 → default 없이 추가
             "ALTER TABLE products ADD COLUMN last_seen_at DATETIME",
+            # 인기도 순위 (e-himart WEIGHT 정렬 기반, 낮을수록 인기). 미수집 = NULL
+            "ALTER TABLE products ADD COLUMN popularity_rank INTEGER",
         ]:
             try:
                 conn.execute(col_sql)
@@ -142,12 +144,15 @@ def init_db():
 
 
 def upsert_product(model_no, product_name, category, product_url, image_url,
-                    spec="{}", goods_no="", is_active=1):
+                    spec="{}", goods_no="", is_active=1, popularity_rank=None):
+    """popularity_rank: 이번 크롤에서 관측한 WEIGHT 순위(1부터). None이면 순위 비갱신.
+    여러 키워드에서 등장 시 더 인기 있는 값(= 더 작은 순위)로만 갱신된다.
+    """
     with get_conn() as conn:
         conn.execute("""
             INSERT INTO products (model_no, product_name, category, product_url, image_url,
-                                  spec, goods_no, is_active, last_seen_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                                  spec, goods_no, is_active, last_seen_at, popularity_rank)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
             ON CONFLICT(model_no) DO UPDATE SET
                 product_name = excluded.product_name,
                 product_url  = excluded.product_url,
@@ -156,8 +161,32 @@ def upsert_product(model_no, product_name, category, product_url, image_url,
                 goods_no     = excluded.goods_no,
                 is_active    = excluded.is_active,
                 last_seen_at = CURRENT_TIMESTAMP,
+                -- 순위는 더 낮은(=더 인기) 값으로만 갱신 · 새 값이 NULL이면 유지
+                popularity_rank = CASE
+                    WHEN excluded.popularity_rank IS NULL THEN products.popularity_rank
+                    WHEN products.popularity_rank IS NULL THEN excluded.popularity_rank
+                    WHEN excluded.popularity_rank < products.popularity_rank THEN excluded.popularity_rank
+                    ELSE products.popularity_rank
+                END,
                 updated_at   = CURRENT_TIMESTAMP
-        """, (model_no, product_name, category, product_url, image_url, spec, goods_no, is_active))
+        """, (model_no, product_name, category, product_url, image_url, spec, goods_no, is_active, popularity_rank))
+
+
+def update_popularity_rank(model_no: str, rank: int):
+    """WEIGHT 정렬에서 관측한 순위를 기록. 더 작은(=더 인기) 값으로만 갱신."""
+    if not model_no or not rank:
+        return
+    with get_conn() as conn:
+        conn.execute("""
+            UPDATE products
+               SET popularity_rank = CASE
+                   WHEN popularity_rank IS NULL THEN ?
+                   WHEN ? < popularity_rank THEN ?
+                   ELSE popularity_rank
+               END,
+               updated_at = CURRENT_TIMESTAMP
+             WHERE model_no = ?
+        """, (rank, rank, rank, model_no))
 
 
 def insert_price(model_no, original_price, sale_price, benefit_price):
@@ -184,7 +213,7 @@ def get_latest_prices(category=None):
         )
         SELECT
             p.model_no, p.product_name, p.category, p.product_url, p.image_url,
-            p.review_count, p.spec,
+            p.review_count, p.spec, p.popularity_rank,
             l.original_price, l.sale_price, l.benefit_price, l.crawled_at,
             prev.benefit_price AS prev_benefit_price
         FROM products p

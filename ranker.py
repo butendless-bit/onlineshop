@@ -1,13 +1,43 @@
 """
-HiMart Ranker — 카테고리별 TOP 5 추천 알고리즘
+HiMart Ranker — 카테고리별 TOP 10 추천 알고리즘 (총 160점 만점)
 """
 import json
 from config import (
     CATEGORIES, TOP_N,
     SCORE_DISCOUNT_MAX, SCORE_PRICE_DROP_MAX, SCORE_ALLTIME_LOW,
+    SCORE_POPULARITY_MAX, SCORE_REVIEW_MAX,
 )
 from database import get_latest_prices, get_alltime_low, get_alltime_lows, get_competitor_prices
 from badge_calculator import get_enhanced_badges
+
+
+def _popularity_score(rank: int | None) -> int:
+    """e-himart WEIGHT(인기순) 기반 점수 — 최대 가중치 60점.
+    rank가 작을수록(상위일수록) 높은 점수. 미수집(NULL) = 0점.
+    """
+    if not rank or rank <= 0:
+        return 0
+    if rank <= 10:    return SCORE_POPULARITY_MAX         # 60
+    if rank <= 30:    return int(SCORE_POPULARITY_MAX * 0.85)  # 51
+    if rank <= 50:    return int(SCORE_POPULARITY_MAX * 0.75)  # 45
+    if rank <= 100:   return int(SCORE_POPULARITY_MAX * 0.60)  # 36
+    if rank <= 200:   return int(SCORE_POPULARITY_MAX * 0.40)  # 24
+    if rank <= 500:   return int(SCORE_POPULARITY_MAX * 0.20)  # 12
+    if rank <= 1000:  return int(SCORE_POPULARITY_MAX * 0.08)  # 4
+    return 0
+
+
+def _review_score(review_count: int | None) -> int:
+    """리뷰 수 = 판매량 대리 지표 — 최대 20점 (로그 스케일)."""
+    if not review_count or review_count <= 0:
+        return 0
+    if review_count >= 1000: return SCORE_REVIEW_MAX         # 20
+    if review_count >= 500:  return int(SCORE_REVIEW_MAX * 0.75)  # 15
+    if review_count >= 200:  return int(SCORE_REVIEW_MAX * 0.55)  # 11
+    if review_count >= 100:  return int(SCORE_REVIEW_MAX * 0.40)  # 8
+    if review_count >= 30:   return int(SCORE_REVIEW_MAX * 0.25)  # 5
+    if review_count >= 10:   return int(SCORE_REVIEW_MAX * 0.10)  # 2
+    return 0
 
 
 def _discount_score(original: int, benefit: int) -> int:
@@ -99,13 +129,16 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
 
         alltime_low = alltime_lows.get(r["model_no"])
         naver_price = naver_prices.get(r["model_no"])
+        review_count = r.get("review_count") or 0
+        popularity_rank = r.get("popularity_rank")
 
+        s_popularity = _popularity_score(popularity_rank)
+        s_review = _review_score(review_count)
         s_discount = _discount_score(original, benefit)
         s_drop = _price_drop_score(benefit, prev)
         s_low = _alltime_low_score(r["model_no"], benefit, alltime_low=alltime_low)
-        total_score = s_discount + s_drop + s_low
+        total_score = s_popularity + s_review + s_discount + s_drop + s_low
 
-        review_count = r.get("review_count") or 0
         badges = get_enhanced_badges(
             r["model_no"], total_score, original, benefit, prev, review_count,
             alltime_low=alltime_low, naver_price=naver_price,
@@ -115,6 +148,8 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
             **r,
             "score": total_score,
             "score_breakdown": {
+                "popularity": s_popularity,
+                "review": s_review,
                 "discount": s_discount,
                 "price_drop": s_drop,
                 "alltime_low": s_low,
@@ -130,6 +165,12 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
         item["rank"] = i
         breakdown = item["score_breakdown"]
         reasons = []
+        if breakdown.get("popularity", 0) >= 45:
+            reasons.append("🏆 베스트셀러")
+        elif breakdown.get("popularity", 0) >= 24:
+            reasons.append("인기 상품")
+        if breakdown.get("review", 0) >= 15:
+            reasons.append("리뷰 다수")
         if breakdown["alltime_low"] > 0:
             reasons.append("역대 최저가 달성")
         if breakdown["price_drop"] >= 30:

@@ -37,7 +37,7 @@ from config import (
     CRAWL_PAGE_SIZE, CRAWL_MAX_PAGES, CRAWL_SORT_ORDERS,
 )
 from database import (
-    init_db, upsert_product, insert_price,
+    init_db, upsert_product, insert_price, update_popularity_rank,
     update_review_count, upsert_competitor_price, upsert_subscription_from_crawl,
     mark_unseen_inactive,
 )
@@ -179,8 +179,10 @@ def _is_product_active(p: dict) -> bool:
     return True
 
 
-def _parse_product(p: dict, category_key: str) -> tuple[bool, str | None]:
+def _parse_product(p: dict, category_key: str,
+                    popularity_rank: int | None = None) -> tuple[bool, str | None]:
     """상품 1개 파싱 → DB 저장.
+    popularity_rank: WEIGHT 정렬 시 이번 관측 순위(1부터). None = 순위 미기록.
     Returns: (저장 성공 여부, model_no or None)
     """
     try:
@@ -218,7 +220,7 @@ def _parse_product(p: dict, category_key: str) -> tuple[bool, str | None]:
         spec = extract_spec(product_name, model_no, category_key)
 
         upsert_product(model_no, product_name, category_key, product_url, image_url,
-                        spec, goods_no, is_active)
+                        spec, goods_no, is_active, popularity_rank=popularity_rank)
 
         # 판매중지 상품이라도 DB에 기록은 하되, 가격은 활성 상품만
         if is_active:
@@ -262,13 +264,20 @@ def _crawl_keyword_exhaustive(session: requests.Session, keyword: str,
     )
     log.info(f"  [{cat_name}] '{keyword}' sort={sort}: totalCnt={total_cnt}, maxPages={max_pages}")
 
+    # WEIGHT 정렬일 때만 순위 기록 (e-himart 공식 인기순 = 판매·조회·찜 종합)
+    record_rank = (sort == "WEIGHT")
+
     # 1페이지 처리
-    for p in products:
+    for idx, p in enumerate(products):
         mn = (p.get("mdlNm") or p.get("goodsNo") or "").strip()
+        rank = (idx + 1) if record_rank else None
         if mn in seen:
+            # 이미 본 상품이라도 WEIGHT 순위는 계속 반영 (순위만 업데이트, 다른 필드 보존)
+            if record_rank and mn:
+                update_popularity_rank(mn, rank)
             continue
         seen.add(mn)
-        ok, _ = _parse_product(p, category_key)
+        ok, _ = _parse_product(p, category_key, popularity_rank=rank)
         if ok:
             count += 1
 
@@ -281,12 +290,15 @@ def _crawl_keyword_exhaustive(session: requests.Session, keyword: str,
             break
 
         page_new = 0
-        for p in products:
+        for idx, p in enumerate(products):
             mn = (p.get("mdlNm") or p.get("goodsNo") or "").strip()
+            rank = ((page_no - 1) * CRAWL_PAGE_SIZE + idx + 1) if record_rank else None
             if mn in seen:
+                if record_rank and mn:
+                    update_popularity_rank(mn, rank)
                 continue
             seen.add(mn)
-            ok, _ = _parse_product(p, category_key)
+            ok, _ = _parse_product(p, category_key, popularity_rank=rank)
             if ok:
                 page_new += 1
                 count += 1

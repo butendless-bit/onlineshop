@@ -14,9 +14,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const campaign = await app.apiFetch(`/api/promo/campaign/${campaignId}`);
+    // localStorage 캐시 우선 조회 → 없으면 API (Vercel 서버리스 인스턴스 불일치 대응)
+    let campaign;
+    try {
+      const cacheKey = `himartLandingCache_${campaignId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) campaign = JSON.parse(cached);
+    } catch (_) {}
+    if (!campaign) {
+      campaign = await app.apiFetch(`/api/promo/campaign/${campaignId}`);
+    }
+
     const landing = campaign.metadata?.landing || {
-      landing_title: campaign.event_title,
+      landing_title: campaign.event_title || '기획전',
       intro_text: '추천 상품을 확인하고 매장으로 문의해 보세요.',
       disclaimer: '행사 및 가격 정보는 생성 시점 기준이며 변동될 수 있습니다.',
       cta_visibility: { phone: true, kakao: true },
