@@ -72,11 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await track('landing_visit');
 
-    // store_name에서 "광복롯데점" 포함 문자열 제거
-    const displayStoreName = (campaign.store_name || '')
-      .replace(/롯데하이마트\s*광복롯데점/g, '롯데하이마트')
-      .replace(/광복롯데점/g, '')
-      .trim();
+    const displayStoreName = (campaign.store_name || '').trim();
 
     root.innerHTML = `
       <div class="landing-mobile-preview" style="margin:0 auto;">

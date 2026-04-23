@@ -66,7 +66,7 @@ def build_instagram_messages(payload: dict[str, Any]) -> list[dict[str, str]]:
 
 【마무리 CTA】
 - 방문·문의를 판매 냄새 없이 자연스럽게 유도
-- 예) '광복롯데몰 하이마트에 오시면 직접 만져보실 수 있어요 :)'
+- 예) '하이마트에 오시면 직접 만져보실 수 있어요 :)'
 - caption 전체 길이는 15줄 이내
 
 【이모지 활용 규칙】

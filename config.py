@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── 매장 정보 ──────────────────────────────────────────────────────────────────
-STORE_NAME = os.getenv("STORE_NAME", "롯데하이마트 광복롯데점")
+STORE_NAME = os.getenv("STORE_NAME", "롯데하이마트")
 
 # ── 크롤링 설정 ────────────────────────────────────────────────────────────────
 CRAWL_DELAY = float(os.getenv("CRAWL_DELAY", "1.5"))   # 요청 간격(초)
