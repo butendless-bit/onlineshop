@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cardsHtml = (campaign.products || []).map((product) => {
       const shortName = app.getShortProductName(product);
       const specText = app.getProductSpecs(product).join(' · ');
+      const productUrl = product.product_url || '';
       return `
         <article class="landing-product-card">
           ${app.getPreferredImage(product) ? `<img src="${app.getPreferredImage(product)}" alt="">` : ''}
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           ${specText ? `<div style="margin-top:6px; font-size:12px; color:#475569;">${specText}</div>` : ''}
           <div style="margin-top:8px; font-size:20px; font-weight:900; color:#e60012;">${app.formatPrice(product, '혜택가')}</div>
           <div class="landing-cta-row">
-            <a class="promo-btn primary public-call" href="tel:${campaign.phone || ''}">전화하기</a>
+            ${productUrl ? `<a class="promo-btn primary" href="${productUrl}" target="_blank" rel="noopener noreferrer">상세보기</a>` : ''}
             ${campaign.kakao_channel_url ? `<a class="promo-btn kakao public-kakao" href="${campaign.kakao_channel_url}" target="_blank" rel="noopener noreferrer">카카오톡 상담하기</a>` : ''}
           </div>
         </article>
@@ -52,17 +53,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await track('landing_visit');
 
+    // store_name에서 "광복롯데점" 포함 문자열 제거
+    const displayStoreName = (campaign.store_name || '')
+      .replace(/롯데하이마트\s*광복롯데점/g, '롯데하이마트')
+      .replace(/광복롯데점/g, '')
+      .trim();
+
     root.innerHTML = `
       <div class="landing-mobile-preview" style="margin:0 auto;">
         <div class="landing-header">
-          <div style="font-size:12px; opacity:.82;">${campaign.store_name}</div>
-          <h2 style="margin:8px 0 0; font-size:26px; line-height:1.2;">${landing.landing_title}</h2>
+          <h2 style="margin:0; font-size:26px; line-height:1.2;">${landing.landing_title}</h2>
           <p style="margin:10px 0 0; line-height:1.6; opacity:.92;">${landing.intro_text}</p>
         </div>
         <div class="landing-card-list">${cardsHtml}</div>
         <div class="landing-footer">
-          <div style="font-weight:900;">${campaign.store_name}</div>
-          <div style="margin-top:6px; color:#475569;">${campaign.phone || '전화번호를 등록해 주세요.'}</div>
           <div style="margin-top:10px;">
             ${campaign.kakao_channel_url ? `<a class="promo-btn kakao public-kakao" href="${campaign.kakao_channel_url}" target="_blank" rel="noopener noreferrer">카카오톡 상담</a>` : ''}
           </div>
@@ -71,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
     `;
 
-    root.querySelectorAll('.public-call').forEach((el) => el.addEventListener('click', () => track('call_click')));
     root.querySelectorAll('.public-kakao').forEach((el) => el.addEventListener('click', () => track('kakao_click')));
   } catch (error) {
     root.innerHTML = `<div class="promo-empty">${error.message}</div>`;
