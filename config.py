@@ -47,12 +47,11 @@ FLASK_DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
 
 # ── 랭킹 알고리즘 가중치 ──────────────────────────────────────────────────────
 TOP_N = 10                   # 카테고리별 추천 수
-SCORE_POPULARITY_MAX = 60    # 인기도 (e-himart WEIGHT 순위 기반) — 최대 가중치
-SCORE_REVIEW_MAX = 20        # 리뷰 수 (판매량 대리 지표)
-SCORE_DISCOUNT_MAX = 40      # 할인율 점수 상한
-SCORE_PRICE_DROP_MAX = 40    # 가격 하락 점수 상한
-SCORE_ALLTIME_LOW = 20       # 역대 최저가 보너스
-# 총 160점 만점
+SCORE_POPULARITY_MAX = 50    # 판매량 (e-himart WEIGHT 순위 기반) — 50%
+SCORE_REVIEW_MAX = 20        # 리뷰 수 — 20%
+SCORE_VALUE_MAX = 20         # 동급사양대비 가성비 (할인율 + 카테고리 내 상대가격) — 20%
+SCORE_PRICE_DROP_MAX = 10    # 직전 대비 가격인하 — 10%
+# 총 100점 만점
 
 # ── 카테고리별 다중 검색어 (끝까지 페이징 · 페이지 수 제한 없음) ──────────────
 # 형식: {category_key: [keyword, ...]}

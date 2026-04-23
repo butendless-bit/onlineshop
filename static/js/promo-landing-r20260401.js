@@ -132,13 +132,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const encoded = _encodeCampaignData(fullCampaign);
     const landingUrl = `${window.location.origin}/promo/${campaign.id}?d=${encoded}`;
-    urlInput.value = landingUrl;
-    renderQr(landingUrl);
 
     // localStorage 캐시도 병행 저장 (같은 기기 빠른 재사용)
     try {
       localStorage.setItem(`himartLandingCache_${campaign.id}`, JSON.stringify(fullCampaign));
     } catch (_) {}
+
+    // TinyURL 단축 URL 요청 (실패해도 원본 URL 사용)
+    postTaskStatus('processing', '단축 URL 생성 중');
+    let displayUrl = landingUrl;
+    try {
+      const shortened = await app.apiFetch('/api/promo/shorten', {
+        method: 'POST',
+        body: JSON.stringify({ url: landingUrl }),
+      });
+      if (shortened?.short_url) displayUrl = shortened.short_url;
+    } catch (_) {}
+
+    urlInput.value = displayUrl;
+    // 원본 URL(데이터 포함)을 data 속성에 보관 → QR / 실제 이동용
+    urlInput.dataset.fullUrl = landingUrl;
+    renderQr(landingUrl);   // QR은 항상 원본 ?d= URL 사용
 
     postTaskStatus('done', '완료');
   }

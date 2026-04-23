@@ -384,3 +384,23 @@ def api_delete_campaign(campaign_id: str):
 @promo_bp.route("/api/promo/campaigns")
 def api_campaigns():
     return jsonify({"items": list_campaigns()})
+
+
+@promo_bp.route("/api/promo/shorten", methods=["POST"])
+def api_shorten_url():
+    """긴 ?d= 인코딩 URL을 TinyURL로 단축."""
+    import urllib.request
+    import urllib.parse
+
+    url = (request.get_json(force=True) or {}).get("url", "").strip()
+    if not url:
+        return jsonify({"error": "url이 필요합니다."}), 400
+    try:
+        api = f"https://tinyurl.com/api-create.php?url={urllib.parse.quote(url, safe='')}"
+        with urllib.request.urlopen(api, timeout=6) as resp:
+            short = resp.read().decode().strip()
+        if short.startswith("https://tinyurl.com/"):
+            return jsonify({"short_url": short})
+        return jsonify({"error": "단축 URL 생성 실패"}), 502
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 502
