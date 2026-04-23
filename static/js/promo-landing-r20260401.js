@@ -93,26 +93,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     requestAnimationFrame(postFrameHeight);
   }
 
-  /** ?d= 원본 URL → TinyURL 단축 (실패 시 원본 반환) */
+  /** ?d= 원본 URL → TinyURL 단축 (5초 타임아웃, 실패 시 원본 반환) */
   async function shortenUrl(longUrl) {
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
       const res = await app.apiFetch('/api/promo/shorten', {
         method: 'POST',
         body: JSON.stringify({ url: longUrl }),
+        signal: controller.signal,
       });
+      clearTimeout(timer);
       return res?.short_url || longUrl;
     } catch (_) {
       return longUrl;
     }
   }
 
-  /** URL 입력창 + QR 동시 업데이트 (단축 URL 표시, QR은 원본 ?d= 유지) */
-  async function applyLandingUrl(longUrl) {
+  /** URL 입력창 + QR 동시 업데이트.
+   *  원본 URL 즉시 표시 → 백그라운드에서 단축 후 업데이트 (UI 블로킹 없음) */
+  function applyLandingUrl(longUrl) {
     urlInput.dataset.fullUrl = longUrl;
-    renderQr(longUrl);                        // QR은 항상 원본
-    urlInput.value = '단축 URL 생성 중…';
-    const short = await shortenUrl(longUrl);
-    urlInput.value = short;
+    renderQr(longUrl);          // QR은 항상 원본 ?d= URL
+    urlInput.value = longUrl;   // 즉시 원본 URL 표시
+    // 백그라운드 단축: 완료되면 조용히 업데이트
+    shortenUrl(longUrl).then((short) => {
+      if (short && short !== longUrl) urlInput.value = short;
+    });
   }
 
   async function generateLanding() {
@@ -160,8 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem(`himartLandingCache_${campaign.id}`, JSON.stringify(fullCampaign));
     } catch (_) {}
 
-    postTaskStatus('processing', '단축 URL 생성 중');
-    await applyLandingUrl(landingUrl);
+    applyLandingUrl(landingUrl);   // 즉시 URL 표시, 단축은 백그라운드
     postTaskStatus('done', '완료');
   }
 
@@ -210,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
       const restoredEncoded = _encodeCampaignData(restoredCampaign);
       const restoredUrl = `${window.location.origin}/promo/${campaign.id}?d=${restoredEncoded}`;
-      await applyLandingUrl(restoredUrl);
+      applyLandingUrl(restoredUrl);   // 즉시 표시, 단축은 백그라운드
       postTaskStatus('done', '완료');
       return;
     }
