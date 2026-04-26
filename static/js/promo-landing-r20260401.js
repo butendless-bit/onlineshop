@@ -88,14 +88,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderQr(url) {
-    qr.innerHTML = '';
-    const holder = document.createElement('div');
-    holder.style.display = 'grid';
-    holder.style.placeItems = 'center';
-    holder.style.minHeight = '220px';
-    qr.appendChild(holder);
-    new QRCode(holder, { text: url, width: 180, height: 180 });
-    requestAnimationFrame(postFrameHeight);
+    try {
+      qr.innerHTML = '';
+      const holder = document.createElement('div');
+      holder.style.display = 'grid';
+      holder.style.placeItems = 'center';
+      holder.style.minHeight = '220px';
+      qr.appendChild(holder);
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(holder, { text: url, width: 180, height: 180 });
+      } else {
+        holder.textContent = 'QR 생성 불가 (CDN 로드 실패)';
+      }
+      requestAnimationFrame(postFrameHeight);
+    } catch (_) {
+      // QR 생성 실패는 무시 — 랜딩 생성 자체는 계속 진행
+    }
   }
 
   /** ?d= 원본 URL → TinyURL 단축 (5초 타임아웃, 실패 시 원본 반환) */
@@ -178,7 +186,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('generate-landing-btn')?.addEventListener('click', () => {
     generateLanding().catch((error) => {
-      app.showToast(error.message);
+      const msg = error?.message || String(error);
+      app.showToast(msg);
+      if (urlInput) urlInput.value = '[오류] ' + msg;
       postTaskStatus('error', '확인 필요');
     });
   });
@@ -229,7 +239,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await applyRecommendedCopy(true);
     await generateLanding();
   } catch (error) {
-    app.showToast(error.message);
+    const msg = error?.message || String(error);
+    app.showToast(msg);
+    if (urlInput) urlInput.value = '[오류] ' + msg;
     postTaskStatus('error', '확인 필요');
   }
 
