@@ -258,12 +258,9 @@ def api_subscription_recommended():
 _SET_SPEC_FILTERS = {
     "tv":           {"size_group": ["50s", "60s", "70s", "80+"]},
     "refrigerator": {"fridge_type": "4도어"},
-}
-# 세트빌더 카테고리별 상품명 키워드 필터 (spec으로 분류 안 되는 항목)
-_SET_NAME_KEYWORDS = {
-    "washer": ["타워", "일체", "워시타워", "WashTower", "콤보"],
-    "dryer":  ["타워", "일체", "워시타워", "WashTower", "콤보"],
-    "aircon": ["2in1", "투인원", "2-in-1", "2IN1", "듀얼", "멀티"],
+    "washer":       {"washer_type": "드럼"},
+    "dryer":        {"dryer_type": "히트펌프"},
+    "aircon":       {"aircon_type": "스탠드"},
 }
 
 
@@ -286,15 +283,9 @@ def api_set_builder():
         spec_filters = _SET_SPEC_FILTERS.get(cat_key)
         items = rank_category_by_maker(cat_key, maker, filters=spec_filters)
 
-        # 상품명 키워드 후필터링 (타워형, 2in1 등)
-        name_kws = _SET_NAME_KEYWORDS.get(cat_key)
-        if name_kws and items:
-            kw_filtered = [
-                it for it in items
-                if any(kw.lower() in (it.get("product_name") or "").lower() for kw in name_kws)
-            ]
-            if kw_filtered:
-                items = kw_filtered
+        # 스펙 필터로 결과 없으면 필터 없이 재시도
+        if not items and spec_filters:
+            items = rank_category_by_maker(cat_key, maker)
 
         if items:
             top = items[0]
