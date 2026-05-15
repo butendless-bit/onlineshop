@@ -12,7 +12,7 @@ from database import (
     update_subscription_product, delete_subscription_product,
     get_subscription_recommendations,
 )
-from ranker import get_all_recommendations, rank_category
+from ranker import get_all_recommendations, rank_category, rank_category_by_maker
 from promo_blueprint import promo_bp
 from promo_repository import init_promo_db
 from services.vercel_seed import ensure_seed_db
@@ -251,6 +251,46 @@ def api_subscription_crawl():
 def api_subscription_recommended():
     category = request.args.get("category")
     return jsonify(get_subscription_recommendations(category))
+
+
+# ── API: 세트 빌더 ────────────────────────────────────────────────────────────
+@app.route("/api/set-builder")
+def api_set_builder():
+    maker = request.args.get("maker", "mixed")
+    categories_param = request.args.get("categories", "")
+    if not categories_param:
+        return jsonify({"error": "카테고리를 1개 이상 선택하세요"}), 400
+
+    selected_cats = [c.strip() for c in categories_param.split(",") if c.strip() in CATEGORIES]
+    if not selected_cats:
+        return jsonify({"error": "유효한 카테고리가 없습니다"}), 400
+
+    result_items = []
+    total_original = 0
+    total_benefit = 0
+
+    for cat_key in selected_cats:
+        items = rank_category_by_maker(cat_key, maker)
+        if items:
+            top = items[0]
+            result_items.append(top)
+            total_original += top.get("original_price") or top.get("sale_price") or 0
+            total_benefit += top.get("benefit_price") or top.get("sale_price") or 0
+
+    discount_rate = round((total_original - total_benefit) / total_original * 100) if total_original > 0 else 0
+
+    maker_label = {"samsung": "삼성", "lg": "LG", "mixed": "삼성+LG 혼합"}.get(maker, maker)
+
+    return jsonify({
+        "maker": maker,
+        "maker_label": maker_label,
+        "categories": selected_cats,
+        "items": result_items,
+        "total_original": total_original,
+        "total_benefit": total_benefit,
+        "discount_rate": discount_rate,
+        "set_count": len(result_items),
+    })
 
 
 # ── API: 가격 히스토리 ─────────────────────────────────────────────────────────

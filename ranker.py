@@ -199,6 +199,34 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
     return result
 
 
+def rank_category_by_maker(category_key: str, maker: str = "mixed") -> list[dict]:
+    """메이커 필터링된 카테고리 랭킹. maker: 'samsung', 'lg', 'mixed'"""
+    items = rank_category(category_key)
+
+    if maker == "mixed":
+        return items
+
+    maker_keywords = {
+        "samsung": ["삼성", "samsung", "비스포크", "bespoke", "갤럭시", "galaxy"],
+        "lg":      ["lg", "엘지", "트롬", "tromm", "디오스", "dios", "그램", "gram",
+                     "오브제", "objet", "스탠바이미", "standbyme"],
+    }
+
+    keywords = maker_keywords.get(maker, [])
+    if not keywords:
+        return items
+
+    filtered = []
+    for item in items:
+        name_lower = (item.get("product_name") or "").lower()
+        model_lower = (item.get("model_no") or "").lower()
+        combined = name_lower + " " + model_lower
+        if any(kw.lower() in combined for kw in keywords):
+            filtered.append(item)
+
+    return filtered
+
+
 def get_all_recommendations(filters_per_category: dict | None = None) -> dict:
     """전체 카테고리 추천 결과 반환"""
     result = {}

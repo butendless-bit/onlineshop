@@ -311,6 +311,7 @@
     <div class="flex items-center gap-2 shrink-0">
       <nav class="flex items-center gap-2 mr-2">
         <a href="/main" class="px-3 py-1.5 rounded-full text-xs font-semibold text-white" style="background:rgba(230,0,18,.18);border:1px solid rgba(230,0,18,.3);">추천 상품</a>
+        <button onclick="openSetBuilder()" class="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95" style="background:linear-gradient(135deg,#e60012,#ff6b35);border:1px solid rgba(255,107,53,.4);box-shadow:0 10px 24px rgba(230,0,18,.15);">⚡ 세트 만들기</button>
         <a href="/promo" onclick="try { if (typeof persistPromoSelection === 'function') persistPromoSelection(); } catch (e) {}" class="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95" style="background:linear-gradient(135deg,#2757d7,#4f8cff);border:1px solid rgba(79,140,255,.32);box-shadow:0 10px 24px rgba(79,140,255,.18);">온라인 홍보하기</a>
       </nav>
       <div class="hidden sm:block text-xs text-gray-500" id="today-date"></div>
@@ -2583,6 +2584,385 @@ function _renderVerdict(specA, specB, priceA, priceB, nameA, nameB) {
 // 모달 바깥 클릭 닫기
 document.getElementById('compare-modal').addEventListener('click', function(e) {
   if (e.target === this) closeCompareModal();
+});
+</script>
+
+<!-- ══════════════════════ 세트 빌더 모달 ══════════════════════ -->
+<div id="set-builder-modal" class="fixed inset-0 z-[100] hidden" style="background:rgba(10,10,15,0.92);backdrop-filter:blur(8px);">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-surface-1 border border-[#2a2a3a] rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto" style="box-shadow:0 40px 100px rgba(0,0,0,0.6);">
+
+      <!-- 헤더 -->
+      <div class="flex items-center justify-between p-6 border-b border-[#2a2a3a]">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">⚡ 가전 세트 만들기</h2>
+          <p class="text-sm text-gray-400 mt-1">메이커와 품목을 선택하면 최적의 세트를 자동 구성합니다</p>
+        </div>
+        <button onclick="closeSetBuilder()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+
+      <!-- Step 1: 메이커 선택 -->
+      <div id="set-step1" class="p-6">
+        <h3 class="text-sm font-semibold text-gray-300 mb-4">STEP 1 — 메이커 선택</h3>
+        <div class="grid grid-cols-3 gap-4">
+          <button onclick="selectSetMaker('samsung')" data-maker="samsung"
+            class="set-maker-btn group flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-[#2a2a3a] bg-surface-2 hover:border-blue-500 transition-all">
+            <div class="w-16 h-16 rounded-full bg-[#1428a0] flex items-center justify-center text-white text-2xl font-black">S</div>
+            <span class="text-white font-semibold">삼성</span>
+            <span class="text-xs text-gray-400">비스포크 · 갤럭시 · BESPOKE</span>
+          </button>
+          <button onclick="selectSetMaker('lg')" data-maker="lg"
+            class="set-maker-btn group flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-[#2a2a3a] bg-surface-2 hover:border-[#a50034] transition-all">
+            <div class="w-16 h-16 rounded-full bg-[#a50034] flex items-center justify-center text-white text-2xl font-black">LG</div>
+            <span class="text-white font-semibold">LG</span>
+            <span class="text-xs text-gray-400">오브제 · 트롬 · 디오스</span>
+          </button>
+          <button onclick="selectSetMaker('mixed')" data-maker="mixed"
+            class="set-maker-btn group flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-[#2a2a3a] bg-surface-2 hover:border-orange-500 transition-all">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#1428a0] to-[#a50034] flex items-center justify-center text-white text-xl font-black">MIX</div>
+            <span class="text-white font-semibold">혼합</span>
+            <span class="text-xs text-gray-400">삼성 + LG 최적 조합</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: 품목 선택 -->
+      <div id="set-step2" class="p-6 border-t border-[#2a2a3a] hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-gray-300">STEP 2 — 품목 선택 <span class="text-gray-500">(2개 이상)</span></h3>
+          <div class="flex gap-2">
+            <button onclick="selectSetPreset('honsu')" class="px-3 py-1 rounded-full text-xs font-semibold bg-pink-500/20 text-pink-300 border border-pink-500/30 hover:bg-pink-500/30 transition-all">🎀 혼수 5종</button>
+            <button onclick="selectSetPreset('full')" class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 transition-all">🏠 입주 풀세트</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-5 gap-3" id="set-category-grid"></div>
+        <div class="mt-5 flex justify-end">
+          <button onclick="buildSet()" id="set-build-btn" disabled
+            class="px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style="background:linear-gradient(135deg,#e60012,#ff6b35);">
+            세트 구성하기 →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: 결과 -->
+      <div id="set-step3" class="hidden">
+        <!-- 로딩 -->
+        <div id="set-loading" class="p-12 text-center hidden">
+          <div class="spinner mx-auto mb-4"></div>
+          <p class="text-gray-400">최적의 세트를 구성하는 중...</p>
+        </div>
+
+        <!-- 프로모션 결과 카드 -->
+        <div id="set-result" class="hidden">
+          <!-- 프로모션 배너 (PNG 캡처 대상) -->
+          <div id="set-promo-card" style="width:1080px;background:#fff;font-family:'Pretendard',sans-serif;position:relative;overflow:hidden;">
+            <!-- 상단 매장 바 -->
+            <div style="background:#e60012;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                  <span style="color:#e60012;font-size:22px;font-weight:900;">H</span>
+                </div>
+                <div>
+                  <div style="color:#fff;font-size:14px;font-weight:700;">LOTTE HIMART</div>
+                  <div style="color:rgba(255,255,255,0.7);font-size:11px;">광복롯데몰점</div>
+                </div>
+              </div>
+              <div style="color:rgba(255,255,255,0.8);font-size:12px;" id="set-promo-date"></div>
+            </div>
+
+            <!-- 메인 카피 -->
+            <div style="text-align:center;padding:40px 40px 20px;">
+              <div id="set-promo-maker-badge" style="display:inline-block;background:linear-gradient(135deg,#ffe000,#ffb800);color:#1a1a1a;font-size:16px;font-weight:800;padding:8px 24px;border-radius:30px;margin-bottom:16px;">
+              </div>
+              <h2 style="font-size:42px;font-weight:900;color:#1a1a1a;line-height:1.2;margin:0;">
+                <span id="set-promo-title-count" style="color:#e60012;"></span>종 패키지
+              </h2>
+              <p style="font-size:18px;color:#666;margin-top:8px;" id="set-promo-subtitle"></p>
+            </div>
+
+            <!-- 상품 이미지 그리드 -->
+            <div style="display:flex;justify-content:center;align-items:flex-end;gap:24px;padding:20px 40px 30px;flex-wrap:wrap;" id="set-promo-images"></div>
+
+            <!-- 품목 나열 -->
+            <div style="text-align:center;padding:0 40px 20px;">
+              <div style="display:inline-flex;align-items:center;gap:6px;background:#fff3cd;padding:10px 24px;border-radius:30px;font-size:14px;font-weight:700;color:#856404;" id="set-promo-categories-list">
+              </div>
+            </div>
+
+            <!-- 가격 영역 -->
+            <div style="background:#f8f9fa;padding:30px 40px;display:flex;align-items:center;justify-content:center;gap:60px;border-top:2px solid #eee;">
+              <div style="text-align:center;">
+                <div style="font-size:13px;color:#999;font-weight:600;">기존가</div>
+                <div style="font-size:24px;font-weight:800;color:#999;text-decoration:line-through;" id="set-promo-original"></div>
+              </div>
+              <div style="font-size:48px;color:#ccc;">→</div>
+              <div style="text-align:center;">
+                <div style="font-size:13px;font-weight:600;" style="color:#e60012;">최종 혜택가</div>
+                <div style="font-size:42px;font-weight:900;color:#e60012;" id="set-promo-benefit"></div>
+              </div>
+              <div style="background:#e60012;color:#fff;padding:12px 20px;border-radius:16px;text-align:center;">
+                <div style="font-size:36px;font-weight:900;line-height:1;" id="set-promo-discount"></div>
+                <div style="font-size:12px;font-weight:700;margin-top:2px;">SALE</div>
+              </div>
+            </div>
+
+            <!-- 하단 안내 -->
+            <div style="padding:16px 40px;font-size:11px;color:#aaa;text-align:center;background:#f8f9fa;border-top:1px solid #eee;">
+              ※ 위 가격은 온라인 혜택가 기준이며, 행사카드 결제 조건과 추가 혜택에 따라 체감가가 달라질 수 있습니다.
+            </div>
+          </div>
+
+          <!-- 컨트롤 버튼 -->
+          <div class="p-6 border-t border-[#2a2a3a] flex items-center justify-between">
+            <button onclick="resetSetBuilder()" class="px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white border border-[#2a2a3a] hover:border-gray-500 transition-all">
+              ← 다시 구성하기
+            </button>
+            <div class="flex gap-3">
+              <button onclick="downloadSetPromo()" class="px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110"
+                style="background:linear-gradient(135deg,#e60012,#b0000e);">
+                📥 PNG 다운로드
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 세트 빌더 프로모 카드 (오프스크린 렌더용) -->
+<div id="set-render-zone" style="position:fixed;left:-9999px;top:0;z-index:-1;"></div>
+
+<script>
+// ══════════════════════ 세트 빌더 ══════════════════════
+const SET_CATEGORIES = [
+  { key: 'tv',          name: 'TV',         icon: '📺' },
+  { key: 'refrigerator',name: '냉장고',     icon: '🧊' },
+  { key: 'washer',      name: '세탁기',     icon: '👕' },
+  { key: 'dryer',       name: '건조기',     icon: '☀️' },
+  { key: 'kimchi',      name: '김치냉장고', icon: '🥬' },
+  { key: 'aircon',      name: '에어컨',     icon: '❄️' },
+  { key: 'airpurifier', name: '공기청정기', icon: '🌿' },
+  { key: 'vacuum',      name: '청소기',     icon: '🧹' },
+  { key: 'dishwasher',  name: '식기세척기', icon: '🍽️' },
+  { key: 'range',       name: '전기레인지', icon: '🔥' },
+];
+
+const PRESETS = {
+  honsu: ['tv', 'refrigerator', 'washer', 'dryer', 'aircon'],
+  full:  ['tv', 'refrigerator', 'washer', 'dryer', 'kimchi', 'aircon', 'airpurifier', 'vacuum', 'dishwasher', 'range'],
+};
+
+let setMaker = null;
+let setSelectedCats = new Set();
+
+function openSetBuilder() {
+  document.getElementById('set-builder-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  resetSetBuilder();
+}
+
+function closeSetBuilder() {
+  document.getElementById('set-builder-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function resetSetBuilder() {
+  setMaker = null;
+  setSelectedCats.clear();
+  document.getElementById('set-step1').classList.remove('hidden');
+  document.getElementById('set-step2').classList.add('hidden');
+  document.getElementById('set-step3').classList.add('hidden');
+  document.querySelectorAll('.set-maker-btn').forEach(b => b.classList.remove('border-blue-500','border-[#a50034]','border-orange-500'));
+  updateSetBuildBtn();
+}
+
+function selectSetMaker(maker) {
+  setMaker = maker;
+  document.querySelectorAll('.set-maker-btn').forEach(b => {
+    b.classList.remove('border-blue-500','border-[#a50034]','border-orange-500');
+    if (b.dataset.maker === maker) {
+      const c = maker === 'samsung' ? 'border-blue-500' : maker === 'lg' ? 'border-[#a50034]' : 'border-orange-500';
+      b.classList.add(c);
+    }
+  });
+  document.getElementById('set-step2').classList.remove('hidden');
+  buildCategoryGrid();
+}
+
+function buildCategoryGrid() {
+  const grid = document.getElementById('set-category-grid');
+  grid.innerHTML = SET_CATEGORIES.map(cat => `
+    <button onclick="toggleSetCategory('${cat.key}')" data-cat="${cat.key}"
+      class="set-cat-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-[#2a2a3a] bg-surface-2 hover:border-gray-500 transition-all">
+      <span class="text-2xl">${cat.icon}</span>
+      <span class="text-xs font-semibold text-gray-300">${cat.name}</span>
+    </button>
+  `).join('');
+}
+
+function toggleSetCategory(key) {
+  if (setSelectedCats.has(key)) setSelectedCats.delete(key);
+  else setSelectedCats.add(key);
+
+  document.querySelectorAll('.set-cat-btn').forEach(b => {
+    if (setSelectedCats.has(b.dataset.cat)) {
+      b.classList.add('border-[#e60012]','bg-[#e60012]/10');
+      b.classList.remove('border-[#2a2a3a]');
+    } else {
+      b.classList.remove('border-[#e60012]','bg-[#e60012]/10');
+      b.classList.add('border-[#2a2a3a]');
+    }
+  });
+  updateSetBuildBtn();
+}
+
+function selectSetPreset(preset) {
+  setSelectedCats.clear();
+  (PRESETS[preset] || []).forEach(k => setSelectedCats.add(k));
+  document.querySelectorAll('.set-cat-btn').forEach(b => {
+    if (setSelectedCats.has(b.dataset.cat)) {
+      b.classList.add('border-[#e60012]','bg-[#e60012]/10');
+      b.classList.remove('border-[#2a2a3a]');
+    } else {
+      b.classList.remove('border-[#e60012]','bg-[#e60012]/10');
+      b.classList.add('border-[#2a2a3a]');
+    }
+  });
+  updateSetBuildBtn();
+}
+
+function updateSetBuildBtn() {
+  const btn = document.getElementById('set-build-btn');
+  btn.disabled = setSelectedCats.size < 2;
+  btn.textContent = setSelectedCats.size >= 2
+    ? `${setSelectedCats.size}종 세트 구성하기 →`
+    : '세트 구성하기 →';
+}
+
+async function buildSet() {
+  if (!setMaker || setSelectedCats.size < 2) return;
+
+  document.getElementById('set-step1').classList.add('hidden');
+  document.getElementById('set-step2').classList.add('hidden');
+  document.getElementById('set-step3').classList.remove('hidden');
+  document.getElementById('set-loading').classList.remove('hidden');
+  document.getElementById('set-result').classList.add('hidden');
+
+  try {
+    const cats = [...setSelectedCats].join(',');
+    const res = await fetch(`/api/set-builder?maker=${setMaker}&categories=${cats}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    renderSetPromo(data);
+  } catch (err) {
+    showToast(err.message || '세트 구성에 실패했습니다.');
+    resetSetBuilder();
+  }
+}
+
+function renderSetPromo(data) {
+  document.getElementById('set-loading').classList.add('hidden');
+  document.getElementById('set-result').classList.remove('hidden');
+
+  const now = new Date();
+  document.getElementById('set-promo-date').textContent =
+    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 기준`;
+
+  document.getElementById('set-promo-maker-badge').textContent = `⚡ ${data.maker_label} ${data.set_count}종 패키지`;
+  document.getElementById('set-promo-title-count').textContent = data.set_count;
+
+  const catNames = data.items.map(item => {
+    const cat = SET_CATEGORIES.find(c => c.key === item.category);
+    return cat ? cat.name : item.category;
+  });
+  document.getElementById('set-promo-subtitle').textContent = catNames.join(' + ');
+  document.getElementById('set-promo-categories-list').innerHTML =
+    '⚡ ' + catNames.join(' + ');
+
+  // 상품 이미지
+  const imgContainer = document.getElementById('set-promo-images');
+  imgContainer.innerHTML = '';
+  data.items.forEach(item => {
+    const imgSize = data.items.length <= 5 ? 160 : 120;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `text-align:center;flex:0 0 auto;`;
+    wrap.innerHTML = `
+      <div style="width:${imgSize}px;height:${imgSize}px;background:#f8f9fa;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto;">
+        <img src="/proxy/image?url=${encodeURIComponent(item.image_url || '')}"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><text x=%2240%22 y=%2248%22 text-anchor=%22middle%22 font-size=%2240%22>${SET_CATEGORIES.find(c=>c.key===item.category)?.icon||'📦'}</text></svg>'"
+             style="max-width:90%;max-height:90%;object-fit:contain;"
+             crossorigin="anonymous">
+      </div>
+      <div style="font-size:11px;color:#666;margin-top:6px;font-weight:600;">${SET_CATEGORIES.find(c=>c.key===item.category)?.name||''}</div>
+      <div style="font-size:10px;color:#999;max-width:${imgSize}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(item.product_name||'').slice(0,20)}</div>
+    `;
+    imgContainer.appendChild(wrap);
+  });
+
+  // 가격
+  document.getElementById('set-promo-original').textContent = `₩${data.total_original.toLocaleString()}`;
+  document.getElementById('set-promo-benefit').textContent = `₩${data.total_benefit.toLocaleString()}`;
+  document.getElementById('set-promo-discount').textContent = `${data.discount_rate}%`;
+
+  // 프로모 카드를 화면 내로 이동해서 보이게
+  const card = document.getElementById('set-promo-card');
+  const zone = document.getElementById('set-render-zone');
+  zone.innerHTML = '';
+  const clone = card.cloneNode(true);
+  clone.id = 'set-promo-card-render';
+  zone.appendChild(clone);
+}
+
+async function downloadSetPromo() {
+  const card = document.getElementById('set-promo-card');
+  const origLeft = card.style.left;
+  const origPos = card.style.position;
+  card.style.position = 'fixed';
+  card.style.left = '-9999px';
+  card.style.top = '0';
+  document.body.appendChild(card);
+
+  try {
+    await new Promise(r => setTimeout(r, 500));
+    const imgs = card.querySelectorAll('img');
+    await Promise.all([...imgs].map(img =>
+      img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
+    ));
+
+    const canvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 1080,
+    });
+    const link = document.createElement('a');
+    link.download = `하이마트_${setMaker}_${setSelectedCats.size}종_세트.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('세트 프로모션 이미지가 다운로드되었습니다!');
+  } catch (err) {
+    showToast('이미지 생성 실패: ' + err.message);
+  } finally {
+    const result = document.getElementById('set-result');
+    const priceArea = card.parentElement === document.body ? card : null;
+    if (priceArea) {
+      const target = document.querySelector('#set-result > div:first-child');
+      if (target) target.appendChild(card);
+      else document.getElementById('set-result').prepend(card);
+    }
+    card.style.position = '';
+    card.style.left = '';
+    card.style.top = '';
+  }
+}
+
+// 모달 바깥 클릭 닫기
+document.getElementById('set-builder-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSetBuilder();
 });
 </script>
 </body>
