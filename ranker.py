@@ -108,7 +108,18 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
                 spec = json.loads(r.get("spec") or "{}")
             except Exception:
                 spec = {}
-            if all(spec.get(k) == v for k, v in filters.items()):
+            match = True
+            for k, v in filters.items():
+                sv = spec.get(k)
+                if isinstance(v, list):
+                    if sv not in v:
+                        match = False
+                        break
+                else:
+                    if sv != v:
+                        match = False
+                        break
+            if match:
                 filtered.append(r)
         rows = filtered
 
@@ -199,9 +210,9 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
     return result
 
 
-def rank_category_by_maker(category_key: str, maker: str = "mixed") -> list[dict]:
+def rank_category_by_maker(category_key: str, maker: str = "mixed", filters: dict | None = None) -> list[dict]:
     """메이커 필터링된 카테고리 랭킹. maker: 'samsung', 'lg', 'mixed'"""
-    items = rank_category(category_key)
+    items = rank_category(category_key, filters=filters)
 
     if maker == "mixed":
         return items

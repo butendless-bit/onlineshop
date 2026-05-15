@@ -2655,62 +2655,9 @@ document.getElementById('compare-modal').addEventListener('click', function(e) {
 
         <!-- 프로모션 결과 카드 -->
         <div id="set-result" class="hidden">
-          <!-- 프로모션 배너 (PNG 캡처 대상) -->
-          <div id="set-promo-card" style="width:1080px;background:#fff;font-family:'Pretendard',sans-serif;position:relative;overflow:hidden;">
-            <!-- 상단 매장 바 -->
-            <div style="background:#e60012;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;">
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                  <span style="color:#e60012;font-size:22px;font-weight:900;">H</span>
-                </div>
-                <div>
-                  <div style="color:#fff;font-size:14px;font-weight:700;">LOTTE HIMART</div>
-                  <div style="color:rgba(255,255,255,0.7);font-size:11px;">광복롯데몰점</div>
-                </div>
-              </div>
-              <div style="color:rgba(255,255,255,0.8);font-size:12px;" id="set-promo-date"></div>
-            </div>
-
-            <!-- 메인 카피 -->
-            <div style="text-align:center;padding:40px 40px 20px;">
-              <div id="set-promo-maker-badge" style="display:inline-block;background:linear-gradient(135deg,#ffe000,#ffb800);color:#1a1a1a;font-size:16px;font-weight:800;padding:8px 24px;border-radius:30px;margin-bottom:16px;">
-              </div>
-              <h2 style="font-size:42px;font-weight:900;color:#1a1a1a;line-height:1.2;margin:0;">
-                <span id="set-promo-title-count" style="color:#e60012;"></span>종 패키지
-              </h2>
-              <p style="font-size:18px;color:#666;margin-top:8px;" id="set-promo-subtitle"></p>
-            </div>
-
-            <!-- 상품 이미지 그리드 -->
-            <div style="display:flex;justify-content:center;align-items:flex-end;gap:24px;padding:20px 40px 30px;flex-wrap:wrap;" id="set-promo-images"></div>
-
-            <!-- 품목 나열 -->
-            <div style="text-align:center;padding:0 40px 20px;">
-              <div style="display:inline-flex;align-items:center;gap:6px;background:#fff3cd;padding:10px 24px;border-radius:30px;font-size:14px;font-weight:700;color:#856404;" id="set-promo-categories-list">
-              </div>
-            </div>
-
-            <!-- 가격 영역 -->
-            <div style="background:#f8f9fa;padding:30px 40px;display:flex;align-items:center;justify-content:center;gap:60px;border-top:2px solid #eee;">
-              <div style="text-align:center;">
-                <div style="font-size:13px;color:#999;font-weight:600;">기존가</div>
-                <div style="font-size:24px;font-weight:800;color:#999;text-decoration:line-through;" id="set-promo-original"></div>
-              </div>
-              <div style="font-size:48px;color:#ccc;">→</div>
-              <div style="text-align:center;">
-                <div style="font-size:13px;font-weight:600;" style="color:#e60012;">최종 혜택가</div>
-                <div style="font-size:42px;font-weight:900;color:#e60012;" id="set-promo-benefit"></div>
-              </div>
-              <div style="background:#e60012;color:#fff;padding:12px 20px;border-radius:16px;text-align:center;">
-                <div style="font-size:36px;font-weight:900;line-height:1;" id="set-promo-discount"></div>
-                <div style="font-size:12px;font-weight:700;margin-top:2px;">SALE</div>
-              </div>
-            </div>
-
-            <!-- 하단 안내 -->
-            <div style="padding:16px 40px;font-size:11px;color:#aaa;text-align:center;background:#f8f9fa;border-top:1px solid #eee;">
-              ※ 위 가격은 온라인 혜택가 기준이며, 행사카드 결제 조건과 추가 혜택에 따라 체감가가 달라질 수 있습니다.
-            </div>
+          <!-- 프로모 카드 컨테이너 (스크롤 가능) -->
+          <div style="max-height:65vh;overflow-y:auto;display:flex;justify-content:center;padding:24px;background:#111;">
+            <div id="set-promo-card" style="width:1080px;min-height:1440px;position:relative;overflow:hidden;font-family:'Pretendard','Noto Sans KR',sans-serif;"></div>
           </div>
 
           <!-- 컨트롤 버튼 -->
@@ -2731,9 +2678,6 @@ document.getElementById('compare-modal').addEventListener('click', function(e) {
     </div>
   </div>
 </div>
-
-<!-- 세트 빌더 프로모 카드 (오프스크린 렌더용) -->
-<div id="set-render-zone" style="position:fixed;left:-9999px;top:0;z-index:-1;"></div>
 
 <script>
 // ══════════════════════ 세트 빌더 ══════════════════════
@@ -2863,81 +2807,191 @@ async function buildSet() {
   }
 }
 
-function renderSetPromo(data) {
+function _manwon(price) {
+  const m = Math.floor(price / 10000);
+  return m.toLocaleString();
+}
+
+function _makerTheme(maker) {
+  if (maker === 'samsung') return {
+    bg: 'linear-gradient(160deg, #0b1e5e 0%, #1a3caf 40%, #2952d6 70%, #4a7aff 100%)',
+    accent: '#4a9fff', badge: '#ffe500', badgeText: '#1a1a1a',
+    label: '삼성', logoText: 'SAMSUNG',
+    highlight: '#ffe500', priceColor: '#ffe500',
+  };
+  if (maker === 'lg') return {
+    bg: 'linear-gradient(160deg, #5a0020 0%, #a50034 40%, #d4004a 70%, #ff2070 100%)',
+    accent: '#ff6090', badge: '#ffe500', badgeText: '#1a1a1a',
+    label: 'LG', logoText: 'LG',
+    highlight: '#ffe500', priceColor: '#ffe500',
+  };
+  return {
+    bg: 'linear-gradient(160deg, #1a1a2e 0%, #2d1b4e 40%, #4a2080 70%, #6b3fa0 100%)',
+    accent: '#c084fc', badge: '#ffe500', badgeText: '#1a1a1a',
+    label: '삼성+LG', logoText: 'PREMIUM',
+    highlight: '#ffe500', priceColor: '#ffe500',
+  };
+}
+
+async function _loadImageAsDataUri(url) {
+  if (!url) return null;
+  try {
+    const resp = await fetch(`/proxy/image?url=${encodeURIComponent(url)}`);
+    const json = await resp.json();
+    return json.data || null;
+  } catch { return null; }
+}
+
+async function renderSetPromo(data) {
   document.getElementById('set-loading').classList.add('hidden');
   document.getElementById('set-result').classList.remove('hidden');
 
-  const now = new Date();
-  document.getElementById('set-promo-date').textContent =
-    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 기준`;
-
-  document.getElementById('set-promo-maker-badge').textContent = `⚡ ${data.maker_label} ${data.set_count}종 패키지`;
-  document.getElementById('set-promo-title-count').textContent = data.set_count;
-
+  const theme = _makerTheme(data.maker);
   const catNames = data.items.map(item => {
     const cat = SET_CATEGORIES.find(c => c.key === item.category);
     return cat ? cat.name : item.category;
   });
-  document.getElementById('set-promo-subtitle').textContent = catNames.join(' + ');
-  document.getElementById('set-promo-categories-list').innerHTML =
-    '⚡ ' + catNames.join(' + ');
 
-  // 상품 이미지
-  const imgContainer = document.getElementById('set-promo-images');
-  imgContainer.innerHTML = '';
-  data.items.forEach(item => {
-    const imgSize = data.items.length <= 5 ? 160 : 120;
-    const wrap = document.createElement('div');
-    wrap.style.cssText = `text-align:center;flex:0 0 auto;`;
-    wrap.innerHTML = `
-      <div style="width:${imgSize}px;height:${imgSize}px;background:#f8f9fa;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto;">
-        <img src="/proxy/image?url=${encodeURIComponent(item.image_url || '')}"
-             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22><text x=%2240%22 y=%2248%22 text-anchor=%22middle%22 font-size=%2240%22>${SET_CATEGORIES.find(c=>c.key===item.category)?.icon||'📦'}</text></svg>'"
-             style="max-width:90%;max-height:90%;object-fit:contain;"
-             crossorigin="anonymous">
+  // 이미지를 data URI로 사전 로드
+  const imagePromises = data.items.map(item => _loadImageAsDataUri(item.image_url));
+  const imageDataUris = await Promise.all(imagePromises);
+
+  const origManwon = _manwon(data.total_original);
+  const benefitManwon = _manwon(data.total_benefit);
+
+  // 상품 이미지 HTML 생성
+  const imgCount = data.items.length;
+  const imgW = imgCount <= 4 ? 220 : imgCount <= 6 ? 170 : 140;
+  const imgH = imgW;
+
+  let imagesHtml = data.items.map((item, i) => {
+    const dataUri = imageDataUris[i];
+    const catInfo = SET_CATEGORIES.find(c => c.key === item.category);
+    const imgSrc = dataUri || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="%23f0f0f0" rx="20"/><text x="100" y="110" text-anchor="middle" font-size="60">${catInfo?.icon||'📦'}</text></svg>`;
+    return `
+      <div style="flex:0 0 auto;text-align:center;">
+        <div style="width:${imgW}px;height:${imgH}px;background:rgba(255,255,255,0.95);border-radius:20px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+          <img src="${imgSrc}" style="max-width:88%;max-height:88%;object-fit:contain;" crossorigin="anonymous">
+        </div>
+        <div style="margin-top:8px;font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);">${catInfo?.name||''}</div>
       </div>
-      <div style="font-size:11px;color:#666;margin-top:6px;font-weight:600;">${SET_CATEGORIES.find(c=>c.key===item.category)?.name||''}</div>
-      <div style="font-size:10px;color:#999;max-width:${imgSize}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(item.product_name||'').slice(0,20)}</div>
     `;
-    imgContainer.appendChild(wrap);
-  });
+  }).join('');
 
-  // 가격
-  document.getElementById('set-promo-original').textContent = `₩${data.total_original.toLocaleString()}`;
-  document.getElementById('set-promo-benefit').textContent = `₩${data.total_benefit.toLocaleString()}`;
-  document.getElementById('set-promo-discount').textContent = `${data.discount_rate}%`;
-
-  // 프로모 카드를 화면 내로 이동해서 보이게
   const card = document.getElementById('set-promo-card');
-  const zone = document.getElementById('set-render-zone');
-  zone.innerHTML = '';
-  const clone = card.cloneNode(true);
-  clone.id = 'set-promo-card-render';
-  zone.appendChild(clone);
+  card.innerHTML = `
+    <div style="width:1080px;min-height:1440px;background:${theme.bg};position:relative;overflow:hidden;padding:0;">
+
+      <!-- 배경 장식 원 -->
+      <div style="position:absolute;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,0.04);"></div>
+      <div style="position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,0.03);"></div>
+
+      <!-- 상단 로고 바 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:40px 50px 20px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:48px;height:48px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#e60012;font-size:26px;font-weight:900;">H</span>
+          </div>
+          <div>
+            <div style="color:#fff;font-size:16px;font-weight:800;letter-spacing:1px;">LOTTE HIMART</div>
+            <div style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:500;">광복롯데몰점</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);padding:10px 24px;border-radius:30px;">
+          <span style="color:#fff;font-size:20px;font-weight:900;letter-spacing:2px;">${theme.logoText}</span>
+        </div>
+      </div>
+
+      <!-- 한정수량 뱃지 -->
+      <div style="text-align:center;padding:20px 0 0;">
+        <div style="display:inline-block;background:${theme.badge};color:${theme.badgeText};font-size:16px;font-weight:900;padding:10px 28px;border-radius:30px;box-shadow:0 4px 20px rgba(255,229,0,0.3);">
+          ⚡ 50세트 한정수량
+        </div>
+      </div>
+
+      <!-- 타이틀 -->
+      <div style="text-align:center;padding:30px 50px 10px;">
+        <h1 style="font-size:64px;font-weight:900;color:#fff;line-height:1.15;margin:0;text-shadow:0 4px 30px rgba(0,0,0,0.3);">
+          ${theme.label} 오픈행사<br>
+          <span style="color:${theme.highlight};">${data.set_count}종</span> 패키지
+        </h1>
+      </div>
+
+      <!-- 품목 나열 -->
+      <div style="text-align:center;padding:10px 50px 30px;">
+        <div style="display:inline-block;font-size:18px;font-weight:600;color:rgba(255,255,255,0.75);letter-spacing:0.5px;">
+          ${catNames.join(' · ')}
+        </div>
+      </div>
+
+      <!-- 상품 이미지 -->
+      <div style="display:flex;justify-content:center;align-items:flex-end;gap:20px;padding:10px 40px 40px;flex-wrap:wrap;">
+        ${imagesHtml}
+      </div>
+
+      <!-- 가격 영역 -->
+      <div style="margin:0 50px;background:rgba(0,0,0,0.25);border-radius:24px;padding:40px;text-align:center;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);">
+        <!-- 기존가 -->
+        <div style="font-size:15px;color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:4px;">기존가</div>
+        <div style="font-size:28px;font-weight:800;color:rgba(255,255,255,0.4);text-decoration:line-through;margin-bottom:20px;">${origManwon}만원</div>
+
+        <!-- 화살표 -->
+        <div style="margin-bottom:20px;">
+          <div style="display:inline-block;width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-top:20px solid ${theme.highlight};"></div>
+        </div>
+
+        <!-- 최종혜택가 -->
+        <div style="font-size:16px;color:rgba(255,255,255,0.7);font-weight:700;margin-bottom:8px;">최종 혜택가</div>
+        <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;">
+          <span style="font-size:96px;font-weight:900;color:${theme.priceColor};line-height:1;text-shadow:0 4px 30px rgba(255,229,0,0.3);">${benefitManwon}</span>
+          <span style="font-size:36px;font-weight:800;color:${theme.priceColor};">만원대</span>
+        </div>
+
+        <!-- 할인율 뱃지 -->
+        <div style="margin-top:20px;">
+          <div style="display:inline-block;background:#e60012;color:#fff;font-size:22px;font-weight:900;padding:12px 32px;border-radius:40px;box-shadow:0 4px 20px rgba(230,0,18,0.4);">
+            ${data.discount_rate}% OFF
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 안내 -->
+      <div style="padding:30px 50px 20px;text-align:center;">
+        <div style="font-size:12px;color:rgba(255,255,255,0.35);line-height:1.6;">
+          ※ 위 가격은 온라인 혜택가 기준이며, 행사카드 결제 조건과 추가 혜택에 따라 체감가가 달라질 수 있습니다.<br>
+          ※ 상품 재고 상황에 따라 일부 모델이 변경될 수 있습니다.
+        </div>
+      </div>
+
+      <!-- 하단 매장 정보 -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:20px 50px 40px;">
+        <div style="width:36px;height:36px;background:#e60012;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#fff;font-size:18px;font-weight:900;">H</span>
+        </div>
+        <div>
+          <span style="color:rgba(255,255,255,0.7);font-size:14px;font-weight:700;">롯데하이마트</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:14px;font-weight:500;"> 광복롯데몰점</span>
+        </div>
+      </div>
+
+    </div>
+  `;
 }
 
 async function downloadSetPromo() {
   const card = document.getElementById('set-promo-card');
-  const origLeft = card.style.left;
-  const origPos = card.style.position;
-  card.style.position = 'fixed';
-  card.style.left = '-9999px';
-  card.style.top = '0';
-  document.body.appendChild(card);
 
   try {
-    await new Promise(r => setTimeout(r, 500));
-    const imgs = card.querySelectorAll('img');
-    await Promise.all([...imgs].map(img =>
-      img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })
-    ));
+    showToast('이미지 생성 중...');
+    await new Promise(r => setTimeout(r, 300));
 
     const canvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: '#ffffff',
+      backgroundColor: null,
       width: 1080,
+      height: card.scrollHeight,
     });
     const link = document.createElement('a');
     link.download = `하이마트_${setMaker}_${setSelectedCats.size}종_세트.png`;
@@ -2946,17 +3000,6 @@ async function downloadSetPromo() {
     showToast('세트 프로모션 이미지가 다운로드되었습니다!');
   } catch (err) {
     showToast('이미지 생성 실패: ' + err.message);
-  } finally {
-    const result = document.getElementById('set-result');
-    const priceArea = card.parentElement === document.body ? card : null;
-    if (priceArea) {
-      const target = document.querySelector('#set-result > div:first-child');
-      if (target) target.appendChild(card);
-      else document.getElementById('set-result').prepend(card);
-    }
-    card.style.position = '';
-    card.style.left = '';
-    card.style.top = '';
   }
 }
 

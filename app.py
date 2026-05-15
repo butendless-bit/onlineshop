@@ -254,6 +254,19 @@ def api_subscription_recommended():
 
 
 # ── API: 세트 빌더 ────────────────────────────────────────────────────────────
+# 세트빌더 카테고리별 기본 스펙 필터 (프리미엄 가전 위주)
+_SET_SPEC_FILTERS = {
+    "tv":           {"size_group": ["50s", "60s", "70s", "80+"]},
+    "refrigerator": {"fridge_type": "4도어"},
+}
+# 세트빌더 카테고리별 상품명 키워드 필터 (spec으로 분류 안 되는 항목)
+_SET_NAME_KEYWORDS = {
+    "washer": ["타워", "일체", "워시타워", "WashTower", "콤보"],
+    "dryer":  ["타워", "일체", "워시타워", "WashTower", "콤보"],
+    "aircon": ["2in1", "투인원", "2-in-1", "2IN1", "듀얼", "멀티"],
+}
+
+
 @app.route("/api/set-builder")
 def api_set_builder():
     maker = request.args.get("maker", "mixed")
@@ -270,7 +283,19 @@ def api_set_builder():
     total_benefit = 0
 
     for cat_key in selected_cats:
-        items = rank_category_by_maker(cat_key, maker)
+        spec_filters = _SET_SPEC_FILTERS.get(cat_key)
+        items = rank_category_by_maker(cat_key, maker, filters=spec_filters)
+
+        # 상품명 키워드 후필터링 (타워형, 2in1 등)
+        name_kws = _SET_NAME_KEYWORDS.get(cat_key)
+        if name_kws and items:
+            kw_filtered = [
+                it for it in items
+                if any(kw.lower() in (it.get("product_name") or "").lower() for kw in name_kws)
+            ]
+            if kw_filtered:
+                items = kw_filtered
+
         if items:
             top = items[0]
             result_items.append(top)
@@ -344,6 +369,15 @@ def proxy_image():
         resp = req.get(url, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
         mime = resp.headers.get("Content-Type", "image/jpeg").split(";")[0]
+
+        # raw=1 → 바이너리 이미지 직접 반환 (img src 용)
+        if request.args.get("raw") == "1":
+            from flask import Response
+            img_resp = Response(resp.content, mimetype=mime)
+            img_resp.headers["Cache-Control"] = "public, max-age=86400"
+            img_resp.headers["Access-Control-Allow-Origin"] = "*"
+            return img_resp
+
         b64  = base64.b64encode(resp.content).decode()
         json_resp = jsonify({"data": f"data:{mime};base64,{b64}"})
         json_resp.headers["Cache-Control"] = "public, max-age=86400"
