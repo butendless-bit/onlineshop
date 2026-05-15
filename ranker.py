@@ -94,8 +94,8 @@ def _price_drop_score(benefit: int, prev_benefit: int | None) -> int:
     return 1
 
 
-def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
-    """카테고리 1개 랭킹 계산 → TOP_N 반환.
+def rank_category(category_key: str, filters: dict | None = None, limit: int | None = None) -> list[dict]:
+    """카테고리 1개 랭킹 계산 → limit(기본 TOP_N) 개 반환.
     filters: {'spec_key': 'value', ...} — spec JSON 값과 매칭 필터링
     """
     rows = get_latest_prices(category_key)
@@ -175,7 +175,7 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
         })
 
     scored.sort(key=lambda x: x["score"], reverse=True)
-    result = scored[:TOP_N]
+    result = scored[:(limit or TOP_N)]
 
     for i, item in enumerate(result, 1):
         item["rank"] = i
@@ -212,7 +212,8 @@ def rank_category(category_key: str, filters: dict | None = None) -> list[dict]:
 
 def rank_category_by_maker(category_key: str, maker: str = "mixed", filters: dict | None = None) -> list[dict]:
     """메이커 필터링된 카테고리 랭킹. maker: 'samsung', 'lg', 'mixed'"""
-    items = rank_category(category_key, filters=filters)
+    pool_size = 100 if maker != "mixed" else None
+    items = rank_category(category_key, filters=filters, limit=pool_size)
 
     if maker == "mixed":
         return items
